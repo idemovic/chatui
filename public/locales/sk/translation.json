@@ -1,0 +1,46 @@
+{
+  "welcome": {
+    "subtitle": "Začnite konverzáciu. Som tu pre vás."
+  },
+  "input": {
+    "placeholder": "Napíšte správu… (Enter = odoslať)",
+    "placeholderUnconfigured": "Nastavte webhook URL v nastaveniach…"
+  },
+  "header": {
+    "assistant": "Asistent",
+    "online": "online",
+    "notConfigured": "Nenakonfigurované"
+  },
+  "sidebar": {
+    "title": "Konverzácie",
+    "empty": "Zatiaľ žiadne konverzácie.",
+    "newChat": "Nová konverzácia",
+    "settings": "Nastavenia"
+  },
+  "settings": {
+    "title": "Nastavenia",
+    "language": "Jazyk rozhrania",
+    "webhookUrl": "Webhook URL",
+    "chatInputKey": "Kľúč vstupu chatu",
+    "sessionKey": "Kľúč relácie",
+    "botName": "Meno bota (globálna záloha)",
+    "metadata": "Metadáta (JSON)",
+    "streaming": "Povoliť streaming (SSE)",
+    "welcomeScreen": "Zobraziť uvítaciu obrazovku",
+    "sidebar": "Zobraziť históriu konverzácií",
+    "fileUploads": "Povoliť nahrávanie súborov",
+    "mode": "Režim zobrazenia",
+    "cta": "Zobraziť CTA popup",
+    "ctaSound": "Prehrať zvuk notifikácie",
+    "ctaDelay": "Oneskorenie CTA (ms)",
+    "perLanguage": "Obsah podľa jazyka",
+    "addLanguage": "Pridať jazyk",
+    "botNameOverride": "Prepísať meno bota",
+    "welcomeSubtitle": "Uvítací podtitul",
+    "initialMessages": "Úvodné správy (jedna za riadok)",
+    "initialMessagesPlaceholder": "Dobrý deň! Ako vám môžem pomôcť?\nHovorím vaším jazykom.",
+    "ctaTextLabel": "Text CTA popupu",
+    "save": "Uložiť",
+    "cancel": "Zrušiť"
+  }
+}

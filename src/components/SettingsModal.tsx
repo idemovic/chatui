@@ -1,0 +1,405 @@
+import { useState, useCallback, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useSettingsStore } from '../store/settingsStore.ts'
+import type { ChatConfig, LangOverride } from '../types/index.ts'
+
+interface Props {
+  onClose: () => void
+}
+
+const KNOWN_LANGS = [
+  { code: 'en', label: 'EN – English' },
+  { code: 'sk', label: 'SK – Slovak' },
+  { code: 'de', label: 'DE – German' },
+  { code: 'cs', label: 'CS – Czech' },
+  { code: 'pl', label: 'PL – Polish' },
+  { code: 'hu', label: 'HU – Hungarian' },
+  { code: 'fr', label: 'FR – French' },
+  { code: 'es', label: 'ES – Spanish' },
+]
+
+export function SettingsModal({ onClose }: Props) {
+  const { t } = useTranslation()
+  const { config, setConfig, language, setLanguage } = useSettingsStore()
+
+  const [local, setLocal] = useState<ChatConfig>({ ...config })
+  const [metaError, setMetaError] = useState('')
+  const [metaRaw, setMetaRaw] = useState(() => {
+    try { return JSON.stringify(local.metadata ?? {}, null, 2) } catch { return '{}' }
+  })
+
+  // Per-language tab state
+  const langKeys = Object.keys(local.i18n ?? {})
+  const allLangTabs = Array.from(new Set(['en', 'sk', ...langKeys]))
+  const [activeLangTab, setActiveLangTab] = useState(language)
+  const [newLangCode, setNewLangCode] = useState('')
+  const [showAddLang, setShowAddLang] = useState(false)
+
+  const getLangData = (lang: string): LangOverride =>
+    local.i18n?.[lang] ?? {}
+
+  const setLangData = (lang: string, patch: Partial<LangOverride>) => {
+    setLocal((l) => ({
+      ...l,
+      i18n: { ...l.i18n, [lang]: { ...getLangData(lang), ...patch } },
+    }))
+  }
+
+  const handleAddLang = useCallback(() => {
+    const code = newLangCode.trim().toLowerCase()
+    if (!code || allLangTabs.includes(code)) return
+    setLocal((l) => ({
+      ...l,
+      i18n: { ...l.i18n, [code]: {} },
+    }))
+    setActiveLangTab(code)
+    setNewLangCode('')
+    setShowAddLang(false)
+  }, [newLangCode, allLangTabs])
+
+  const handleSave = useCallback(() => {
+    let metadata: Record<string, unknown> | undefined
+    const trimmed = metaRaw.trim()
+    if (trimmed && trimmed !== '{}') {
+      try {
+        metadata = JSON.parse(trimmed) as Record<string, unknown>
+        setMetaError('')
+      } catch {
+        setMetaError('Invalid JSON')
+        return
+      }
+    }
+    setConfig({ ...local, metadata })
+    onClose()
+  }, [local, metaRaw, setConfig, onClose])
+
+  const activeLangData = getLangData(activeLangTab)
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.6)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div
+        className="w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        style={{
+          background: 'var(--t-bg-surface)',
+          border: '1px solid var(--t-bg-border)',
+          maxHeight: '90vh',
+        }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0"
+          style={{ borderColor: 'var(--t-bg-border)' }}
+        >
+          <h2 className="text-base font-semibold text-fg-primary">{t('settings.title')}</h2>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-fg-muted hover:text-fg-primary hover:bg-bg-surface2 transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-5 overflow-y-auto flex-1">
+
+          {/* ── Interface language ── */}
+          <Field label={t('settings.language')}>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { code: 'en', label: 'EN' },
+                { code: 'sk', label: 'SK' },
+              ].map((l) => (
+                <button
+                  key={l.code}
+                  onClick={() => setLanguage(l.code)}
+                  className="px-3 py-1 rounded-lg text-sm transition-colors"
+                  style={
+                    language === l.code
+                      ? { background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }
+                      : { background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }
+                  }
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          <hr style={{ borderColor: 'var(--t-bg-border)' }} />
+
+          {/* ── Webhook + keys ── */}
+          <Field label={t('settings.webhookUrl')} required>
+            <input
+              type="url"
+              value={local.webhookUrl}
+              onChange={(e) => setLocal((l) => ({ ...l, webhookUrl: e.target.value }))}
+              placeholder="https://your-n8n.app.n8n.cloud/webhook/..."
+              className="input-field"
+            />
+          </Field>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t('settings.chatInputKey')}>
+              <input
+                value={local.chatInputKey ?? 'chatInput'}
+                onChange={(e) => setLocal((l) => ({ ...l, chatInputKey: e.target.value }))}
+                className="input-field"
+              />
+            </Field>
+            <Field label={t('settings.sessionKey')}>
+              <input
+                value={local.chatSessionKey ?? 'sessionId'}
+                onChange={(e) => setLocal((l) => ({ ...l, chatSessionKey: e.target.value }))}
+                className="input-field"
+              />
+            </Field>
+          </div>
+
+          <Field label={t('settings.botName')}>
+            <input
+              value={local.botName ?? ''}
+              onChange={(e) => setLocal((l) => ({ ...l, botName: e.target.value }))}
+              placeholder="Assistant"
+              className="input-field"
+            />
+          </Field>
+
+          <Field label={t('settings.metadata')} error={metaError}>
+            <textarea
+              value={metaRaw}
+              onChange={(e) => { setMetaRaw(e.target.value); setMetaError('') }}
+              rows={2}
+              className="input-field font-mono text-xs resize-none"
+              placeholder="{}"
+            />
+          </Field>
+
+          {/* ── Toggles ── */}
+          <div className="space-y-2">
+            <Toggle label={t('settings.streaming')} checked={local.streaming ?? false}
+              onChange={(v) => setLocal((l) => ({ ...l, streaming: v }))} />
+            <Toggle label={t('settings.welcomeScreen')} checked={local.showWelcomeScreen ?? true}
+              onChange={(v) => setLocal((l) => ({ ...l, showWelcomeScreen: v }))} />
+            <Toggle label={t('settings.sidebar')} checked={local.showSidebar ?? false}
+              onChange={(v) => setLocal((l) => ({ ...l, showSidebar: v }))} />
+            <Toggle label={t('settings.fileUploads')} checked={local.allowFileUploads ?? false}
+              onChange={(v) => setLocal((l) => ({ ...l, allowFileUploads: v }))} />
+          </div>
+
+          {/* ── Mode ── */}
+          <Field label={t('settings.mode')}>
+            <div className="flex gap-2">
+              {(['fullscreen', 'window', 'mixed'] as const).map((m) => (
+                <button key={m} onClick={() => setLocal((l) => ({ ...l, mode: m }))}
+                  className="flex-1 py-1.5 rounded-lg text-sm capitalize transition-colors"
+                  style={local.mode === m
+                    ? { background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }
+                    : { background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }
+                  }
+                >{m}</button>
+              ))}
+            </div>
+          </Field>
+
+          {local.mode === 'window' && (
+            <div className="space-y-3 pl-3 border-l-2" style={{ borderColor: 'var(--t-accent)' }}>
+              <Toggle label={t('settings.cta')} checked={local.showCta ?? true}
+                onChange={(v) => setLocal((l) => ({ ...l, showCta: v }))} />
+              <Toggle label={t('settings.ctaSound')} checked={local.ctaSound ?? true}
+                onChange={(v) => setLocal((l) => ({ ...l, ctaSound: v }))} />
+              <Field label={t('settings.ctaDelay')}>
+                <input type="number" value={local.ctaDelay ?? 5000}
+                  onChange={(e) => setLocal((l) => ({ ...l, ctaDelay: Number(e.target.value) }))}
+                  className="input-field" min={0} step={500} />
+              </Field>
+            </div>
+          )}
+
+          <hr style={{ borderColor: 'var(--t-bg-border)' }} />
+
+          {/* ── Per-language content ── */}
+          <div>
+            <p className="text-xs font-semibold text-fg-secondary uppercase tracking-wider mb-3">
+              {t('settings.perLanguage')}
+            </p>
+
+            {/* Language tabs */}
+            <div className="flex flex-wrap gap-1 mb-4">
+              {allLangTabs.map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => setActiveLangTab(lang)}
+                  className="px-3 py-1 rounded-lg text-xs font-medium uppercase transition-colors"
+                  style={
+                    activeLangTab === lang
+                      ? { background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }
+                      : { background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }
+                  }
+                >
+                  {lang}
+                </button>
+              ))}
+
+              {/* Add language */}
+              {showAddLang ? (
+                <div className="flex gap-1 items-center">
+                  <select
+                    value={newLangCode}
+                    onChange={(e) => setNewLangCode(e.target.value)}
+                    className="input-field py-1 text-xs"
+                    style={{ width: 'auto' }}
+                  >
+                    <option value="">Pick…</option>
+                    {KNOWN_LANGS.filter((l) => !allLangTabs.includes(l.code)).map((l) => (
+                      <option key={l.code} value={l.code}>{l.label}</option>
+                    ))}
+                    <option value="__custom">Custom code…</option>
+                  </select>
+                  {newLangCode === '__custom' && (
+                    <input
+                      placeholder="e.g. fr"
+                      maxLength={5}
+                      className="input-field py-1 text-xs w-20"
+                      onChange={(e) => setNewLangCode(e.target.value)}
+                    />
+                  )}
+                  <button onClick={handleAddLang}
+                    className="px-2 py-1 rounded-lg text-xs transition-colors"
+                    style={{ background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }}>
+                    Add
+                  </button>
+                  <button onClick={() => setShowAddLang(false)}
+                    className="px-2 py-1 rounded-lg text-xs text-fg-muted hover:text-fg-primary">
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowAddLang(true)}
+                  className="px-3 py-1 rounded-lg text-xs text-fg-muted hover:text-fg-primary hover:bg-bg-surface2 transition-colors"
+                >
+                  + {t('settings.addLanguage')}
+                </button>
+              )}
+            </div>
+
+            {/* Per-language fields */}
+            <div className="space-y-3">
+              <Field label={t('settings.botNameOverride')}>
+                <input
+                  value={activeLangData.botName ?? ''}
+                  onChange={(e) => setLangData(activeLangTab, { botName: e.target.value || undefined })}
+                  placeholder={local.botName ?? 'Assistant'}
+                  className="input-field"
+                />
+              </Field>
+
+              <Field label={t('settings.welcomeSubtitle')}>
+                <input
+                  value={activeLangData.welcomeSubtitle ?? ''}
+                  onChange={(e) => setLangData(activeLangTab, { welcomeSubtitle: e.target.value || undefined })}
+                  placeholder={t('welcome.subtitle')}
+                  className="input-field"
+                />
+              </Field>
+
+              <Field label={t('settings.initialMessages')}>
+                <textarea
+                  value={(activeLangData.initialMessages ?? []).join('\n')}
+                  onChange={(e) =>
+                    setLangData(activeLangTab, {
+                      initialMessages: e.target.value
+                        ? e.target.value.split('\n').filter(Boolean)
+                        : [],
+                    })
+                  }
+                  rows={4}
+                  className="input-field resize-none text-sm"
+                  placeholder={t('settings.initialMessagesPlaceholder')}
+                />
+              </Field>
+
+              {local.mode === 'window' && (
+                <Field label={t('settings.ctaTextLabel')}>
+                  <input
+                    value={activeLangData.ctaText ?? ''}
+                    onChange={(e) => setLangData(activeLangTab, { ctaText: e.target.value || undefined })}
+                    placeholder={local.ctaText ?? 'Hi! How can I help you today?'}
+                    className="input-field"
+                  />
+                </Field>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div
+          className="flex justify-end gap-2 px-6 py-4 border-t flex-shrink-0"
+          style={{ borderColor: 'var(--t-bg-border)' }}
+        >
+          <button onClick={onClose}
+            className="px-4 py-2 rounded-lg text-sm text-fg-secondary hover:text-fg-primary hover:bg-bg-surface2 transition-colors">
+            {t('settings.cancel')}
+          </button>
+          <button onClick={handleSave}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            style={{ background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }}>
+            {t('settings.save')}
+          </button>
+        </div>
+      </div>
+
+      <style>{`
+        .input-field {
+          width: 100%;
+          padding: 8px 12px;
+          border-radius: 8px;
+          font-size: 13px;
+          background: var(--t-bg-surface2);
+          color: var(--t-fg-primary);
+          border: 1px solid var(--t-bg-border);
+          outline: none;
+          transition: border-color 0.15s;
+        }
+        .input-field:focus { border-color: var(--t-accent); }
+      `}</style>
+    </div>
+  )
+}
+
+function Field({ label, required, error, children }: {
+  label: string; required?: boolean; error?: string; children: ReactNode
+}) {
+  return (
+    <div className="space-y-1">
+      <label className="text-xs font-medium text-fg-secondary">
+        {label}{required && <span className="text-red-400 ml-0.5">*</span>}
+      </label>
+      {children}
+      {error && <p className="text-xs text-red-400">{error}</p>}
+    </div>
+  )
+}
+
+function Toggle({ label, checked, onChange }: {
+  label: string; checked: boolean; onChange: (v: boolean) => void
+}) {
+  return (
+    <label className="flex items-center gap-3 cursor-pointer select-none">
+      <div className="relative w-9 h-5 rounded-full transition-colors"
+        style={{ background: checked ? 'var(--t-accent)' : 'var(--t-bg-surface2)' }}
+        onClick={() => onChange(!checked)}>
+        <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform shadow"
+          style={{ left: checked ? '18px' : '2px' }} />
+      </div>
+      <span className="text-sm text-fg-secondary">{label}</span>
+    </label>
+  )
+}

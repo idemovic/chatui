@@ -1,0 +1,228 @@
+@import "tailwindcss";
+
+/* ─── Raw theme variables ─────────────────────────────────────────────────── */
+
+:root,
+[data-theme="midnight"] {
+  --t-bg-base:      #0f1117;
+  --t-bg-surface:   #1a1d27;
+  --t-bg-surface2:  #22263a;
+  --t-bg-border:    #2d3142;
+  --t-accent:       #6366f1;
+  --t-accent-fg:    #ffffff;
+  --t-fg-primary:   #ffffff;
+  --t-fg-secondary: #94a3b8;
+  --t-fg-muted:     #64748b;
+  --t-user-bubble:  #6366f1;
+  --t-user-fg:      #ffffff;
+  color-scheme: dark;
+}
+
+[data-theme="ivory"] {
+  --t-bg-base:      #ffffff;
+  --t-bg-surface:   #f1f5f9;
+  --t-bg-surface2:  #e2e8f0;
+  --t-bg-border:    #cbd5e1;
+  --t-accent:       #4338ca;
+  --t-accent-fg:    #ffffff;
+  --t-fg-primary:   #0f172a;
+  --t-fg-secondary: #334155;
+  --t-fg-muted:     #64748b;
+  --t-user-bubble:  #4338ca;
+  --t-user-fg:      #ffffff;
+  color-scheme: light;
+}
+
+[data-theme="sunrise"] {
+  --t-bg-base:      #ffffff;
+  --t-bg-surface:   #fff7ed;
+  --t-bg-surface2:  #ffedd5;
+  --t-bg-border:    #fed7aa;
+  --t-accent:       #f97316;
+  --t-accent-fg:    #ffffff;
+  --t-fg-primary:   #1c0a00;
+  --t-fg-secondary: #431407;
+  --t-fg-muted:     #9a3412;
+  --t-user-bubble:  #f97316;
+  --t-user-fg:      #ffffff;
+  color-scheme: light;
+}
+
+[data-theme="cosmos"] {
+  --t-bg-base:      #0d0a1a;
+  --t-bg-surface:   #15102b;
+  --t-bg-surface2:  #1e1840;
+  --t-bg-border:    #2e2555;
+  --t-accent:       #a855f7;
+  --t-accent-fg:    #ffffff;
+  --t-fg-primary:   #f3e8ff;
+  --t-fg-secondary: #c4b5fd;
+  --t-fg-muted:     #7c3aed;
+  --t-user-bubble:  #a855f7;
+  --t-user-fg:      #ffffff;
+  color-scheme: dark;
+}
+
+[data-theme="forest"] {
+  --t-bg-base:      #0a1410;
+  --t-bg-surface:   #111f18;
+  --t-bg-surface2:  #162b1f;
+  --t-bg-border:    #1e3a2a;
+  --t-accent:       #22c55e;
+  --t-accent-fg:    #ffffff;
+  --t-fg-primary:   #dcfce7;
+  --t-fg-secondary: #86efac;
+  --t-fg-muted:     #4ade80;
+  --t-user-bubble:  #16a34a;
+  --t-user-fg:      #ffffff;
+  color-scheme: dark;
+}
+
+[data-theme="ocean"] {
+  --t-bg-base:      #060f1a;
+  --t-bg-surface:   #0c1b2e;
+  --t-bg-surface2:  #112440;
+  --t-bg-border:    #163354;
+  --t-accent:       #06b6d4;
+  --t-accent-fg:    #ffffff;
+  --t-fg-primary:   #e0f7fa;
+  --t-fg-secondary: #67e8f9;
+  --t-fg-muted:     #0891b2;
+  --t-user-bubble:  #0891b2;
+  --t-user-fg:      #ffffff;
+  color-scheme: dark;
+}
+
+[data-theme="cherry"] {
+  --t-bg-base:      #120608;
+  --t-bg-surface:   #1e0c10;
+  --t-bg-surface2:  #2a1016;
+  --t-bg-border:    #3d1520;
+  --t-accent:       #ef4444;
+  --t-accent-fg:    #ffffff;
+  --t-fg-primary:   #ffe4e6;
+  --t-fg-secondary: #fca5a5;
+  --t-fg-muted:     #f87171;
+  --t-user-bubble:  #dc2626;
+  --t-user-fg:      #ffffff;
+  color-scheme: dark;
+}
+
+[data-theme="navy"] {
+  --t-bg-base:      #080f1e;
+  --t-bg-surface:   #0f1a33;
+  --t-bg-surface2:  #162348;
+  --t-bg-border:    #1e3060;
+  --t-accent:       #3b82f6;
+  --t-accent-fg:    #ffffff;
+  --t-fg-primary:   #dbeafe;
+  --t-fg-secondary: #93c5fd;
+  --t-fg-muted:     #60a5fa;
+  --t-user-bubble:  #2563eb;
+  --t-user-fg:      #ffffff;
+  color-scheme: dark;
+}
+
+[data-theme="lavender"] {
+  --t-bg-base:      #faf5ff;
+  --t-bg-surface:   #f3e8ff;
+  --t-bg-surface2:  #e9d5ff;
+  --t-bg-border:    #d8b4fe;
+  --t-accent:       #8b5cf6;
+  --t-accent-fg:    #ffffff;
+  --t-fg-primary:   #2e1065;
+  --t-fg-secondary: #4c1d95;
+  --t-fg-muted:     #7c3aed;
+  --t-user-bubble:  #7c3aed;
+  --t-user-fg:      #ffffff;
+  color-scheme: light;
+}
+
+[data-theme="amber"] {
+  --t-bg-base:      #0f0a00;
+  --t-bg-surface:   #1c1400;
+  --t-bg-surface2:  #2a1d00;
+  --t-bg-border:    #3d2c00;
+  --t-accent:       #f59e0b;
+  --t-accent-fg:    #000000;
+  --t-fg-primary:   #fef3c7;
+  --t-fg-secondary: #fcd34d;
+  --t-fg-muted:     #d97706;
+  --t-user-bubble:  #d97706;
+  --t-user-fg:      #000000;
+  color-scheme: dark;
+}
+
+/* ─── Tailwind design tokens (reference CSS vars so runtime theme changes work) */
+
+@theme {
+  --color-bg-base:      var(--t-bg-base);
+  --color-bg-surface:   var(--t-bg-surface);
+  --color-bg-surface2:  var(--t-bg-surface2);
+  --color-bg-border:    var(--t-bg-border);
+  --color-accent:       var(--t-accent);
+  --color-accent-fg:    var(--t-accent-fg);
+  --color-fg-primary:   var(--t-fg-primary);
+  --color-fg-secondary: var(--t-fg-secondary);
+  --color-fg-muted:     var(--t-fg-muted);
+  --color-user-bubble:  var(--t-user-bubble);
+  --color-user-fg:      var(--t-user-fg);
+}
+
+/* ─── Base styles ─────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--t-bg-base);
+  color: var(--t-fg-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--t-bg-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--t-fg-muted); }
+
+/* ─── Typing indicator animation ─────────────────────────────────────────── */
+
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%            { transform: translateY(-4px); opacity: 1; }
+}
+
+.typing-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--t-fg-muted);
+  animation: typing-dot 1.2s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* ─── CTA popup speech bubble tail ───────────────────────────────────────── */
+
+.cta-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  right: 20px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid var(--t-bg-surface);
+}

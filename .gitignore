@@ -1,0 +1,13 @@
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Local env overrides — copy .env.example to .env and fill in values
+.env
+.env.local
+.env.*.local
+
+# Runtime config — copy public/chat-config.example.json to public/chat-config.json
+# and fill in your webhook URL. Never commit secrets.
+public/chat-config.json

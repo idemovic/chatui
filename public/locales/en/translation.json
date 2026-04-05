@@ -1,0 +1,46 @@
+{
+  "welcome": {
+    "subtitle": "Start a conversation. I'm here to help."
+  },
+  "input": {
+    "placeholder": "Type a message… (Enter to send)",
+    "placeholderUnconfigured": "Configure webhook URL in settings…"
+  },
+  "header": {
+    "assistant": "Assistant",
+    "online": "online",
+    "notConfigured": "Not configured"
+  },
+  "sidebar": {
+    "title": "Conversations",
+    "empty": "No conversations yet.",
+    "newChat": "New conversation",
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Interface language",
+    "webhookUrl": "Webhook URL",
+    "chatInputKey": "Chat input key",
+    "sessionKey": "Session key",
+    "botName": "Bot name (global fallback)",
+    "metadata": "Metadata (JSON)",
+    "streaming": "Enable streaming (SSE)",
+    "welcomeScreen": "Show welcome screen",
+    "sidebar": "Show conversation sidebar",
+    "fileUploads": "Allow file uploads",
+    "mode": "Display mode",
+    "cta": "Show CTA popup",
+    "ctaSound": "Play notification sound",
+    "ctaDelay": "CTA delay (ms)",
+    "perLanguage": "Per-language content",
+    "addLanguage": "Add language",
+    "botNameOverride": "Bot name override",
+    "welcomeSubtitle": "Welcome subtitle",
+    "initialMessages": "Initial messages (one per line)",
+    "initialMessagesPlaceholder": "Hello! How can I help you today?\nI speak your language.",
+    "ctaTextLabel": "CTA popup text",
+    "save": "Save",
+    "cancel": "Cancel"
+  }
+}
