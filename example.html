@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Website – chatui integration example</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+    header {
+      padding: 1rem 2rem;
+      background: #1e293b;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    main {
+      max-width: 900px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+    }
+    h2 { margin-top: 2.5rem; font-size: 1rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+    p  { line-height: 1.7; }
+  </style>
+</head>
+<body>
+
+<header>My Website</header>
+
+<main>
+  <h1>Integration Examples</h1>
+  <p>
+    This file demonstrates three ways to embed chatui into an existing project.
+    Pick the one that fits your setup — they go from simplest to most flexible.
+  </p>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       OPTION A — iframe  (recommended for most projects)
+       ─────────────────────────────────────────────────────────────────────
+       1. Build chatui:  VITE_PUBLIC_MODE=true vite build
+       2. Serve the dist/ folder at some path, e.g. /chatui/
+       3. Place chat-config.json next to dist/index.html  (see bottom of file)
+       4. Drop the iframe below into your page.
+       ═══════════════════════════════════════════════════════════════════════ -->
+
+  <h2>Option A — Fullscreen chat page inside an iframe</h2>
+  <p>Good for a dedicated support page or a portal tab.</p>
+
+  <iframe
+    src="/chatui/index.html"
+    title="Chat"
+    style="
+      width: 100%;
+      height: 560px;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.12);
+    "
+    allow="microphone"
+  ></iframe>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       OPTION B — Floating window via iframe
+       ─────────────────────────────────────────────────────────────────────
+       Same build as Option A, but the chat-config.json sets  mode: "window"
+       so the widget renders as a floating button + popup inside the iframe.
+       The iframe itself is invisible / zero-sized; the widget breaks out via
+       position:fixed inside its own document.
+
+       Limitation: position:fixed is scoped to the iframe's viewport, so the
+       button will sit in the iframe's corner, not the host page's corner.
+       To get a true page-level widget use Option C instead.
+       ═══════════════════════════════════════════════════════════════════════ -->
+
+  <h2>Option B — Floating widget (iframe, window mode)</h2>
+  <p>
+    Set <code>mode: "window"</code> in chat-config.json.
+    The iframe must be positioned where you want the button to appear.
+  </p>
+
+  <div style="position:relative; height:600px; border:1px dashed #cbd5e1; border-radius:12px; overflow:hidden; background:#f1f5f9;">
+    <p style="padding:1rem; color:#94a3b8;">← your page content here</p>
+    <iframe
+      src="/chatui/index.html"
+      title="Chat widget"
+      style="
+        position: absolute;
+        bottom: 0; right: 0;
+        width: 420px;
+        height: 600px;
+        border: none;
+        background: transparent;
+      "
+      allow="microphone"
+    ></iframe>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       OPTION C — Inline React mount  (same-repo / monorepo)
+       ─────────────────────────────────────────────────────────────────────
+       If your project is also a Vite + React app, install chatui as a local
+       package and mount it directly — no iframe, full theme/state sharing.
+
+       1. In your project's package.json add:
+              "chatui": "file:../chatui"
+
+       2. In your page component:
+              import { App as ChatWidget } from 'chatui/src/App'
+              import 'chatui/src/index.css'
+
+       3. Override the config before mounting (or let the user configure it):
+              import { useSettingsStore } from 'chatui/src/store/settingsStore'
+
+              useSettingsStore.getState().setConfig({
+                webhookUrl: 'https://your-n8n.app.n8n.cloud/webhook/abc123',
+                mode: 'window',
+                botName: 'Support',
+                theme: 'midnight',
+                streaming: true,
+              })
+
+       4. Mount inside a container that is full-height (the widget needs h-full):
+              <div style={{ height: '100vh' }}>
+                <ChatWidget />
+              </div>
+
+       This example.html cannot demo that path directly (no bundler here),
+       but see the pseudo-code block below.
+       ═══════════════════════════════════════════════════════════════════════ -->
+
+  <h2>Option C — Direct React mount (monorepo / same bundler)</h2>
+  <pre style="background:#1e293b;color:#e2e8f0;padding:1.5rem;border-radius:10px;overflow:auto;font-size:.85rem;line-height:1.6">
+<span style="color:#94a3b8">// YourPage.tsx</span>
+import { App as ChatWidget } from 'chatui/src/App'
+import { useSettingsStore }  from 'chatui/src/store/settingsStore'
+import 'chatui/src/index.css'
+
+<span style="color:#94a3b8">// Configure once, before first render</span>
+useSettingsStore.getState().setConfig({
+  webhookUrl: 'https://your-n8n.app.n8n.cloud/webhook/abc123',
+  mode:        'window',     <span style="color:#94a3b8">// or 'fullscreen' | 'mixed'</span>
+  botName:     'Support',
+  theme:       'midnight',
+  streaming:   true,
+  showSidebar: false,
+  showCta:     true,
+  ctaDelay:    4000,
+  i18n: {
+    en: { ctaText: 'Hi! Need help?', initialMessages: ['Hello! How can I assist you today?'] },
+  },
+})
+
+export function YourPage() {
+  return (
+    &lt;div style={{ height: '100vh' }}&gt;
+      &lt;YourOwnContent /&gt;
+      &lt;ChatWidget /&gt;  {/* floating button overlays the page */}
+    &lt;/div&gt;
+  )
+}
+  </pre>
+</main>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     chat-config.json  — place this next to dist/index.html
+     (used by Options A & B via VITE_PUBLIC_MODE=true build)
+     ═══════════════════════════════════════════════════════════════════════
+
+{
+  "webhookUrl":       "https://your-n8n.app.n8n.cloud/webhook/abc123",
+  "chatInputKey":     "chatInput",
+  "chatSessionKey":   "sessionId",
+  "botName":          "Support",
+  "theme":            "midnight",
+  "defaultLanguage":  "en",
+  "mode":             "window",
+  "streaming":        true,
+  "showWelcomeScreen": true,
+  "showSidebar":      false,
+  "allowFileUploads": false,
+  "showCta":          true,
+  "ctaDelay":         5000,
+  "ctaSound":         true,
+  "i18n": {
+    "en": {
+      "ctaText":         "Hi! Need help?",
+      "botName":         "Support",
+      "welcomeSubtitle": "Ask me anything — I'm here to help.",
+      "initialMessages": [
+        "Hello! How can I assist you today?"
+      ]
+    }
+  }
+}
+
+     BUILD COMMANDS
+     ──────────────
+     # lock down settings UI + load config from /chat-config.json at runtime
+     VITE_PUBLIC_MODE=true npx vite build
+
+     # optional: serve from a sub-path (update vite.config.ts base option too)
+     VITE_PUBLIC_MODE=true VITE_BASE=/chatui/ npx vite build
+-->
+
+</body>
+</html>

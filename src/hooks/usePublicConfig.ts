@@ -19,6 +19,9 @@ export function usePublicConfig() {
   useEffect(() => {
     if (!PUBLIC_MODE) return
 
+    const urlLang = new URLSearchParams(location.search).get('lang')
+    if (urlLang) setLanguage(urlLang)
+
     fetch(CONFIG_URL)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`)
