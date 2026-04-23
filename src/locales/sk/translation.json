@@ -17,6 +17,9 @@
     "newChat": "Nová konverzácia",
     "settings": "Nastavenia"
   },
+  "footer": {
+    "poweredBy": "Poháňa <a>ELIA AI Assistant</a>"
+  },
   "settings": {
     "title": "Nastavenia",
     "language": "Jazyk rozhrania",

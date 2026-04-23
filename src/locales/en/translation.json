@@ -17,6 +17,9 @@
     "newChat": "New conversation",
     "settings": "Settings"
   },
+  "footer": {
+    "poweredBy": "Powered by <a>ELIA AI Assistant</a>"
+  },
   "settings": {
     "title": "Settings",
     "language": "Interface language",

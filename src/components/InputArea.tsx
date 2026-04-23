@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
+import { Trans } from 'react-i18next'
 
 interface Props {
   onSend: (text: string) => void
@@ -40,9 +41,10 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
 
   return (
     <div
-      className="flex items-end gap-2 p-3 border-t"
+      className="border-t"
       style={{ borderColor: 'var(--t-bg-border)', background: 'var(--t-bg-base)' }}
     >
+    <div className="flex items-end gap-2 p-3">
       {allowFileUploads && (
         <button
           className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-fg-secondary hover:text-fg-primary hover:bg-bg-surface transition-colors"
@@ -82,6 +84,24 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
           <path d="m22 2-7 20-4-9-9-4 20-7z" />
         </svg>
       </button>
+    </div>
+
+    <div className="text-center text-[11px] pb-2 px-3 text-fg-muted">
+      <Trans
+        i18nKey="footer.poweredBy"
+        components={{
+          a: (
+            <a
+              href="https://www.elia-asistent.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline"
+              style={{ color: 'inherit' }}
+            />
+          ),
+        }}
+      />
+    </div>
     </div>
   )
 }
