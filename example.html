@@ -261,6 +261,9 @@ useSettingsStore.getState().setConfig({
   ctaDelay: 5000,                                    <span class="c">// ms before it appears</span>
   ctaSound: true,                                    <span class="c">// Web Audio beep</span>
 
+  <span class="c">// ─── UI lock ──────────────────────────────────────────────────────</span>
+  hideSettings: false,                               <span class="c">// true hides gear, theme picker, settings modal</span>
+
   <span class="c">// ─── i18n ─────────────────────────────────────────────────────────</span>
   defaultLanguage:  <span class="s">'en'</span>,
   initialMessages: [<span class="s">'Hello! How can I help?'</span>],    <span class="c">// global fallback</span>
@@ -312,6 +315,7 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>ctaText</code></td><td><code>string</code></td><td><code>'Hi! How can I help you today?'</code></td><td>Global fallback CTA text.</td></tr>
     <tr><td><code>ctaDelay</code></td><td><code>number</code></td><td><code>5000</code></td><td>Milliseconds before the CTA appears.</td></tr>
     <tr><td><code>ctaSound</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Play a Web Audio beep when the CTA shows.</td></tr>
+    <tr><td><code>hideSettings</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Hide the built-in gear button, theme picker, and settings modal.</td></tr>
   </tbody>
 </table>
 
@@ -398,18 +402,15 @@ useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre
   node in n8n and add your origin under <strong>Allowed Origins (CORS)</strong>.
 </p>
 
-<h3>The settings gear icon should be hidden in production</h3>
+<h3>Hiding the settings gear in production</h3>
 <p>
-  chatui hides its built-in settings UI when <code>import.meta.env.VITE_PUBLIC_MODE === 'true'</code>.
-  Add to the host's <code>.env</code>:
+  Pass <code>hideSettings: true</code> in your config. That removes the gear button, the theme
+  picker, and the settings modal in one go. No env vars, no separate build.
 </p>
-<pre><code>VITE_PUBLIC_MODE=true</code></pre>
-<p>
-  In that mode chatui also tries to fetch <code>/chat-config.json</code> at boot. Since you are
-  configuring in code, that fetch will 404 and log a single warning; the static config you set
-  still applies. If you prefer no warning, serve a copy of your config JSON at
-  <code>/chat-config.json</code> or point <code>VITE_CONFIG_URL</code> at a different path.
-</p>
+<pre><code>useSettingsStore.getState().setConfig({
+  webhookUrl: <span class="s">'https://your-n8n/webhook/abc'</span>,
+  hideSettings: true,
+})</code></pre>
 
 <h3>The widget renders but has no height</h3>
 <p>

@@ -38,6 +38,8 @@ export interface ChatConfig {
   ctaText?: string
   ctaDelay?: number
   ctaSound?: boolean
+  /** Hide the built-in settings UI (gear button, theme picker, settings modal). */
+  hideSettings?: boolean
 }
 
 export interface Message {

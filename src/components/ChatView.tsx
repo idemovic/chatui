@@ -9,11 +9,10 @@ import { ThemePicker } from './ThemePicker.tsx'
 
 interface Props {
   showSidebar: boolean
-  publicMode?: boolean
   onOpenSettings: () => void
 }
 
-export function ChatView({ showSidebar, publicMode, onOpenSettings }: Props) {
+export function ChatView({ showSidebar, onOpenSettings }: Props) {
   const { t } = useTranslation()
   const activeSessionId = useChatStore((s) => s.activeSessionId)
   const messages = useChatStore((s) =>
@@ -23,6 +22,7 @@ export function ChatView({ showSidebar, publicMode, onOpenSettings }: Props) {
   const isStreaming = useChatStore((s) => s.isStreaming)
   const config = useSettingsStore((s) => s.config)
   const language = useSettingsStore((s) => s.language)
+  const hideSettings = config.hideSettings ?? false
   const { send } = useChat()
 
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -63,9 +63,9 @@ export function ChatView({ showSidebar, publicMode, onOpenSettings }: Props) {
         </div>
 
         <div className="flex items-center gap-1">
-          {!showSidebar && !publicMode && <ThemePicker />}
+          {!showSidebar && !hideSettings && <ThemePicker />}
 
-          {!publicMode && (
+          {!hideSettings && (
             <button
               onClick={onOpenSettings}
               className="w-8 h-8 rounded-lg flex items-center justify-center text-fg-secondary hover:text-fg-primary hover:bg-bg-surface transition-colors"

@@ -1,20 +1,21 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useChatStore } from '../store/chatStore.ts'
+import { useSettingsStore } from '../store/settingsStore.ts'
 import { ThemePicker } from './ThemePicker.tsx'
 
 interface Props {
-  publicMode?: boolean
   onOpenSettings: () => void
 }
 
-export function Sidebar({ publicMode, onOpenSettings }: Props) {
+export function Sidebar({ onOpenSettings }: Props) {
   const { t } = useTranslation()
   const sessions = useChatStore((s) => s.sessions)
   const activeSessionId = useChatStore((s) => s.activeSessionId)
   const createSession = useChatStore((s) => s.createSession)
   const setActiveSession = useChatStore((s) => s.setActiveSession)
   const deleteSession = useChatStore((s) => s.deleteSession)
+  const hideSettings = useSettingsStore((s) => s.config.hideSettings ?? false)
   const [hovered, setHovered] = useState<string | null>(null)
 
   return (
@@ -94,8 +95,8 @@ export function Sidebar({ publicMode, onOpenSettings }: Props) {
         className="border-t"
         style={{ borderColor: 'var(--t-bg-border)' }}
       >
-        {!publicMode && <ThemePicker />}
-        {!publicMode && (
+        {!hideSettings && <ThemePicker />}
+        {!hideSettings && (
           <div className="px-3 pb-3">
             <button
               onClick={onOpenSettings}

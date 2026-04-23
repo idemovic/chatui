@@ -21,7 +21,7 @@ Built with **React 19 + Vite + Tailwind CSS v4**. Config-compatible with the off
 - **Markdown rendering** — bot messages support full GFM markdown via `react-markdown`
 - **Typing indicator** — animated three-dot indicator while awaiting a response
 - **Persistent settings** — theme, language, and all config survive page reload
-- **Public mode** — build once with the settings UI locked; config loaded from a JSON file at runtime (no rebuild needed to change webhook URL)
+- **Lockable UI** — set `config.hideSettings: true` to hide the gear, theme picker, and settings modal
 
 ---
 
@@ -154,53 +154,18 @@ data: {"text": "chunk"}
 
 ---
 
-## Public mode (production deployment)
+## Locking the UI in production
 
-Public mode locks the settings UI and loads all configuration from a JSON file at runtime. The build is done once; the config can be updated on the server without rebuilding.
+To hide the built-in settings gear, theme picker, and settings modal, set `hideSettings: true` in your config before the first render:
 
-### 1. Create your `.env` file
-
-```bash
-cp .env.example .env
+```ts
+useSettingsStore.getState().setConfig({
+  webhookUrl: 'https://your-n8n/webhook/abc',
+  hideSettings: true,
+})
 ```
 
-Edit `.env`:
-
-```env
-VITE_PUBLIC_MODE=true
-VITE_CONFIG_URL=/chat-config.json   # optional, this is the default
-```
-
-### 2. Create your config file
-
-```bash
-cp public/chat-config.example.json public/chat-config.json
-```
-
-Edit `public/chat-config.json` — fill in your webhook URL, bot name, initial messages per language, etc.  
-`chat-config.json` is in `.gitignore` so secrets are never committed.
-
-### 3. Build
-
-```bash
-npm run build
-```
-
-Deploy the contents of `dist/` together with your `chat-config.json`.  
-The browser fetches `chat-config.json` on every page load — update it on the server to change any setting without a rebuild.
-
-### What changes in public mode
-
-| Feature | Dev mode | Public mode |
-|---|---|---|
-| Settings gear icon | Visible | Hidden |
-| Settings modal | Accessible | Not rendered |
-| Webhook URL | Editable in UI | From `chat-config.json` |
-| Theme picker | Visible | Hidden |
-| Language switcher | In settings | In settings (hidden) |
-| Config source | `localStorage` | `chat-config.json` (fetched) |
-
-> **Note:** `VITE_PUBLIC_MODE` is baked into the bundle at build time by Vite. Changing the value requires a rebuild. The config **contents** (`chat-config.json`) are fetched at runtime and can be updated freely.
+The config is static; if you want to update it later, rebuild your host app. If you need runtime config without a rebuild (e.g. CMS-driven), fetch the JSON yourself and call `setConfig` with the result - chatui no longer ships a built-in fetcher.
 
 ---
 

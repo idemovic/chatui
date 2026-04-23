@@ -3,14 +3,10 @@ import { useSettingsStore } from './store/settingsStore.ts'
 import { useChatStore } from './store/chatStore.ts'
 import { useTheme } from './hooks/useTheme.ts'
 import { useCta } from './hooks/useCta.ts'
-import { usePublicConfig } from './hooks/usePublicConfig.ts'
 import { Sidebar } from './components/Sidebar.tsx'
 import { ChatView } from './components/ChatView.tsx'
 import { SettingsModal } from './components/SettingsModal.tsx'
 import { CtaPopup } from './components/CtaPopup.tsx'
-
-/** Baked in at build time via VITE_PUBLIC_MODE=true in .env */
-const PUBLIC_MODE = import.meta.env.VITE_PUBLIC_MODE === 'true'
 
 /** Tracks whether the viewport is ≥ 768 px (Tailwind's md breakpoint). */
 function useIsDesktop(): boolean {
@@ -28,7 +24,6 @@ function useIsDesktop(): boolean {
 
 export function App() {
   useTheme()
-  usePublicConfig()
 
   const config = useSettingsStore((s) => s.config)
   const activeSessionId = useChatStore((s) => s.activeSessionId)
@@ -44,9 +39,10 @@ export function App() {
   const isWindow =
     config.mode === 'window' || (config.mode === 'mixed' && isDesktop)
   const showSidebar = !isWindow && (config.showSidebar ?? false)
+  const hideSettings = config.hideSettings ?? false
 
   const openSettings = () => {
-    if (!PUBLIC_MODE) setSettingsOpen(true)
+    if (!hideSettings) setSettingsOpen(true)
   }
 
   // Ensure a session exists on first load
@@ -65,7 +61,6 @@ export function App() {
           >
             <ChatView
               showSidebar={false}
-              publicMode={PUBLIC_MODE}
               onOpenSettings={openSettings}
             />
           </div>
@@ -99,7 +94,7 @@ export function App() {
           )}
         </button>
 
-        {!PUBLIC_MODE && settingsOpen && (
+        {!hideSettings && settingsOpen && (
           <SettingsModal onClose={() => setSettingsOpen(false)} />
         )}
       </>
@@ -126,7 +121,7 @@ export function App() {
             ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           `}
         >
-          <Sidebar publicMode={PUBLIC_MODE} onOpenSettings={openSettings} />
+          <Sidebar onOpenSettings={openSettings} />
         </div>
       )}
 
@@ -145,12 +140,11 @@ export function App() {
         )}
         <ChatView
           showSidebar={showSidebar}
-          publicMode={PUBLIC_MODE}
           onOpenSettings={openSettings}
         />
       </div>
 
-      {!PUBLIC_MODE && settingsOpen && (
+      {!hideSettings && settingsOpen && (
         <SettingsModal onClose={() => setSettingsOpen(false)} />
       )}
     </div>
