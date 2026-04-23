@@ -3,269 +3,425 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Website – chatui integration example</title>
+  <title>chatui - integration guide</title>
   <style>
+    :root {
+      --bg: #f8fafc;
+      --fg: #0f172a;
+      --muted: #64748b;
+      --accent: #6366f1;
+      --code-bg: #0f172a;
+      --code-fg: #e2e8f0;
+      --code-comment: #94a3b8;
+      --code-string: #86efac;
+      --code-keyword: #c4b5fd;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f8fafc;
-      color: #1e293b;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.55;
     }
     header {
-      padding: 1rem 2rem;
-      background: #1e293b;
+      padding: 1.25rem 2rem;
+      background: #0f172a;
       color: #fff;
-      font-size: 1.1rem;
       font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
     }
+    header .sub { font-weight: 400; color: #94a3b8; font-size: .9rem; }
     main {
       max-width: 900px;
-      margin: 3rem auto;
+      margin: 2rem auto 6rem;
       padding: 0 1.5rem;
     }
-    h2 { margin-top: 2.5rem; font-size: 1rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
-    p  { line-height: 1.7; }
+    h1 { font-size: 1.75rem; margin: 0 0 .5rem; }
+    h2 {
+      margin-top: 3rem;
+      font-size: 1.25rem;
+      padding-bottom: .4rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 { margin-top: 2rem; font-size: 1rem; }
+    p, li { line-height: 1.7; }
+    code {
+      font-family: 'SF Mono', Menlo, Consolas, monospace;
+      font-size: .88em;
+      background: #eef2f7;
+      padding: .1em .35em;
+      border-radius: 4px;
+    }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 1.1rem 1.25rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'SF Mono', Menlo, Consolas, monospace;
+      font-size: .85rem;
+      line-height: 1.6;
+    }
+    pre code { background: none; padding: 0; border-radius: 0; color: inherit; font-size: 1em; }
+    .c { color: var(--code-comment); }
+    .k { color: var(--code-keyword); }
+    .s { color: var(--code-string); }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1rem 0;
+      font-size: .9rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: .55rem .75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f1f5f9; font-weight: 600; }
+    td code { font-size: .85em; }
+    .callout {
+      background: #fff7ed;
+      border-left: 3px solid #f97316;
+      padding: .85rem 1rem;
+      border-radius: 4px;
+      margin: 1rem 0;
+      font-size: .92rem;
+    }
+    .callout.info {
+      background: #eff6ff;
+      border-left-color: #3b82f6;
+    }
+    .swatch {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      vertical-align: middle;
+      margin-right: .4rem;
+      border: 1px solid rgba(0,0,0,.1);
+    }
+    nav.toc {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0 2.5rem;
+      font-size: .9rem;
+    }
+    nav.toc ol { margin: .25rem 0 0 0; padding-left: 1.25rem; }
+    nav.toc a { color: var(--accent); text-decoration: none; }
+    nav.toc a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
-<header>My Website</header>
+<header>
+  <span>chatui integration guide</span>
+  <span class="sub">npm install + static config</span>
+</header>
 
 <main>
-  <h1>Integration Examples</h1>
-  <p>
-    This file demonstrates four ways to embed chatui into an existing project.
-    Pick the one that fits your setup — they go from simplest to most flexible.
-  </p>
 
-  <!-- ═══════════════════════════════════════════════════════════════════════
-       OPTION A — Your own button, chat panel in iframe
-       ─────────────────────────────────────────────────────────────────────
-       The chatui app runs in "fullscreen" mode inside a hidden iframe.
-       Your page controls open/close — no floating button inside the widget.
-       chat-config.json should set  "mode": "fullscreen", "showSidebar": false
-       ═══════════════════════════════════════════════════════════════════════ -->
+<h1>Embed chatui in your app</h1>
+<p>
+  This guide walks you through installing <code>chatui</code> from an npm tarball (or local file
+  path), mounting the widget in your React app, and configuring every option statically in code.
+  No runtime config fetch, no settings UI needed.
+</p>
 
-  <h2>Option A — Custom button on your page (recommended)</h2>
-  <p>You own the toggle button; the chat panel is an iframe that slides in/out.</p>
+<nav class="toc">
+  <strong>On this page</strong>
+  <ol>
+    <li><a href="#prereqs">Prerequisites</a></li>
+    <li><a href="#install">Install</a></li>
+    <li><a href="#mount">Minimal mount</a></li>
+    <li><a href="#full-config">Full static configuration</a></li>
+    <li><a href="#reference">Configuration reference</a></li>
+    <li><a href="#themes">Themes</a></li>
+    <li><a href="#languages">Languages</a></li>
+    <li><a href="#gotchas">Gotchas and troubleshooting</a></li>
+  </ol>
+</nav>
 
-  <style>
-    /* ── chat panel ── */
-    #chat-panel {
-      position: fixed;
-      bottom: 80px; right: 16px;
-      width: 380px; height: 560px;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 8px 40px rgba(0,0,0,.22);
-      border: 1px solid #2d3142;
-      /* hidden by default */
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(12px) scale(.97);
-      transition: opacity .2s ease, transform .2s ease;
-      z-index: 1000;
-    }
-    #chat-panel.open {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateY(0) scale(1);
-    }
-    #chat-panel iframe {
-      width: 100%; height: 100%;
-      border: none; display: block;
-    }
+<h2 id="prereqs">1. Prerequisites</h2>
+<p>The host app must use the same bundler and styling pipeline that chatui is authored against:</p>
+<ul>
+  <li>React 19</li>
+  <li>Vite (any version that supports <code>import.meta.glob</code>, so 4.x or later)</li>
+  <li>Tailwind CSS v4 via <code>@tailwindcss/vite</code></li>
+  <li>Node 18 or newer</li>
+</ul>
+<div class="callout info">
+  chatui is shipped as TypeScript source, not a prebuilt bundle. Your host's Vite + Tailwind
+  pipeline compiles it alongside your own code. That is why the prerequisites are strict.
+</div>
 
-    /* ── toggle button ── */
-    #chat-toggle {
-      position: fixed;
-      bottom: 16px; right: 16px;
-      width: 56px; height: 56px;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      background: #6366f1;
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(99,102,241,.5);
-      display: flex; align-items: center; justify-content: center;
-      transition: transform .15s ease, background .15s ease;
-      z-index: 1001;
-    }
-    #chat-toggle:hover { transform: scale(1.08); background: #4f46e5; }
-    #chat-toggle svg { transition: transform .2s ease; }
-    #chat-toggle.open svg.icon-open  { display: none; }
-    #chat-toggle.open svg.icon-close { display: block; }
-    #chat-toggle svg.icon-close { display: none; }
-  </style>
+<h2 id="install">2. Install</h2>
 
-  <!-- The panel — iframe is NOT loaded until first open (src set by JS) -->
-  <div id="chat-panel" role="dialog" aria-label="Chat" aria-hidden="true">
-    <iframe id="chat-iframe" title="Chat" allow="microphone"></iframe>
-  </div>
+<h3>Option A: from a tarball (recommended for sharing)</h3>
+<p>Run <code>npm pack</code> in the chatui repo to produce <code>chatui-X.Y.Z.tgz</code>. Then in your host:</p>
+<pre><code>npm install /absolute/path/to/chatui-0.0.1.tgz</code></pre>
 
-  <!-- The button -->
-  <button id="chat-toggle" aria-label="Open chat" aria-expanded="false" aria-controls="chat-panel">
-    <svg class="icon-open"  width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-  </button>
+<h3>Option B: local file path (recommended for parallel development)</h3>
+<p>In your host's <code>package.json</code>:</p>
+<pre><code>{
+  <span class="s">"dependencies"</span>: {
+    <span class="s">"chatui"</span>: <span class="s">"file:../chatui"</span>
+  }
+}</code></pre>
+<p>Then run <code>npm install</code>. Edits in the chatui repo reflect in the host after a dev-server restart.</p>
 
-  <script>
-    (function () {
-      const CHAT_URL = '/chatui/index.html' // adjust to your deploy path
-      const panel    = document.getElementById('chat-panel')
-      const iframe   = document.getElementById('chat-iframe')
-      const btn      = document.getElementById('chat-toggle')
-      let   loaded   = false
+<h2 id="mount">3. Minimal mount</h2>
+<p>
+  A single entry file is enough. The widget reads its configuration from chatui's Zustand store, so
+  you set the config once before React renders and everything picks it up from there.
+</p>
 
-      btn.addEventListener('click', function () {
-        const opening = !panel.classList.contains('open')
+<pre><code><span class="c">// src/main.tsx</span>
+<span class="k">import</span> { StrictMode } <span class="k">from</span> <span class="s">'react'</span>
+<span class="k">import</span> { createRoot } <span class="k">from</span> <span class="s">'react-dom/client'</span>
 
-        // Lazy-load the iframe on first open so it doesn't slow the host page
-        if (opening && !loaded) {
-          iframe.src = CHAT_URL
-          loaded = true
-        }
+<span class="k">import</span> { App <span class="k">as</span> ChatWidget } <span class="k">from</span> <span class="s">'chatui'</span>
+<span class="k">import</span> { useSettingsStore }    <span class="k">from</span> <span class="s">'chatui/store'</span>
+<span class="k">import</span>                            <span class="s">'chatui/css'</span>
 
-        panel.classList.toggle('open', opening)
-        btn.classList.toggle('open', opening)
-        btn.setAttribute('aria-expanded', String(opening))
-        panel.setAttribute('aria-hidden',  String(!opening))
-      })
-
-      // Close on Escape
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && panel.classList.contains('open')) btn.click()
-      })
-    })()
-  </script>
-
-  <!-- ═══════════════════════════════════════════════════════════════════════
-       OPTION B — iframe  (recommended for most projects)
-       ─────────────────────────────────────────────────────────────────────
-       1. Build chatui:  VITE_PUBLIC_MODE=true vite build
-       2. Serve the dist/ folder at some path, e.g. /chatui/
-       3. Place chat-config.json next to dist/index.html  (see bottom of file)
-       4. Drop the iframe below into your page.
-       ═══════════════════════════════════════════════════════════════════════ -->
-
-  <h2>Option B — Fullscreen chat page inside an iframe</h2>
-  <p>Good for a dedicated support page or a portal tab.</p>
-
-  <iframe
-    src="/chatui/index.html"
-    title="Chat"
-    style="
-      width: 100%;
-      height: 560px;
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 4px 24px rgba(0,0,0,.12);
-    "
-    allow="microphone"
-  ></iframe>
-
-
-  <!-- ═══════════════════════════════════════════════════════════════════════
-       OPTION C — Floating window via iframe
-       ─────────────────────────────────────────────────────────────────────
-       Same build as Option A, but the chat-config.json sets  mode: "window"
-       so the widget renders as a floating button + popup inside the iframe.
-       The iframe itself is invisible / zero-sized; the widget breaks out via
-       position:fixed inside its own document.
-
-       Limitation: position:fixed is scoped to the iframe's viewport, so the
-       button will sit in the iframe's corner, not the host page's corner.
-       To get a true page-level widget use Option C instead.
-       ═══════════════════════════════════════════════════════════════════════ -->
-
-  <h2>Option C — Floating widget (iframe, window mode)</h2>
-  <p>
-    Set <code>mode: "window"</code> in chat-config.json.
-    The iframe must be positioned where you want the button to appear.
-  </p>
-
-  <div style="position:relative; height:600px; border:1px dashed #cbd5e1; border-radius:12px; overflow:hidden; background:#f1f5f9;">
-    <p style="padding:1rem; color:#94a3b8;">← your page content here</p>
-    <iframe
-      src="/chatui/index.html"
-      title="Chat widget"
-      style="
-        position: absolute;
-        bottom: 0; right: 0;
-        width: 420px;
-        height: 600px;
-        border: none;
-        background: transparent;
-      "
-      allow="microphone"
-    ></iframe>
-  </div>
-
-
-  <!-- ═══════════════════════════════════════════════════════════════════════
-       OPTION D — Inline React mount  (same-repo / monorepo)
-       ─────────────────────────────────────────────────────────────────────
-       If your project is also a Vite + React app, install chatui as a local
-       package and mount it directly — no iframe, full theme/state sharing.
-
-       1. In your project's package.json add:
-              "chatui": "file:../chatui"
-
-       2. In your page component:
-              import { App as ChatWidget } from 'chatui/src/App'
-              import 'chatui/src/index.css'
-
-       3. Override the config before mounting (or let the user configure it):
-              import { useSettingsStore } from 'chatui/src/store/settingsStore'
-
-              useSettingsStore.getState().setConfig({
-                webhookUrl: 'https://your-n8n.app.n8n.cloud/webhook/abc123',
-                mode: 'window',
-                botName: 'Support',
-                theme: 'midnight',
-                streaming: true,
-              })
-
-       4. Mount inside a container that is full-height (the widget needs h-full):
-              <div style={{ height: '100vh' }}>
-                <ChatWidget />
-              </div>
-
-       This example.html cannot demo that path directly (no bundler here),
-       but see the pseudo-code block below.
-       ═══════════════════════════════════════════════════════════════════════ -->
-
-  <h2>Option D — Direct React mount (monorepo / same bundler)</h2>
-  <pre style="background:#1e293b;color:#e2e8f0;padding:1.5rem;border-radius:10px;overflow:auto;font-size:.85rem;line-height:1.6">
-<span style="color:#94a3b8">// YourPage.tsx</span>
-import { App as ChatWidget } from 'chatui/src/App'
-import { useSettingsStore }  from 'chatui/src/store/settingsStore'
-import 'chatui/src/index.css'
-
-<span style="color:#94a3b8">// Configure once, before first render</span>
+<span class="c">// Configure BEFORE the first render. setConfig merges into the persisted store.</span>
 useSettingsStore.getState().setConfig({
-  webhookUrl: 'https://your-n8n.app.n8n.cloud/webhook/abc123',
-  mode:        'window',     <span style="color:#94a3b8">// or 'fullscreen' | 'mixed'</span>
-  botName:     'Support',
-  theme:       'midnight',
+  webhookUrl: <span class="s">'https://your-n8n.example.com/webhook/abc123'</span>,
+  mode:        <span class="s">'window'</span>,
+  botName:     <span class="s">'Support'</span>,
   streaming:   true,
-  showSidebar: false,
-  showCta:     true,
-  ctaDelay:    4000,
+})
+useSettingsStore.getState().setTheme(<span class="s">'midnight'</span>)
+useSettingsStore.getState().setLanguage(<span class="s">'en'</span>)
+
+<span class="k">const</span> rootEl = document.getElementById(<span class="s">'root'</span>)
+<span class="k">if</span> (!rootEl) <span class="k">throw new</span> Error(<span class="s">'Root element not found'</span>)
+
+createRoot(rootEl).render(
+  &lt;StrictMode&gt;
+    <span class="c">{/* The chat panel needs a full-height parent. */}</span>
+    &lt;div style={{ height: <span class="s">'100vh'</span> }}&gt;
+      &lt;ChatWidget /&gt;
+    &lt;/div&gt;
+  &lt;/StrictMode&gt;,
+)</code></pre>
+
+<div class="callout">
+  <strong>About persistence.</strong> chatui persists its config to <code>localStorage</code> under
+  the key <code>chatui-settings</code>. Calling <code>setConfig</code> on boot overwrites the
+  matching fields. Unset fields keep their stored values. If you want a fully clean slate, call
+  <code>localStorage.removeItem('chatui-settings')</code> before calling <code>setConfig</code>.
+</div>
+
+<h2 id="full-config">4. Full static configuration</h2>
+<p>
+  Every option available, with defaults and realistic values. Drop this into the bootstrap file
+  and delete the fields you do not need.
+</p>
+
+<pre><code><span class="k">import</span> { useSettingsStore } <span class="k">from</span> <span class="s">'chatui/store'</span>
+
+useSettingsStore.getState().setConfig({
+
+  <span class="c">// ─── Required ────────────────────────────────────────────────────</span>
+  webhookUrl: <span class="s">'https://your-n8n.example.com/webhook/abc123'</span>,
+
+  <span class="c">// ─── Webhook transport ────────────────────────────────────────────</span>
+  webhookConfig: {
+    method:  <span class="s">'POST'</span>,                           <span class="c">// or 'GET'</span>
+    headers: { <span class="s">'X-API-Key'</span>: <span class="s">'your-secret'</span> },
+  },
+  chatInputKey:   <span class="s">'chatInput'</span>,                 <span class="c">// body key for the user message</span>
+  chatSessionKey: <span class="s">'sessionId'</span>,                 <span class="c">// body key for the session id</span>
+  metadata:       { source: <span class="s">'marketing-site'</span> },  <span class="c">// merged into every request body</span>
+
+  <span class="c">// ─── Behavior ─────────────────────────────────────────────────────</span>
+  streaming:             false,                      <span class="c">// expect SSE from n8n</span>
+  showWelcomeScreen:     true,
+  allowFileUploads:      false,
+  allowedFilesMimeTypes: <span class="s">'image/*,application/pdf'</span>,
+
+  <span class="c">// ─── Layout ───────────────────────────────────────────────────────</span>
+  mode:        <span class="s">'window'</span>,                         <span class="c">// 'fullscreen' | 'window' | 'mixed'</span>
+  showSidebar: false,                                <span class="c">// fullscreen mode only</span>
+
+  <span class="c">// ─── Appearance ───────────────────────────────────────────────────</span>
+  theme:   <span class="s">'midnight'</span>,                           <span class="c">// see Themes section</span>
+  botName: <span class="s">'Assistant'</span>,                          <span class="c">// global fallback (per-lang overrides below)</span>
+
+  <span class="c">// ─── CTA popup (window mode) ─────────────────────────────────────</span>
+  showCta:  true,
+  ctaText:  <span class="s">'Hi! How can I help?'</span>,                <span class="c">// global fallback</span>
+  ctaDelay: 5000,                                    <span class="c">// ms before it appears</span>
+  ctaSound: true,                                    <span class="c">// Web Audio beep</span>
+
+  <span class="c">// ─── i18n ─────────────────────────────────────────────────────────</span>
+  defaultLanguage:  <span class="s">'en'</span>,
+  initialMessages: [<span class="s">'Hello! How can I help?'</span>],    <span class="c">// global fallback</span>
   i18n: {
-    en: { ctaText: 'Hi! Need help?', initialMessages: ['Hello! How can I assist you today?'] },
+    en: {
+      botName:         <span class="s">'Sam'</span>,
+      welcomeSubtitle: <span class="s">'Ask me anything.'</span>,
+      initialMessages: [<span class="s">'Hi! How can I help?'</span>, <span class="s">'I speak English.'</span>],
+      ctaText:         <span class="s">'Try me now!'</span>,
+    },
+    sk: {
+      botName:         <span class="s">'Sam'</span>,
+      welcomeSubtitle: <span class="s">'Opýtajte sa ma čokoľvek.'</span>,
+      initialMessages: [<span class="s">'Dobrý deň! Ako vám môžem pomôcť?'</span>],
+      ctaText:         <span class="s">'Vyskúšajte ma!'</span>,
+    },
   },
 })
 
-export function YourPage() {
-  return (
-    &lt;div style={{ height: '100vh' }}&gt;
-      &lt;YourOwnContent /&gt;
-      &lt;ChatWidget /&gt;  {/* floating button overlays the page */}
-    &lt;/div&gt;
-  )
-}
-  </pre>
+<span class="c">// Theme and active language are separate state slices</span>
+useSettingsStore.getState().setTheme(<span class="s">'cosmos'</span>)
+useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre>
+
+<h2 id="reference">5. Configuration reference</h2>
+
+<h3>ChatConfig</h3>
+<table>
+  <thead>
+    <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>webhookUrl</code></td><td><code>string</code></td><td>-</td><td><strong>Required.</strong> n8n Chat Trigger production URL.</td></tr>
+    <tr><td><code>webhookConfig</code></td><td><code>object</code></td><td><code>{method:'POST'}</code></td><td>Transport options. See sub-table.</td></tr>
+    <tr><td><code>chatInputKey</code></td><td><code>string</code></td><td><code>'chatInput'</code></td><td>Body key holding the user message.</td></tr>
+    <tr><td><code>chatSessionKey</code></td><td><code>string</code></td><td><code>'sessionId'</code></td><td>Body key holding the session id.</td></tr>
+    <tr><td><code>metadata</code></td><td><code>object</code></td><td>-</td><td>Extra fields merged into every request body.</td></tr>
+    <tr><td><code>streaming</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Parse the response as Server-Sent Events.</td></tr>
+    <tr><td><code>mode</code></td><td><code>'fullscreen' | 'window' | 'mixed'</code></td><td><code>'fullscreen'</code></td><td><code>mixed</code> = fullscreen on mobile, floating window on desktop.</td></tr>
+    <tr><td><code>showSidebar</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Conversation history sidebar. Fullscreen mode only.</td></tr>
+    <tr><td><code>showWelcomeScreen</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Welcome screen when the conversation is empty.</td></tr>
+    <tr><td><code>allowFileUploads</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Show the file-attachment button in the input bar.</td></tr>
+    <tr><td><code>allowedFilesMimeTypes</code></td><td><code>string</code></td><td>-</td><td>Comma-separated MIME list passed to <code>&lt;input accept&gt;</code>.</td></tr>
+    <tr><td><code>theme</code></td><td><code>string</code></td><td><code>'midnight'</code></td><td>Initial theme id. See Themes section for the full list.</td></tr>
+    <tr><td><code>botName</code></td><td><code>string</code></td><td><code>'Assistant'</code></td><td>Global fallback bot name.</td></tr>
+    <tr><td><code>defaultLanguage</code></td><td><code>string</code></td><td><code>'en'</code></td><td>Initial UI language code.</td></tr>
+    <tr><td><code>initialMessages</code></td><td><code>string[]</code></td><td><code>[]</code></td><td>Global fallback initial bot messages.</td></tr>
+    <tr><td><code>i18n</code></td><td><code>Record&lt;string, LangOverride&gt;</code></td><td>-</td><td>Per-language overrides. See sub-table.</td></tr>
+    <tr><td><code>showCta</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Show the CTA speech bubble above the floating button.</td></tr>
+    <tr><td><code>ctaText</code></td><td><code>string</code></td><td><code>'Hi! How can I help you today?'</code></td><td>Global fallback CTA text.</td></tr>
+    <tr><td><code>ctaDelay</code></td><td><code>number</code></td><td><code>5000</code></td><td>Milliseconds before the CTA appears.</td></tr>
+    <tr><td><code>ctaSound</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Play a Web Audio beep when the CTA shows.</td></tr>
+  </tbody>
+</table>
+
+<h3>webhookConfig</h3>
+<table>
+  <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>method</code></td><td><code>'POST' | 'GET'</code></td><td>Request method. GET puts the payload in query params.</td></tr>
+    <tr><td><code>headers</code></td><td><code>Record&lt;string, string&gt;</code></td><td>Extra headers. Common use: auth tokens.</td></tr>
+  </tbody>
+</table>
+
+<h3>LangOverride (per-language i18n)</h3>
+<p>Values fall back in this order: <code>i18n[activeLang]</code>, then <code>i18n['en']</code>, then the top-level config field.</p>
+<table>
+  <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>botName</code></td><td><code>string</code></td><td>Bot display name for this language.</td></tr>
+    <tr><td><code>welcomeSubtitle</code></td><td><code>string</code></td><td>Subtitle shown on the welcome screen.</td></tr>
+    <tr><td><code>initialMessages</code></td><td><code>string[]</code></td><td>Greeting messages shown before the user types.</td></tr>
+    <tr><td><code>ctaText</code></td><td><code>string</code></td><td>CTA bubble copy for this language (window mode).</td></tr>
+  </tbody>
+</table>
+
+<h2 id="themes">6. Themes</h2>
+<p>Pass any of these ids as <code>config.theme</code> or via <code>setTheme(id)</code>.</p>
+<table>
+  <thead><tr><th>Id</th><th>Label</th><th>Scheme</th><th>Accent</th></tr></thead>
+  <tbody>
+    <tr><td><code>midnight</code></td><td>Midnight</td><td>Dark</td><td><span class="swatch" style="background:#6366f1"></span>#6366f1</td></tr>
+    <tr><td><code>ivory</code></td><td>Ivory</td><td>Light</td><td><span class="swatch" style="background:#4338ca"></span>#4338ca</td></tr>
+    <tr><td><code>sunrise</code></td><td>Sunrise</td><td>Light</td><td><span class="swatch" style="background:#f97316"></span>#f97316</td></tr>
+    <tr><td><code>cosmos</code></td><td>Cosmos</td><td>Dark</td><td><span class="swatch" style="background:#a855f7"></span>#a855f7</td></tr>
+    <tr><td><code>forest</code></td><td>Forest</td><td>Dark</td><td><span class="swatch" style="background:#22c55e"></span>#22c55e</td></tr>
+    <tr><td><code>ocean</code></td><td>Ocean</td><td>Dark</td><td><span class="swatch" style="background:#06b6d4"></span>#06b6d4</td></tr>
+    <tr><td><code>cherry</code></td><td>Cherry</td><td>Dark</td><td><span class="swatch" style="background:#ef4444"></span>#ef4444</td></tr>
+    <tr><td><code>navy</code></td><td>Navy</td><td>Dark</td><td><span class="swatch" style="background:#3b82f6"></span>#3b82f6</td></tr>
+    <tr><td><code>lavender</code></td><td>Lavender</td><td>Light</td><td><span class="swatch" style="background:#8b5cf6"></span>#8b5cf6</td></tr>
+    <tr><td><code>amber</code></td><td>Amber</td><td>Dark</td><td><span class="swatch" style="background:#f59e0b"></span>#f59e0b</td></tr>
+  </tbody>
+</table>
+
+<h2 id="languages">7. Languages</h2>
+<p>
+  English and Slovak ship bundled inside <code>node_modules/chatui/src/locales/</code>. The widget
+  loads them on demand using Vite code-splitting, no HTTP fetch.
+</p>
+<p>To register a new language at runtime (without rebuilding chatui):</p>
+<pre><code><span class="k">import</span> i18n <span class="k">from</span> <span class="s">'i18next'</span>
+
+i18n.addResourceBundle(<span class="s">'fr'</span>, <span class="s">'translation'</span>, {
+  welcome:  { subtitle: <span class="s">'Commencez une conversation.'</span> },
+  input:    { placeholder: <span class="s">'Tapez un message...'</span> },
+  <span class="c">// ... full keys: see node_modules/chatui/src/locales/en/translation.json</span>
+})
+
+useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre>
+<p>
+  Then add any French per-language overrides under <code>config.i18n.fr</code>.
+</p>
+
+<h2 id="gotchas">8. Gotchas and troubleshooting</h2>
+
+<h3>Tailwind classes not applying</h3>
+<p>
+  chatui's CSS contains an <code>@source "./**/*.{ts,tsx}"</code> directive that tells Tailwind to
+  scan its own TSX files. This works automatically in almost every host. If you still see unstyled
+  components, add this line to your own Tailwind entry CSS as a belt-and-braces fix:
+</p>
+<pre><code>@source <span class="s">"../node_modules/chatui/src/**/*.{ts,tsx}"</span>;</code></pre>
+
+<h3>"Invalid hook call" or two React copies</h3>
+<p>
+  chatui declares <code>react</code> and <code>react-dom</code> as <code>peerDependencies</code>.
+  If npm installs two copies anyway (because of version mismatch), dedupe:
+</p>
+<pre><code>npm dedupe
+<span class="c"># or if that does not help, add to your package.json:</span>
+<span class="s">"overrides"</span>: { <span class="s">"react"</span>: <span class="s">"^19.0.0"</span>, <span class="s">"react-dom"</span>: <span class="s">"^19.0.0"</span> }</code></pre>
+
+<h3>Webhook is called but returns CORS errors</h3>
+<p>
+  Your n8n Chat Trigger must allow the origin your host page is served from. Open the Chat Trigger
+  node in n8n and add your origin under <strong>Allowed Origins (CORS)</strong>.
+</p>
+
+<h3>The settings gear icon should be hidden in production</h3>
+<p>
+  chatui hides its built-in settings UI when <code>import.meta.env.VITE_PUBLIC_MODE === 'true'</code>.
+  Add to the host's <code>.env</code>:
+</p>
+<pre><code>VITE_PUBLIC_MODE=true</code></pre>
+<p>
+  In that mode chatui also tries to fetch <code>/chat-config.json</code> at boot. Since you are
+  configuring in code, that fetch will 404 and log a single warning; the static config you set
+  still applies. If you prefer no warning, serve a copy of your config JSON at
+  <code>/chat-config.json</code> or point <code>VITE_CONFIG_URL</code> at a different path.
+</p>
+
+<h3>The widget renders but has no height</h3>
+<p>
+  chatui uses <code>h-full</code> internally. Its parent container must have an explicit height,
+  for example <code>height: 100vh</code> or a fixed pixel value.
+</p>
+
+<h3>Clearing persisted state during development</h3>
+<pre><code><span class="c">// DevTools console, or a temporary boot-time line</span>
+localStorage.removeItem(<span class="s">'chatui-settings'</span>)
+localStorage.removeItem(<span class="s">'chatui-chat'</span>)</code></pre>
+
 </main>
 
 </body>

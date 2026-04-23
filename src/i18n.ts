@@ -1,8 +1,19 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import HttpBackend from 'i18next-http-backend'
+import resourcesToBackend from 'i18next-resources-to-backend'
 
-/** Read the persisted language from Zustand's localStorage entry before React boots. */
+type LocaleModule = { default: Record<string, unknown> }
+
+const localeModules = import.meta.glob<LocaleModule>('./locales/*/translation.json')
+
+const supportedLngs = Array.from(
+  new Set(
+    Object.keys(localeModules)
+      .map((path) => path.split('/')[2])
+      .filter((lng): lng is string => Boolean(lng)),
+  ),
+)
+
 function getInitialLang(): string {
   try {
     const raw = localStorage.getItem('chatui-settings')
@@ -14,20 +25,23 @@ function getInitialLang(): string {
   } catch {
     // ignore
   }
-  // Fall back to browser language (first segment only: "en-US" → "en")
   return navigator.language.split('-')[0] ?? 'en'
 }
 
 void i18n
-  .use(HttpBackend)
+  .use(
+    resourcesToBackend(async (lng: string, ns: string) => {
+      const loader = localeModules[`./locales/${lng}/${ns}.json`]
+      if (!loader) throw new Error(`Missing locale bundle: ${lng}/${ns}`)
+      const mod = await loader()
+      return mod.default
+    }),
+  )
   .use(initReactI18next)
   .init({
     lng: getInitialLang(),
     fallbackLng: 'en',
-    supportedLngs: ['en', 'sk'],
-    backend: {
-      loadPath: '/locales/{{lng}}/{{ns}}.json',
-    },
+    supportedLngs,
     interpolation: {
       escapeValue: false,
     },
