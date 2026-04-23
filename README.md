@@ -154,18 +154,20 @@ data: {"text": "chunk"}
 
 ---
 
-## Locking the UI in production
+## Settings UI
 
-To hide the built-in settings gear, theme picker, and settings modal, set `hideSettings: true` in your config before the first render:
+For consumers installing chatui as a package, the built-in settings gear, theme picker, and settings modal are **hidden by default** - configuration is meant to live in host code. To expose the UI (admin dashboards, live demos, internal tools), flip the flag:
 
 ```ts
 useSettingsStore.getState().setConfig({
-  webhookUrl: 'https://your-n8n/webhook/abc',
-  hideSettings: true,
+  webhookUrl:   'https://your-n8n/webhook/abc',
+  hideSettings: false,
 })
 ```
 
-The config is static; if you want to update it later, rebuild your host app. If you need runtime config without a rebuild (e.g. CMS-driven), fetch the JSON yourself and call `setConfig` with the result - chatui no longer ships a built-in fetcher.
+The chatui repo's own `npm run dev` unlocks the UI automatically via its entry file, so local development is unaffected.
+
+If you need runtime config without a rebuild (e.g. CMS-driven), fetch the JSON yourself and call `setConfig` with the result - chatui no longer ships a built-in fetcher.
 
 ---
 

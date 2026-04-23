@@ -262,7 +262,7 @@ useSettingsStore.getState().setConfig({
   ctaSound: true,                                    <span class="c">// Web Audio beep</span>
 
   <span class="c">// ─── UI lock ──────────────────────────────────────────────────────</span>
-  hideSettings: false,                               <span class="c">// true hides gear, theme picker, settings modal</span>
+  hideSettings: true,                                <span class="c">// default. Set to false to show the gear, theme picker, and settings modal.</span>
 
   <span class="c">// ─── i18n ─────────────────────────────────────────────────────────</span>
   defaultLanguage:  <span class="s">'en'</span>,
@@ -315,7 +315,7 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>ctaText</code></td><td><code>string</code></td><td><code>'Hi! How can I help you today?'</code></td><td>Global fallback CTA text.</td></tr>
     <tr><td><code>ctaDelay</code></td><td><code>number</code></td><td><code>5000</code></td><td>Milliseconds before the CTA appears.</td></tr>
     <tr><td><code>ctaSound</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Play a Web Audio beep when the CTA shows.</td></tr>
-    <tr><td><code>hideSettings</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Hide the built-in gear button, theme picker, and settings modal.</td></tr>
+    <tr><td><code>hideSettings</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Hide the built-in gear button, theme picker, and settings modal. Defaults to <code>true</code> for npm consumers; set <code>false</code> to expose the UI.</td></tr>
   </tbody>
 </table>
 
@@ -402,14 +402,15 @@ useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre
   node in n8n and add your origin under <strong>Allowed Origins (CORS)</strong>.
 </p>
 
-<h3>Hiding the settings gear in production</h3>
+<h3>Showing the settings gear (it is hidden by default)</h3>
 <p>
-  Pass <code>hideSettings: true</code> in your config. That removes the gear button, the theme
-  picker, and the settings modal in one go. No env vars, no separate build.
+  For npm consumers the gear, theme picker, and settings modal are hidden out of the box, because
+  your config is static code. If you want them back (admin dashboard, internal tools, live demo),
+  flip the flag:
 </p>
 <pre><code>useSettingsStore.getState().setConfig({
-  webhookUrl: <span class="s">'https://your-n8n/webhook/abc'</span>,
-  hideSettings: true,
+  webhookUrl:   <span class="s">'https://your-n8n/webhook/abc'</span>,
+  hideSettings: false,
 })</code></pre>
 
 <h3>The widget renders but has no height</h3>

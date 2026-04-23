@@ -26,6 +26,7 @@ const defaultConfig: ChatConfig = {
   ctaText: 'Hi! How can I help you today?',
   ctaDelay: 5000,
   ctaSound: true,
+  hideSettings: true,
   i18n: {
     en: { initialMessages: [], ctaText: 'Hi! How can I help you today?' },
     sk: { initialMessages: [], ctaText: 'Dobrý deň! Ako vám môžem pomôcť?' },
