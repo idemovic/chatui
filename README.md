@@ -13,6 +13,7 @@ Built with **React 19 + Vite + Tailwind CSS v4**. Config-compatible with the off
 - **n8n webhook compatible** — same parameters as `@n8n/chat`; works with any n8n Chat Trigger node out of the box
 - **SSE streaming** — optional word-by-word bot responses via Server-Sent Events
 - **10 built-in themes** — Midnight, Ivory, Sunrise (orange/white), Cosmos, Forest, Ocean, Cherry, Navy, Lavender, Amber; switch at runtime
+- **12 built-in avatars + custom upload** — pick a bundled avatar by id, upload your own (max 500 KB), or paste a URL; same picker for the window-mode toggle button icon
 - **Two display modes** — `fullscreen` (standalone page) or `window` (floating button + popup panel)
 - **CTA popup** — timed speech-bubble with a Web Audio notification sound, shown once above the toggle button in window mode
 - **Conversation history** — optional sidebar with persistent multi-session history (Zustand + localStorage)

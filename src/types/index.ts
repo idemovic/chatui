@@ -40,6 +40,10 @@ export interface ChatConfig {
   ctaSound?: boolean
   /** Hide the built-in settings UI (gear button, theme picker, settings modal). */
   hideSettings?: boolean
+  /** Bot avatar. Built-in id (e.g. 'amara'), URL, or data URL. */
+  botAvatar?: string
+  /** Popup toggle button icon (window mode). Built-in id, URL, or data URL. */
+  toggleButtonIcon?: string
 }
 
 export interface Message {

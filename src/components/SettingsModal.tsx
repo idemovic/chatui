@@ -1,7 +1,10 @@
-import { useState, useCallback, type ReactNode } from 'react'
+import { useState, useCallback, useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../store/settingsStore.ts'
+import { builtInAvatarIds, builtInAvatars, resolveAvatarUrl } from '../assets/avatars/index.ts'
 import type { ChatConfig, LangOverride } from '../types/index.ts'
+
+const MAX_UPLOAD_BYTES = 500 * 1024
 
 interface Props {
   onClose: () => void
@@ -170,6 +173,14 @@ export function SettingsModal({ onClose }: Props) {
             />
           </Field>
 
+          <Field label={t('settings.botAvatar')}>
+            <AvatarPicker
+              value={local.botAvatar}
+              onChange={(v) => setLocal((l) => ({ ...l, botAvatar: v }))}
+              shape="circle"
+            />
+          </Field>
+
           <Field label={t('settings.metadata')} error={metaError}>
             <textarea
               value={metaRaw}
@@ -217,6 +228,13 @@ export function SettingsModal({ onClose }: Props) {
                 <input type="number" value={local.ctaDelay ?? 5000}
                   onChange={(e) => setLocal((l) => ({ ...l, ctaDelay: Number(e.target.value) }))}
                   className="input-field" min={0} step={500} />
+              </Field>
+              <Field label={t('settings.toggleButtonIcon')}>
+                <AvatarPicker
+                  value={local.toggleButtonIcon}
+                  onChange={(v) => setLocal((l) => ({ ...l, toggleButtonIcon: v }))}
+                  shape="circle"
+                />
               </Field>
             </div>
           )}
@@ -401,5 +419,130 @@ function Toggle({ label, checked, onChange }: {
       </div>
       <span className="text-sm text-fg-secondary">{label}</span>
     </label>
+  )
+}
+
+function AvatarPicker({
+  value,
+  onChange,
+  shape,
+}: {
+  value: string | undefined
+  onChange: (v: string | undefined) => void
+  shape: 'circle' | 'square'
+}) {
+  const { t } = useTranslation()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [uploadError, setUploadError] = useState('')
+  const previewUrl = resolveAvatarUrl(value)
+  const radius = shape === 'circle' ? 'rounded-full' : 'rounded-lg'
+
+  const handleFile = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      setUploadError(t('settings.avatarErrorType'))
+      return
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setUploadError(t('settings.avatarErrorSize'))
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const result = e.target?.result
+      if (typeof result === 'string') {
+        onChange(result)
+        setUploadError('')
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Preview + clear */}
+      <div className="flex items-center gap-3">
+        <div
+          className={`w-14 h-14 ${radius} overflow-hidden flex items-center justify-center text-xs`}
+          style={{
+            background: 'var(--t-bg-surface2)',
+            color: 'var(--t-fg-muted)',
+            border: '1px solid var(--t-bg-border)',
+          }}
+        >
+          {previewUrl ? (
+            <img src={previewUrl} alt="" className="w-full h-full object-cover" />
+          ) : (
+            t('settings.avatarNone')
+          )}
+        </div>
+        {value && (
+          <button
+            type="button"
+            onClick={() => { onChange(undefined); setUploadError('') }}
+            className="px-2 py-1 rounded-lg text-xs text-fg-muted hover:text-fg-primary hover:bg-bg-surface2 transition-colors"
+          >
+            {t('settings.avatarClear')}
+          </button>
+        )}
+      </div>
+
+      {/* Built-in grid */}
+      <div className="grid grid-cols-6 gap-2">
+        {builtInAvatarIds.map((id) => {
+          const selected = value === id
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => { onChange(id); setUploadError('') }}
+              className={`${radius} overflow-hidden transition-transform hover:scale-105`}
+              style={{
+                outline: selected ? '2px solid var(--t-accent)' : '1px solid var(--t-bg-border)',
+                outlineOffset: selected ? '1px' : '0',
+              }}
+              title={id}
+            >
+              <img src={builtInAvatars[id]} alt={id} className="w-full aspect-square object-cover" />
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Upload + URL */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          className="px-3 py-1.5 rounded-lg text-xs transition-colors"
+          style={{ background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }}
+        >
+          {t('settings.avatarUpload')}
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            if (f) handleFile(f)
+            e.target.value = ''
+          }}
+        />
+        <input
+          type="url"
+          placeholder={t('settings.avatarUrlPlaceholder')}
+          value={value && !(value in builtInAvatars) && !value.startsWith('data:') ? value : ''}
+          onChange={(e) => {
+            const v = e.target.value.trim()
+            onChange(v || undefined)
+            setUploadError('')
+          }}
+          className="input-field flex-1 text-xs"
+        />
+      </div>
+
+      {uploadError && <p className="text-xs text-red-400">{uploadError}</p>}
+    </div>
   )
 }

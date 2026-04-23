@@ -1,9 +1,34 @@
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { useSettingsStore } from '../store/settingsStore.ts'
+import { resolveAvatarUrl } from '../assets/avatars/index.ts'
 import type { Message } from '../types/index.ts'
 
 interface Props {
   message: Message
+}
+
+function BotAvatar() {
+  const botAvatar = useSettingsStore((s) => s.config.botAvatar)
+  const url = resolveAvatarUrl(botAvatar)
+  if (url) {
+    return (
+      <div
+        className="w-7 h-7 rounded-full flex-shrink-0 overflow-hidden"
+        style={{ background: 'var(--t-bg-surface2)' }}
+      >
+        <img src={url} alt="" className="w-full h-full object-cover" />
+      </div>
+    )
+  }
+  return (
+    <div
+      className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
+      style={{ background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }}
+    >
+      A
+    </div>
+  )
 }
 
 function formatTime(ts: number): string {
@@ -19,16 +44,16 @@ export function MessageBubble({ message }: Props) {
   return (
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} items-end mb-4`}>
       {/* Avatar */}
-      <div
-        className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-        style={
-          isUser
-            ? { background: 'var(--t-user-bubble)', color: 'var(--t-user-fg)' }
-            : { background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }
-        }
-      >
-        {isUser ? 'U' : 'A'}
-      </div>
+      {isUser ? (
+        <div
+          className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
+          style={{ background: 'var(--t-user-bubble)', color: 'var(--t-user-fg)' }}
+        >
+          U
+        </div>
+      ) : (
+        <BotAvatar />
+      )}
 
       <div className={`flex flex-col gap-1 max-w-[75%] ${isUser ? 'items-end' : 'items-start'}`}>
         {/* Bubble */}
@@ -93,12 +118,7 @@ export function MessageBubble({ message }: Props) {
 export function TypingIndicator() {
   return (
     <div className="flex gap-3 items-end mb-4">
-      <div
-        className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-        style={{ background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }}
-      >
-        A
-      </div>
+      <BotAvatar />
       <div
         className="px-4 py-3 rounded-2xl flex gap-1.5 items-center"
         style={{

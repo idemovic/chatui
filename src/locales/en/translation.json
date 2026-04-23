@@ -43,6 +43,14 @@
     "initialMessages": "Initial messages (one per line)",
     "initialMessagesPlaceholder": "Hello! How can I help you today?\nI speak your language.",
     "ctaTextLabel": "CTA popup text",
+    "botAvatar": "Bot avatar",
+    "toggleButtonIcon": "Popup button icon",
+    "avatarNone": "None",
+    "avatarClear": "Clear",
+    "avatarUpload": "Upload…",
+    "avatarUrlPlaceholder": "or paste a URL",
+    "avatarErrorType": "Please choose an image file.",
+    "avatarErrorSize": "Image is too large (max 500 KB).",
     "save": "Save",
     "cancel": "Cancel"
   }

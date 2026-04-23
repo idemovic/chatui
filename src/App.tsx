@@ -7,6 +7,7 @@ import { Sidebar } from './components/Sidebar.tsx'
 import { ChatView } from './components/ChatView.tsx'
 import { SettingsModal } from './components/SettingsModal.tsx'
 import { CtaPopup } from './components/CtaPopup.tsx'
+import { resolveAvatarUrl } from './assets/avatars/index.ts'
 
 /** Tracks whether the viewport is ≥ 768 px (Tailwind's md breakpoint). */
 function useIsDesktop(): boolean {
@@ -74,25 +75,14 @@ export function App() {
         )}
 
         {/* Toggle button */}
-        <button
-          className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105"
-          style={{ background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }}
+        <ToggleButton
+          open={windowOpen}
+          iconSrc={resolveAvatarUrl(config.toggleButtonIcon)}
           onClick={() => {
             dismissCta()
             setWindowOpen((o) => !o)
           }}
-          aria-label="Toggle chat"
-        >
-          {windowOpen ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-          )}
-        </button>
+        />
 
         {!hideSettings && settingsOpen && (
           <SettingsModal onClose={() => setSettingsOpen(false)} />
@@ -148,5 +138,40 @@ export function App() {
         <SettingsModal onClose={() => setSettingsOpen(false)} />
       )}
     </div>
+  )
+}
+
+function ToggleButton({
+  open,
+  iconSrc,
+  onClick,
+}: {
+  open: boolean
+  iconSrc: string | undefined
+  onClick: () => void
+}) {
+  const showImage = Boolean(iconSrc) && !open
+  return (
+    <button
+      className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 overflow-hidden"
+      style={{
+        background: showImage ? 'transparent' : 'var(--t-accent)',
+        color: 'var(--t-accent-fg)',
+      }}
+      onClick={onClick}
+      aria-label="Toggle chat"
+    >
+      {open ? (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      ) : showImage ? (
+        <img src={iconSrc} alt="" className="w-full h-full object-cover" />
+      ) : (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+      )}
+    </button>
   )
 }

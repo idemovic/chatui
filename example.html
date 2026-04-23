@@ -143,6 +143,7 @@
     <li><a href="#full-config">Full static configuration</a></li>
     <li><a href="#reference">Configuration reference</a></li>
     <li><a href="#themes">Themes</a></li>
+    <li><a href="#avatars">Avatars and toggle button icon</a></li>
     <li><a href="#languages">Languages</a></li>
     <li><a href="#gotchas">Gotchas and troubleshooting</a></li>
   </ol>
@@ -252,14 +253,16 @@ useSettingsStore.getState().setConfig({
   showSidebar: false,                                <span class="c">// fullscreen mode only</span>
 
   <span class="c">// ─── Appearance ───────────────────────────────────────────────────</span>
-  theme:   <span class="s">'midnight'</span>,                           <span class="c">// see Themes section</span>
-  botName: <span class="s">'Assistant'</span>,                          <span class="c">// global fallback (per-lang overrides below)</span>
+  theme:     <span class="s">'midnight'</span>,                         <span class="c">// see Themes section</span>
+  botName:   <span class="s">'Assistant'</span>,                        <span class="c">// global fallback (per-lang overrides below)</span>
+  botAvatar: <span class="s">'amara'</span>,                            <span class="c">// built-in id, URL, or data URL. See Avatars section.</span>
 
   <span class="c">// ─── CTA popup (window mode) ─────────────────────────────────────</span>
   showCta:  true,
   ctaText:  <span class="s">'Hi! How can I help?'</span>,                <span class="c">// global fallback</span>
   ctaDelay: 5000,                                    <span class="c">// ms before it appears</span>
   ctaSound: true,                                    <span class="c">// Web Audio beep</span>
+  toggleButtonIcon: <span class="s">'priya'</span>,                      <span class="c">// replaces the default chat bubble. Same value forms as botAvatar.</span>
 
   <span class="c">// ─── UI lock ──────────────────────────────────────────────────────</span>
   hideSettings: true,                                <span class="c">// default. Set to false to show the gear, theme picker, and settings modal.</span>
@@ -308,6 +311,8 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>allowedFilesMimeTypes</code></td><td><code>string</code></td><td>-</td><td>Comma-separated MIME list passed to <code>&lt;input accept&gt;</code>.</td></tr>
     <tr><td><code>theme</code></td><td><code>string</code></td><td><code>'midnight'</code></td><td>Initial theme id. See Themes section for the full list.</td></tr>
     <tr><td><code>botName</code></td><td><code>string</code></td><td><code>'Assistant'</code></td><td>Global fallback bot name.</td></tr>
+    <tr><td><code>botAvatar</code></td><td><code>string</code></td><td>-</td><td>Built-in avatar id, full URL, or data URL. See Avatars section.</td></tr>
+    <tr><td><code>toggleButtonIcon</code></td><td><code>string</code></td><td>-</td><td>Image shown inside the floating toggle button in <code>window</code> / <code>mixed</code> mode. Same value forms as <code>botAvatar</code>.</td></tr>
     <tr><td><code>defaultLanguage</code></td><td><code>string</code></td><td><code>'en'</code></td><td>Initial UI language code.</td></tr>
     <tr><td><code>initialMessages</code></td><td><code>string[]</code></td><td><code>[]</code></td><td>Global fallback initial bot messages.</td></tr>
     <tr><td><code>i18n</code></td><td><code>Record&lt;string, LangOverride&gt;</code></td><td>-</td><td>Per-language overrides. See sub-table.</td></tr>
@@ -358,7 +363,24 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
   </tbody>
 </table>
 
-<h2 id="languages">7. Languages</h2>
+<h2 id="avatars">7. Avatars and toggle button icon</h2>
+<p>
+  chatui ships 12 built-in avatars bundled inside <code>node_modules/chatui/src/assets/avatars/</code>.
+  You can reference one by id, supply your own URL, or paste a data URL.
+</p>
+<p>
+  Both <code>botAvatar</code> and <code>toggleButtonIcon</code> accept the same value forms:
+</p>
+<ul>
+  <li><strong>Built-in id</strong>: <code>'amara'</code>, <code>'david'</code>, <code>'elena'</code>, <code>'kenji'</code>, <code>'luca'</code>, <code>'marcus'</code>, <code>'mei'</code>, <code>'nadia'</code>, <code>'omar'</code>, <code>'priya'</code>, <code>'samuel'</code>, <code>'sofia'</code></li>
+  <li><strong>URL</strong>: any <code>http(s)://…</code> or root-relative path such as <code>'/img/my-avatar.png'</code></li>
+  <li><strong>Data URL</strong>: <code>'data:image/png;base64,…'</code> (what the built-in file picker produces)</li>
+</ul>
+<p>
+  If the settings UI is visible (<code>hideSettings: false</code>), end users can pick a built-in, upload a file (max 500 KB), or paste a URL from the settings modal. The toggle button icon picker only appears in <code>window</code> / <code>mixed</code> mode.
+</p>
+
+<h2 id="languages">8. Languages</h2>
 <p>
   English and Slovak ship bundled inside <code>node_modules/chatui/src/locales/</code>. The widget
   loads them on demand using Vite code-splitting, no HTTP fetch.
@@ -377,7 +399,7 @@ useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre
   Then add any French per-language overrides under <code>config.i18n.fr</code>.
 </p>
 
-<h2 id="gotchas">8. Gotchas and troubleshooting</h2>
+<h2 id="gotchas">9. Gotchas and troubleshooting</h2>
 
 <h3>Tailwind classes not applying</h3>
 <p>

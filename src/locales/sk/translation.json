@@ -43,6 +43,14 @@
     "initialMessages": "Úvodné správy (jedna za riadok)",
     "initialMessagesPlaceholder": "Dobrý deň! Ako vám môžem pomôcť?\nHovorím vaším jazykom.",
     "ctaTextLabel": "Text CTA popupu",
+    "botAvatar": "Avatar bota",
+    "toggleButtonIcon": "Ikona tlačidla popupu",
+    "avatarNone": "Žiadny",
+    "avatarClear": "Vymazať",
+    "avatarUpload": "Nahrať…",
+    "avatarUrlPlaceholder": "alebo vložte URL",
+    "avatarErrorType": "Vyberte súbor obrázka.",
+    "avatarErrorSize": "Obrázok je príliš veľký (max 500 KB).",
     "save": "Uložiť",
     "cancel": "Zrušiť"
   }
