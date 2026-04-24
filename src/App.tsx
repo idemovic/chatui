@@ -1,3 +1,4 @@
+import './i18n.ts'
 import { useState, useEffect } from 'react'
 import { useSettingsStore } from './store/settingsStore.ts'
 import { useChatStore } from './store/chatStore.ts'

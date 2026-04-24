@@ -11,7 +11,10 @@
     "./store": "./src/store/settingsStore.ts",
     "./chat-store": "./src/store/chatStore.ts",
     "./types": "./src/types/index.ts",
-    "./css": "./src/index.css"
+    "./css": {
+      "types": "./src/index.css.d.ts",
+      "default": "./src/index.css"
+    }
   },
   "scripts": {
     "dev": "vite",

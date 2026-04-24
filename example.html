@@ -401,6 +401,26 @@ useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre
 
 <h2 id="gotchas">9. Gotchas and troubleshooting</h2>
 
+<h3>SyntaxError: void-elements does not provide an export named 'default'</h3>
+<p>
+  This is a CJS/ESM interop issue in the <code>react-i18next</code> → <code>html-parse-stringify</code>
+  → <code>void-elements</code> chain. Fix it by forcing Vite to pre-bundle <code>html-parse-stringify</code>
+  in your host's <code>vite.config.ts</code>:
+</p>
+<pre><code>export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  optimizeDeps: {
+    include: [
+      <span class="s">'html-parse-stringify'</span>,
+      <span class="s">'use-sync-external-store/shim'</span>,
+      <span class="s">'style-to-js'</span>,
+      <span class="s">'extend'</span>,
+      <span class="s">'debug'</span>,
+      <span class="s">'ms'</span>,
+    ],
+  },
+})</code></pre>
+
 <h3>Tailwind classes not applying</h3>
 <p>
   chatui's CSS contains an <code>@source "./**/*.{ts,tsx}"</code> directive that tells Tailwind to
