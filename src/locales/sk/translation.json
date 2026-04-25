@@ -20,6 +20,18 @@
   "footer": {
     "poweredBy": "Poháňa <a>{{label}}</a>"
   },
+  "tabs": {
+    "notifications": "Tipy",
+    "help": "Pomoc",
+    "chat": "Chat",
+    "faqSearch": "Hľadať vo FAQ…",
+    "loading": "Načítavam…",
+    "error": "Nepodarilo sa načítať",
+    "empty": {
+      "notifications": "Zatiaľ žiadne oznámenia.",
+      "faq": "Žiadne zhodné položky."
+    }
+  },
   "settings": {
     "title": "Nastavenia",
     "language": "Jazyk rozhrania",
@@ -35,6 +47,12 @@
     "mode": "Režim zobrazenia",
     "fullscreenSheet": "Štýl spodného panela (nepokryje celú obrazovku)",
     "fullscreenSheetHeight": "Výška panela (CSS dĺžka, napr. 75vh, 600px)",
+    "tabsSection": "Záložky (oznámenia + FAQ)",
+    "tabsNotificationsTitle": "Názov záložky oznámení",
+    "tabsNotificationsFeedUrl": "URL feedu oznámení",
+    "tabsHelpTitle": "Názov záložky FAQ",
+    "tabsHelpFeedUrl": "URL feedu FAQ",
+    "tabsChatTitle": "Názov záložky chatu",
     "cta": "Zobraziť CTA popup",
     "ctaSound": "Prehrať zvuk notifikácie",
     "ctaDelay": "Oneskorenie CTA (ms)",

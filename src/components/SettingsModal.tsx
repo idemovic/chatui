@@ -291,6 +291,112 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
             </div>
           )}
 
+          <hr style={{ borderColor: 'var(--t-bg-border)' }} />
+
+          {/* ── Tabs (notifications / help feeds) ── */}
+          <div>
+            <p className="text-xs font-semibold text-fg-secondary uppercase tracking-wider mb-3">
+              {t('settings.tabsSection')}
+            </p>
+
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <Field label={t('settings.tabsNotificationsTitle')}>
+                  <input
+                    value={local.tabs?.notifications?.title ?? ''}
+                    onChange={(e) =>
+                      setLocal((l) => ({
+                        ...l,
+                        tabs: {
+                          ...l.tabs,
+                          notifications: {
+                            ...l.tabs?.notifications,
+                            title: e.target.value || undefined,
+                          },
+                        },
+                      }))
+                    }
+                    placeholder={t('tabs.notifications')}
+                    className="input-field"
+                  />
+                </Field>
+                <Field label={t('settings.tabsNotificationsFeedUrl')}>
+                  <input
+                    type="url"
+                    value={local.tabs?.notifications?.feedUrl ?? ''}
+                    onChange={(e) =>
+                      setLocal((l) => ({
+                        ...l,
+                        tabs: {
+                          ...l.tabs,
+                          notifications: {
+                            ...l.tabs?.notifications,
+                            feedUrl: e.target.value || undefined,
+                          },
+                        },
+                      }))
+                    }
+                    placeholder="/notifications.json"
+                    className="input-field"
+                  />
+                </Field>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Field label={t('settings.tabsHelpTitle')}>
+                  <input
+                    value={local.tabs?.help?.title ?? ''}
+                    onChange={(e) =>
+                      setLocal((l) => ({
+                        ...l,
+                        tabs: {
+                          ...l.tabs,
+                          help: { ...l.tabs?.help, title: e.target.value || undefined },
+                        },
+                      }))
+                    }
+                    placeholder={t('tabs.help')}
+                    className="input-field"
+                  />
+                </Field>
+                <Field label={t('settings.tabsHelpFeedUrl')}>
+                  <input
+                    type="url"
+                    value={local.tabs?.help?.feedUrl ?? ''}
+                    onChange={(e) =>
+                      setLocal((l) => ({
+                        ...l,
+                        tabs: {
+                          ...l.tabs,
+                          help: { ...l.tabs?.help, feedUrl: e.target.value || undefined },
+                        },
+                      }))
+                    }
+                    placeholder="/faq.json"
+                    className="input-field"
+                  />
+                </Field>
+              </div>
+
+              <Field label={t('settings.tabsChatTitle')}>
+                <input
+                  value={local.tabs?.chat?.title ?? ''}
+                  onChange={(e) =>
+                    setLocal((l) => ({
+                      ...l,
+                      tabs: {
+                        ...l.tabs,
+                        chat: { ...l.tabs?.chat, title: e.target.value || undefined },
+                      },
+                    }))
+                  }
+                  placeholder={t('tabs.chat')}
+                  className="input-field"
+                />
+              </Field>
+            </div>
+          </div>
+
           {local.mode === 'window' && (
             <div className="space-y-3 pl-3 border-l-2" style={{ borderColor: 'var(--t-accent)' }}>
               <Toggle label={t('settings.cta')} checked={local.showCta ?? true}

@@ -145,6 +145,7 @@
     <li><a href="#themes">Themes</a></li>
     <li><a href="#avatars">Avatars and toggle button icon</a></li>
     <li><a href="#languages">Languages</a></li>
+    <li><a href="#tabs">Tabs (notifications + FAQ)</a></li>
     <li><a href="#gotchas">Gotchas and troubleshooting</a></li>
   </ol>
 </nav>
@@ -308,6 +309,24 @@ useSettingsStore.getState().setConfig({
   poweredByUrl:   <span class="s">'https://www.elia-asistent.com'</span>, <span class="c">// link target</span>
   poweredByHide:  false,                             <span class="c">// hide the entire footer line</span>
 
+  <span class="c">// ─── Tabs (Notifications + FAQ) — see "Tabs" section ─────────────</span>
+  tabs: {
+    notifications: {
+      title:   <span class="s">'Tips'</span>,
+      feedUrl: <span class="s">'/notifications.json'</span>,            <span class="c">// production: hosted JSON</span>
+      <span class="c">// items:  [...]                            // dev alternative; URL wins if both set</span>
+    },
+    help: {
+      title:   <span class="s">'Help'</span>,
+      <span class="c">// inline items for quick local testing</span>
+      items: [
+        { question: <span class="s">'How do I categorize expenses?'</span>, answer: <span class="s">'Group by purpose…'</span> },
+        { question: <span class="s">'How do I save receipts?'</span>,      answer: <span class="s">'Snap with the app…'</span> },
+      ],
+    },
+    chat: { title: <span class="s">'Chat'</span> },
+  },
+
   <span class="c">// ─── i18n ─────────────────────────────────────────────────────────</span>
   defaultLanguage:  <span class="s">'en'</span>,
   initialMessages: [<span class="s">'Hello! How can I help?'</span>],    <span class="c">// global fallback</span>
@@ -367,6 +386,13 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>poweredByLabel</code></td><td><code>string</code></td><td><code>'ELIA AI Assistant'</code></td><td>Link text after the localized "Powered by" prefix in the input footer.</td></tr>
     <tr><td><code>poweredByUrl</code></td><td><code>string</code></td><td><code>'https://www.elia-asistent.com'</code></td><td>Link target for the footer.</td></tr>
     <tr><td><code>poweredByHide</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Hide the entire "Powered by" footer line.</td></tr>
+    <tr><td><code>tabs.notifications.title</code></td><td><code>string</code></td><td>i18n <code>tabs.notifications</code></td><td>Notifications tab label. Per-language override at <code>i18n[lang].tabs.notifications.title</code>.</td></tr>
+    <tr><td><code>tabs.notifications.feedUrl</code></td><td><code>string</code></td><td>-</td><td>JSON feed URL. Returns <code>{ items: NotificationItem[] }</code>. See "Tabs" section.</td></tr>
+    <tr><td><code>tabs.notifications.items</code></td><td><code>NotificationItem[]</code></td><td>-</td><td>Inline items (dev/static alternative). URL wins when both are set.</td></tr>
+    <tr><td><code>tabs.help.title</code></td><td><code>string</code></td><td>i18n <code>tabs.help</code></td><td>FAQ tab label. Per-language override available.</td></tr>
+    <tr><td><code>tabs.help.feedUrl</code></td><td><code>string</code></td><td>-</td><td>JSON feed URL. Returns <code>{ items: FaqItem[] }</code>.</td></tr>
+    <tr><td><code>tabs.help.items</code></td><td><code>FaqItem[]</code></td><td>-</td><td>Inline FAQ items.</td></tr>
+    <tr><td><code>tabs.chat.title</code></td><td><code>string</code></td><td>i18n <code>tabs.chat</code></td><td>Chat tab label.</td></tr>
   </tbody>
 </table>
 
@@ -445,7 +471,96 @@ useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre
   Then add any French per-language overrides under <code>config.i18n.fr</code>.
 </p>
 
-<h2 id="gotchas">9. Gotchas and troubleshooting</h2>
+<h2 id="tabs">9. Tabs (notifications + FAQ)</h2>
+<p>
+  The chat panel can host up to three tabs above the conversation: a Notifications feed,
+  a searchable FAQ, and the chat itself. Tabs are <strong>fully opt-in</strong>: if neither
+  Notifications nor FAQ has a data source, no tab bar renders and the panel looks identical
+  to the single-pane chat.
+</p>
+<p>
+  Each tab accepts a <code>feedUrl</code> (JSON over HTTP, recommended for production) or
+  <code>items</code> (inline array, useful while developing). When both are set, the URL wins.
+</p>
+
+<h3>Notifications feed</h3>
+<p>The endpoint at <code>tabs.notifications.feedUrl</code> must return:</p>
+<pre><code>{
+  <span class="s">"items"</span>: [
+    {
+      <span class="s">"id"</span>:      <span class="s">"vat-deadline-2025"</span>,
+      <span class="s">"title"</span>:   <span class="s">"Lehota na podanie DPH"</span>,
+      <span class="s">"message"</span>: <span class="s">"Tvoje daňové priznanie..."</span>,
+      <span class="s">"tags"</span>:    [{ <span class="s">"label"</span>: <span class="s">"New"</span>, <span class="s">"variant"</span>: <span class="s">"neutral"</span> },
+                  { <span class="s">"label"</span>: <span class="s">"High"</span>, <span class="s">"variant"</span>: <span class="s">"danger"</span> }],
+      <span class="s">"date"</span>:    <span class="s">"2025-07-11"</span>,
+      <span class="s">"cta"</span>: { <span class="s">"url"</span>: <span class="s">"https://example.com/vat"</span>, <span class="s">"title"</span>: <span class="s">"Read more"</span> }
+    }
+  ]
+}</code></pre>
+<p>
+  <code>id</code>, <code>tags</code>, <code>date</code>, <code>cta</code> are optional.
+  <code>title</code> + <code>message</code> are required.
+  <code>tag.variant</code>: <code>'neutral' | 'success' | 'warning' | 'danger'</code>.
+  Tags can also be plain strings (rendered as neutral).
+  <code>cta.url</code> opens in a new tab. <code>date</code> is shown verbatim — format it
+  on the server.
+</p>
+
+<h3>FAQ feed</h3>
+<p>The endpoint at <code>tabs.help.feedUrl</code> must return:</p>
+<pre><code>{
+  <span class="s">"items"</span>: [
+    {
+      <span class="s">"id"</span>:       <span class="s">"expense-categorization"</span>,
+      <span class="s">"question"</span>: <span class="s">"Ako mám kategorizovať firemné výdavky?"</span>,
+      <span class="s">"answer"</span>:   <span class="s">"Nákupy rozdeľ podľa..."</span>,
+      <span class="s">"category"</span>: <span class="s">"Výdavky"</span>
+    }
+  ]
+}</code></pre>
+<p>
+  Search is case-insensitive substring across <code>question + answer + category</code>.
+  Click a row to expand the answer.
+</p>
+
+<h3>Inline items (dev / static)</h3>
+<p>
+  Skip the URL and pass items directly when prototyping or shipping a small static list:
+</p>
+<pre><code>useSettingsStore.getState().setConfig({
+  tabs: {
+    notifications: {
+      items: [
+        {
+          title:   <span class="s">'Welcome'</span>,
+          message: <span class="s">'Thanks for trying the demo.'</span>,
+          tags:    [{ label: <span class="s">'New'</span>, variant: <span class="s">'success'</span> }],
+          cta:     { url: <span class="s">'https://example.com'</span>, title: <span class="s">'Learn more'</span> },
+        },
+      ],
+    },
+  },
+})</code></pre>
+
+<h3>Per-language tab titles</h3>
+<p>Override titles per language under <code>i18n[lang].tabs</code>:</p>
+<pre><code>i18n: {
+  sk: {
+    tabs: {
+      notifications: { title: <span class="s">'Tipy'</span>  },
+      help:          { title: <span class="s">'Pomoc'</span> },
+      chat:          { title: <span class="s">'Chat'</span>  },
+    },
+  },
+}</code></pre>
+<p>
+  Resolution order for each title: <code>i18n[activeLang].tabs.X.title</code> →
+  <code>tabs.X.title</code> → built-in i18n string (<code>tabs.notifications</code> /
+  <code>tabs.help</code> / <code>tabs.chat</code>).
+</p>
+
+<h2 id="gotchas">10. Gotchas and troubleshooting</h2>
 
 <h3>"Calling <code>require</code> for 'react' in an environment that doesn't expose <code>require</code>"</h3>
 <p>

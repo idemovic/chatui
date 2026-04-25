@@ -20,6 +20,18 @@
   "footer": {
     "poweredBy": "Powered by <a>{{label}}</a>"
   },
+  "tabs": {
+    "notifications": "Tips",
+    "help": "Help",
+    "chat": "Chat",
+    "faqSearch": "Search FAQ…",
+    "loading": "Loading…",
+    "error": "Couldn't load",
+    "empty": {
+      "notifications": "No notifications yet.",
+      "faq": "No matching entries."
+    }
+  },
   "settings": {
     "title": "Settings",
     "language": "Interface language",
@@ -35,6 +47,12 @@
     "mode": "Display mode",
     "fullscreenSheet": "Bottom-sheet style (don't cover full screen)",
     "fullscreenSheetHeight": "Sheet height (CSS length, e.g. 75vh, 600px)",
+    "tabsSection": "Tabs (notifications + FAQ)",
+    "tabsNotificationsTitle": "Notifications tab title",
+    "tabsNotificationsFeedUrl": "Notifications feed URL",
+    "tabsHelpTitle": "FAQ tab title",
+    "tabsHelpFeedUrl": "FAQ feed URL",
+    "tabsChatTitle": "Chat tab title",
     "cta": "Show CTA popup",
     "ctaSound": "Play notification sound",
     "ctaDelay": "CTA delay (ms)",

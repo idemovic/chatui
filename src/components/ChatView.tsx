@@ -1,11 +1,16 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useChatStore } from '../store/chatStore.ts'
 import { useSettingsStore } from '../store/settingsStore.ts'
 import { useChat } from '../hooks/useChat.ts'
 import { MessageBubble, TypingIndicator } from './MessageBubble.tsx'
 import { InputArea } from './InputArea.tsx'
+import { Tabs } from './Tabs.tsx'
+import { NotificationsTab } from './NotificationsTab.tsx'
+import { FaqTab } from './FaqTab.tsx'
 import { resolveAvatarUrl } from '../assets/avatars/index.ts'
+
+type TabId = 'notifications' | 'help' | 'chat'
 
 interface Props {
   onOpenSettings: () => void
@@ -31,6 +36,46 @@ export function ChatView({ onOpenSettings }: Props) {
   const initialMessages = langData.initialMessages ?? config.initialMessages ?? []
   const botName = langData.botName ?? config.botName ?? t('header.assistant')
 
+  // Tabs
+  const tabsCfg = config.tabs
+  const notificationsCfg = tabsCfg?.notifications
+  const helpCfg = tabsCfg?.help
+  const tabsEnabled = !!(
+    notificationsCfg?.feedUrl ||
+    notificationsCfg?.items?.length ||
+    helpCfg?.feedUrl ||
+    helpCfg?.items?.length
+  )
+
+  const tabBar = tabsEnabled
+    ? [
+        notificationsCfg?.feedUrl || notificationsCfg?.items?.length
+          ? {
+              id: 'notifications' as const,
+              label:
+                langData.tabs?.notifications?.title ??
+                tabsCfg?.notifications?.title ??
+                t('tabs.notifications'),
+              icon: 'bulb' as const,
+            }
+          : null,
+        helpCfg?.feedUrl || helpCfg?.items?.length
+          ? {
+              id: 'help' as const,
+              label: langData.tabs?.help?.title ?? tabsCfg?.help?.title ?? t('tabs.help'),
+              icon: 'book' as const,
+            }
+          : null,
+        {
+          id: 'chat' as const,
+          label: langData.tabs?.chat?.title ?? tabsCfg?.chat?.title ?? t('tabs.chat'),
+          icon: 'chat' as const,
+        },
+      ].filter((x): x is NonNullable<typeof x> => x !== null)
+    : []
+
+  const [activeTab, setActiveTab] = useState<TabId>('chat')
+
   // Ensure there's always an active session
   useEffect(() => {
     if (!activeSessionId) createSession()
@@ -43,6 +88,8 @@ export function ChatView({ onOpenSettings }: Props) {
 
   const showWelcome = config.showWelcomeScreen && messages.length === 0 && !isStreaming
   const welcomeSubtitle = langData.welcomeSubtitle ?? t('welcome.subtitle')
+
+  const showChat = !tabsEnabled || activeTab === 'chat'
 
   return (
     <div className="flex flex-col h-full min-w-0">
@@ -83,45 +130,65 @@ export function ChatView({ onOpenSettings }: Props) {
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        {showWelcome ? (
-          <WelcomeScreen botName={botName} subtitle={welcomeSubtitle} />
-        ) : (
-          <>
-            {messages.length === 0 &&
-              initialMessages.map((msg, i) => (
-                <MessageBubble
-                  key={i}
-                  message={{ id: String(i), role: 'bot', content: msg, ts: Date.now() }}
-                />
-              ))}
-            {messages.map((msg, i) => {
-              const isEmptyBotPlaceholder =
-                isStreaming &&
-                i === messages.length - 1 &&
-                msg.role === 'bot' &&
-                msg.content === ''
-              if (isEmptyBotPlaceholder) return null
-              return <MessageBubble key={msg.id} message={msg} />
-            })}
-            {isStreaming &&
-              messages[messages.length - 1]?.role === 'bot' &&
-              messages[messages.length - 1]?.content === '' && <TypingIndicator />}
-          </>
-        )}
-        <div ref={bottomRef} />
-      </div>
+      {/* Tab bar (only when tabs are configured) */}
+      {tabsEnabled && (
+        <Tabs tabs={tabBar} activeId={activeTab} onChange={(id) => setActiveTab(id as TabId)} />
+      )}
 
-      {/* Input */}
-      <InputArea
-        onSend={send}
-        disabled={isStreaming || !config.webhookUrl}
-        placeholder={
-          !config.webhookUrl ? t('input.placeholderUnconfigured') : t('input.placeholder')
-        }
-        allowFileUploads={config.allowFileUploads}
-      />
+      {/* Tab body */}
+      {tabsEnabled && activeTab === 'notifications' && (
+        <NotificationsTab
+          feedUrl={notificationsCfg?.feedUrl}
+          inlineItems={notificationsCfg?.items}
+        />
+      )}
+      {tabsEnabled && activeTab === 'help' && (
+        <FaqTab feedUrl={helpCfg?.feedUrl} inlineItems={helpCfg?.items} />
+      )}
+
+      {/* Chat (default tab, or shown when no tabs configured) */}
+      {showChat && (
+        <>
+          <div className="flex-1 overflow-y-auto px-4 py-4">
+            {showWelcome ? (
+              <WelcomeScreen botName={botName} subtitle={welcomeSubtitle} />
+            ) : (
+              <>
+                {messages.length === 0 &&
+                  initialMessages.map((msg, i) => (
+                    <MessageBubble
+                      key={i}
+                      message={{ id: String(i), role: 'bot', content: msg, ts: Date.now() }}
+                    />
+                  ))}
+                {messages.map((msg, i) => {
+                  const isEmptyBotPlaceholder =
+                    isStreaming &&
+                    i === messages.length - 1 &&
+                    msg.role === 'bot' &&
+                    msg.content === ''
+                  if (isEmptyBotPlaceholder) return null
+                  return <MessageBubble key={msg.id} message={msg} />
+                })}
+                {isStreaming &&
+                  messages[messages.length - 1]?.role === 'bot' &&
+                  messages[messages.length - 1]?.content === '' && <TypingIndicator />}
+              </>
+            )}
+            <div ref={bottomRef} />
+          </div>
+
+          {/* Input */}
+          <InputArea
+            onSend={send}
+            disabled={isStreaming || !config.webhookUrl}
+            placeholder={
+              !config.webhookUrl ? t('input.placeholderUnconfigured') : t('input.placeholder')
+            }
+            allowFileUploads={config.allowFileUploads}
+          />
+        </>
+      )}
     </div>
   )
 }

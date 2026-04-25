@@ -8,6 +8,37 @@ export interface LangOverride {
   botName?: string
   /** Welcome screen subtitle */
   welcomeSubtitle?: string
+  /** Per-language tab title overrides (titles only — feed URLs/items are global). */
+  tabs?: {
+    notifications?: { title?: string }
+    help?: { title?: string }
+    chat?: { title?: string }
+  }
+}
+
+export type NotificationTagVariant = 'neutral' | 'success' | 'warning' | 'danger'
+
+export interface NotificationTag {
+  label: string
+  variant?: NotificationTagVariant
+}
+
+export interface NotificationItem {
+  id?: string
+  title: string
+  message: string
+  /** Tag entries can be plain strings (rendered as 'neutral') or { label, variant } objects. */
+  tags?: Array<string | NotificationTag>
+  /** Verbatim string — host pre-formats. */
+  date?: string
+  cta?: { url: string; title: string }
+}
+
+export interface FaqItem {
+  id?: string
+  question: string
+  answer: string
+  category?: string
 }
 
 export interface ChatConfig {
@@ -57,6 +88,22 @@ export interface ChatConfig {
   fullscreenSheet?: boolean
   /** Sheet height as a CSS length (vh, %, px). Default: '75vh'. */
   fullscreenSheetHeight?: string
+  /** Optional tabs above the chat panel. Tab is active iff its block has feedUrl OR items. */
+  tabs?: {
+    notifications?: {
+      title?: string
+      feedUrl?: string
+      items?: NotificationItem[]
+    }
+    help?: {
+      title?: string
+      feedUrl?: string
+      items?: FaqItem[]
+    }
+    chat?: {
+      title?: string
+    }
+  }
 }
 
 export interface Message {
