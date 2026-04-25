@@ -91,8 +91,8 @@ export function App() {
   }
 
   // Fullscreen mode
-  return (
-    <div className="flex h-full" style={{ background: 'var(--t-bg-base)' }}>
+  const fullscreenContent = (
+    <div className="flex h-full w-full" style={{ background: 'var(--t-bg-base)' }}>
       {/* Mobile sidebar backdrop */}
       {mobileSidebarOpen && showSidebar && (
         <div
@@ -129,11 +129,53 @@ export function App() {
         )}
         <ChatView onOpenSettings={openSettings} />
       </div>
+    </div>
+  )
 
+  if (config.fullscreenSheet) {
+    const sheetHeight = config.fullscreenSheetHeight ?? '75vh'
+    return (
+      <>
+        {/* Dimmed backdrop above the sheet */}
+        <div
+          className="fixed inset-0 z-40 pointer-events-none"
+          style={{ background: 'rgba(0, 0, 0, 0.4)' }}
+        />
+        {/* Bottom sheet */}
+        <div
+          className="fixed inset-x-0 bottom-0 z-50 flex flex-col overflow-hidden"
+          style={{
+            height: sheetHeight,
+            borderTopLeftRadius: '20px',
+            borderTopRightRadius: '20px',
+            background: 'var(--t-bg-base)',
+            boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.18)',
+          }}
+        >
+          {/* Drag handle */}
+          <div className="flex justify-center pt-2 pb-1 flex-shrink-0">
+            <div
+              className="w-10 h-1 rounded-full"
+              style={{ background: 'var(--t-bg-border)' }}
+            />
+          </div>
+          <div className="flex-1 min-h-0">{fullscreenContent}</div>
+        </div>
+
+        {!hideSettings && settingsOpen && (
+          <SettingsModal onClose={() => setSettingsOpen(false)} />
+        )}
+      </>
+    )
+  }
+
+  return (
+    <>
+      {fullscreenContent}
       {!hideSettings && settingsOpen && (
         <SettingsModal onClose={() => setSettingsOpen(false)} />
       )}
-    </div>
+    </>
   )
 }
 

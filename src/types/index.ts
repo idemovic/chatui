@@ -51,6 +51,12 @@ export interface ChatConfig {
   poweredByUrl?: string
   /** Hide the entire "Powered by" footer line. */
   poweredByHide?: boolean
+  /** In fullscreen layout, present the chat as a bottom sheet (rounded top, drag handle, dimmed
+   *  backdrop above) instead of fully covering the viewport. Applies to mode 'fullscreen' and to
+   *  'mixed' on mobile. Default: false. */
+  fullscreenSheet?: boolean
+  /** Sheet height as a CSS length (vh, %, px). Default: '75vh'. */
+  fullscreenSheetHeight?: string
 }
 
 export interface Message {

@@ -30,6 +30,8 @@ const defaultConfig: ChatConfig = {
   poweredByLabel: 'ELIA AI Assistant',
   poweredByUrl: 'https://www.elia-asistent.com',
   poweredByHide: false,
+  fullscreenSheet: false,
+  fullscreenSheetHeight: '75vh',
   i18n: {
     en: { initialMessages: [], ctaText: 'Hi! How can I help you today?' },
     sk: { initialMessages: [], ctaText: 'Dobrý deň! Ako vám môžem pomôcť?' },

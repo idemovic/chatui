@@ -274,6 +274,23 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
             </div>
           </Field>
 
+          {(local.mode === 'fullscreen' || local.mode === 'mixed') && (
+            <div className="space-y-3 pl-3 border-l-2" style={{ borderColor: 'var(--t-accent)' }}>
+              <Toggle label={t('settings.fullscreenSheet')} checked={local.fullscreenSheet ?? false}
+                onChange={(v) => setLocal((l) => ({ ...l, fullscreenSheet: v }))} />
+              {local.fullscreenSheet && (
+                <Field label={t('settings.fullscreenSheetHeight')}>
+                  <input
+                    value={local.fullscreenSheetHeight ?? '75vh'}
+                    onChange={(e) => setLocal((l) => ({ ...l, fullscreenSheetHeight: e.target.value || undefined }))}
+                    placeholder="75vh"
+                    className="input-field"
+                  />
+                </Field>
+              )}
+            </div>
+          )}
+
           {local.mode === 'window' && (
             <div className="space-y-3 pl-3 border-l-2" style={{ borderColor: 'var(--t-accent)' }}>
               <Toggle label={t('settings.cta')} checked={local.showCta ?? true}

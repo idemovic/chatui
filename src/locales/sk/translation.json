@@ -33,6 +33,8 @@
     "sidebar": "Zobraziť históriu konverzácií",
     "fileUploads": "Povoliť nahrávanie súborov",
     "mode": "Režim zobrazenia",
+    "fullscreenSheet": "Štýl spodného panela (nepokryje celú obrazovku)",
+    "fullscreenSheetHeight": "Výška panela (CSS dĺžka, napr. 75vh, 600px)",
     "cta": "Zobraziť CTA popup",
     "ctaSound": "Prehrať zvuk notifikácie",
     "ctaDelay": "Oneskorenie CTA (ms)",

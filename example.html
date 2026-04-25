@@ -284,6 +284,10 @@ useSettingsStore.getState().setConfig({
   mode:        <span class="s">'window'</span>,                         <span class="c">// 'fullscreen' | 'window' | 'mixed'</span>
   showSidebar: false,                                <span class="c">// fullscreen mode only</span>
 
+  <span class="c">// ─── Bottom-sheet style (fullscreen / mixed-on-mobile) ──────────</span>
+  fullscreenSheet:       false,                      <span class="c">// don't fully cover the viewport; sheet docked to bottom</span>
+  fullscreenSheetHeight: <span class="s">'75vh'</span>,                    <span class="c">// any CSS length: '75vh' | '600px' | '70%'</span>
+
   <span class="c">// ─── Appearance ───────────────────────────────────────────────────</span>
   theme:     <span class="s">'midnight'</span>,                         <span class="c">// see Themes section</span>
   botName:   <span class="s">'Assistant'</span>,                        <span class="c">// global fallback (per-lang overrides below)</span>
@@ -343,6 +347,8 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>streaming</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Parse the response as Server-Sent Events.</td></tr>
     <tr><td><code>mode</code></td><td><code>'fullscreen' | 'window' | 'mixed'</code></td><td><code>'fullscreen'</code></td><td><code>mixed</code> = fullscreen on mobile, floating window on desktop.</td></tr>
     <tr><td><code>showSidebar</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Conversation history sidebar. Fullscreen mode only.</td></tr>
+    <tr><td><code>fullscreenSheet</code></td><td><code>boolean</code></td><td><code>false</code></td><td>In fullscreen layout (and mixed-on-mobile), present the chat as a bottom sheet (rounded top, drag handle, dimmed backdrop above) instead of fully covering the viewport.</td></tr>
+    <tr><td><code>fullscreenSheetHeight</code></td><td><code>string</code></td><td><code>'75vh'</code></td><td>Sheet height as any CSS length. Only used when <code>fullscreenSheet</code> is true.</td></tr>
     <tr><td><code>showWelcomeScreen</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Welcome screen when the conversation is empty.</td></tr>
     <tr><td><code>allowFileUploads</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Show the file-attachment button in the input bar.</td></tr>
     <tr><td><code>allowedFilesMimeTypes</code></td><td><code>string</code></td><td>-</td><td>Comma-separated MIME list passed to <code>&lt;input accept&gt;</code>.</td></tr>
@@ -453,9 +459,6 @@ useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre
     exclude: [<span class="s">'chatui'</span>],
   },
 })</code></pre>
-<p>Then clear the Vite cache and restart:</p>
-<pre><code>rm -rf node_modules/.vite   <span class="c"># or on Windows: rmdir /s /q node_modules\.vite</span>
-npm run dev</code></pre>
 
 <h3>"Invalid hook call" or two React copies</h3>
 <p>

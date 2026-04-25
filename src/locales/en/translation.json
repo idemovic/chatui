@@ -33,6 +33,8 @@
     "sidebar": "Show conversation sidebar",
     "fileUploads": "Allow file uploads",
     "mode": "Display mode",
+    "fullscreenSheet": "Bottom-sheet style (don't cover full screen)",
+    "fullscreenSheetHeight": "Sheet height (CSS length, e.g. 75vh, 600px)",
     "cta": "Show CTA popup",
     "ctaSound": "Play notification sound",
     "ctaDelay": "CTA delay (ms)",
