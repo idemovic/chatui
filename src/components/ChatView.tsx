@@ -5,7 +5,6 @@ import { useSettingsStore } from '../store/settingsStore.ts'
 import { useChat } from '../hooks/useChat.ts'
 import { MessageBubble, TypingIndicator } from './MessageBubble.tsx'
 import { InputArea } from './InputArea.tsx'
-import { ThemePicker } from './ThemePicker.tsx'
 
 interface Props {
   showSidebar: boolean
@@ -63,8 +62,6 @@ export function ChatView({ showSidebar, onOpenSettings }: Props) {
         </div>
 
         <div className="flex items-center gap-1">
-          {!showSidebar && !hideSettings && <ThemePicker />}
-
           {!hideSettings && (
             <button
               onClick={onOpenSettings}

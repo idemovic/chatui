@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../store/settingsStore.ts'
 import { builtInAvatarIds, builtInAvatars, resolveAvatarUrl } from '../assets/avatars/index.ts'
+import { ThemePicker } from './ThemePicker.tsx'
 import type { ChatConfig, LangOverride } from '../types/index.ts'
 
 const MAX_UPLOAD_BYTES = 500 * 1024
@@ -23,13 +24,43 @@ const KNOWN_LANGS = [
 
 export function SettingsModal({ onClose }: Props) {
   const { t } = useTranslation()
-  const { config, setConfig, language, setLanguage } = useSettingsStore()
+  const { config, setConfig, language, setLanguage, activeTheme } = useSettingsStore()
 
   const [local, setLocal] = useState<ChatConfig>({ ...config })
   const [metaError, setMetaError] = useState('')
   const [metaRaw, setMetaRaw] = useState(() => {
     try { return JSON.stringify(local.metadata ?? {}, null, 2) } catch { return '{}' }
   })
+  const [showExport, setShowExport] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const exportCode = (() => {
+    let metadata: Record<string, unknown> | undefined
+    const trimmed = metaRaw.trim()
+    if (trimmed && trimmed !== '{}') {
+      try { metadata = JSON.parse(trimmed) as Record<string, unknown> } catch { /* ignore */ }
+    }
+    const cfg = { ...local, metadata }
+    Object.keys(cfg).forEach((k) => {
+      if ((cfg as Record<string, unknown>)[k] === undefined) {
+        delete (cfg as Record<string, unknown>)[k]
+      }
+    })
+    return `import { useSettingsStore } from 'chatui/store'
+
+useSettingsStore.getState().setConfig(${JSON.stringify(cfg, null, 2)})
+
+useSettingsStore.getState().setTheme(${JSON.stringify(activeTheme)})
+useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
+`
+  })()
+
+  const handleCopy = useCallback(() => {
+    void navigator.clipboard.writeText(exportCode).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  }, [exportCode])
 
   // Per-language tab state
   const langKeys = Object.keys(local.i18n ?? {})
@@ -109,6 +140,26 @@ export function SettingsModal({ onClose }: Props) {
         </div>
 
         {/* Body */}
+        {showExport ? (
+          <div className="px-6 py-5 space-y-3 overflow-y-auto flex-1">
+            <p className="text-xs text-fg-secondary leading-relaxed">
+              Paste this into your host app's bootstrap file (e.g. <code>src/main.tsx</code>) before the first React render. See <code>example.html</code> for the full integration guide.
+            </p>
+            <textarea
+              readOnly
+              value={exportCode}
+              className="w-full font-mono text-xs p-3 rounded-lg resize-none"
+              style={{
+                background: 'var(--t-bg-surface2)',
+                color: 'var(--t-fg-primary)',
+                border: '1px solid var(--t-bg-border)',
+                minHeight: '300px',
+                outline: 'none',
+              }}
+              onClick={(e) => e.currentTarget.select()}
+            />
+          </div>
+        ) : (
         <div className="px-6 py-5 space-y-5 overflow-y-auto flex-1">
 
           {/* ── Interface language ── */}
@@ -132,6 +183,11 @@ export function SettingsModal({ onClose }: Props) {
                 </button>
               ))}
             </div>
+          </Field>
+
+          {/* ── Theme ── */}
+          <Field label={t('settings.theme') ?? 'Theme'}>
+            <ThemePicker />
           </Field>
 
           <hr style={{ borderColor: 'var(--t-bg-border)' }} />
@@ -356,21 +412,44 @@ export function SettingsModal({ onClose }: Props) {
             </div>
           </div>
         </div>
+        )}
 
         {/* Footer */}
         <div
-          className="flex justify-end gap-2 px-6 py-4 border-t flex-shrink-0"
+          className="flex justify-between gap-2 px-6 py-4 border-t flex-shrink-0"
           style={{ borderColor: 'var(--t-bg-border)' }}
         >
-          <button onClick={onClose}
-            className="px-4 py-2 rounded-lg text-sm text-fg-secondary hover:text-fg-primary hover:bg-bg-surface2 transition-colors">
-            {t('settings.cancel')}
-          </button>
-          <button onClick={handleSave}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            style={{ background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }}>
-            {t('settings.save')}
-          </button>
+          {showExport ? (
+            <>
+              <button onClick={() => setShowExport(false)}
+                className="px-4 py-2 rounded-lg text-sm text-fg-secondary hover:text-fg-primary hover:bg-bg-surface2 transition-colors">
+                ← Back
+              </button>
+              <button onClick={handleCopy}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                style={{ background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }}>
+                {copied ? '✓ Copied' : 'Copy to clipboard'}
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => setShowExport(true)}
+                className="px-4 py-2 rounded-lg text-sm text-fg-secondary hover:text-fg-primary hover:bg-bg-surface2 transition-colors">
+                Export config
+              </button>
+              <div className="flex gap-2">
+                <button onClick={onClose}
+                  className="px-4 py-2 rounded-lg text-sm text-fg-secondary hover:text-fg-primary hover:bg-bg-surface2 transition-colors">
+                  {t('settings.cancel')}
+                </button>
+                <button onClick={handleSave}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  style={{ background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }}>
+                  {t('settings.save')}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

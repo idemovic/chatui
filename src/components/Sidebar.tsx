@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useChatStore } from '../store/chatStore.ts'
 import { useSettingsStore } from '../store/settingsStore.ts'
-import { ThemePicker } from './ThemePicker.tsx'
 
 interface Props {
   onOpenSettings: () => void
@@ -90,12 +89,11 @@ export function Sidebar({ onOpenSettings }: Props) {
         ))}
       </div>
 
-      {/* Bottom: theme picker + settings */}
+      {/* Bottom: settings */}
       <div
         className="border-t"
         style={{ borderColor: 'var(--t-bg-border)' }}
       >
-        {!hideSettings && <ThemePicker />}
         {!hideSettings && (
           <div className="px-3 pb-3">
             <button
