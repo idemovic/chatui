@@ -12,6 +12,7 @@ export function useChat() {
   const { activeSessionId, addMessage, appendToLastBot, setStreaming, createSession } =
     useChatStore()
   const config = useSettingsStore((s) => s.config)
+  const language = useSettingsStore((s) => s.language)
   const isStreaming = useChatStore((s) => s.isStreaming)
 
   const send = useCallback(
@@ -41,11 +42,11 @@ export function useChat() {
 
       try {
         if (config.streaming) {
-          await sendMessage(config, sessionId, text.trim(), (chunk) => {
+          await sendMessage(config, sessionId, text.trim(), language, (chunk) => {
             appendToLastBot(sessionId, chunk)
           })
         } else {
-          const response = await sendMessage(config, sessionId, text.trim())
+          const response = await sendMessage(config, sessionId, text.trim(), language)
           appendToLastBot(sessionId, response)
         }
       } catch (err) {
@@ -58,7 +59,7 @@ export function useChat() {
         setStreaming(false)
       }
     },
-    [activeSessionId, config, addMessage, appendToLastBot, setStreaming, createSession],
+    [activeSessionId, config, language, addMessage, appendToLastBot, setStreaming, createSession],
   )
 
   return { send, isStreaming }

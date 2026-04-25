@@ -25,6 +25,7 @@ export async function sendMessage(
   config: ChatConfig,
   sessionId: string,
   text: string,
+  language?: string,
   onChunk?: (chunk: string) => void,
 ): Promise<string> {
   const chatInputKey = config.chatInputKey ?? 'chatInput'
@@ -38,6 +39,7 @@ export async function sendMessage(
   const body: Record<string, unknown> = {
     [chatInputKey]: text,
     [chatSessionKey]: sessionId,
+    ...(language ? { language } : {}),
     ...config.metadata,
   }
 
