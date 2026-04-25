@@ -5,6 +5,7 @@ import { useSettingsStore } from '../store/settingsStore.ts'
 import { useChat } from '../hooks/useChat.ts'
 import { MessageBubble, TypingIndicator } from './MessageBubble.tsx'
 import { InputArea } from './InputArea.tsx'
+import { resolveAvatarUrl } from '../assets/avatars/index.ts'
 
 interface Props {
   showSidebar: boolean
@@ -52,7 +53,16 @@ export function ChatView({ showSidebar, onOpenSettings }: Props) {
         style={{ borderColor: 'var(--t-bg-border)', background: 'var(--t-bg-base)' }}
       >
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full" style={{ background: 'var(--t-accent)' }} />
+          {resolveAvatarUrl(config.botAvatar) ? (
+            <img
+              src={resolveAvatarUrl(config.botAvatar)}
+              alt=""
+              className="w-7 h-7 rounded-full object-cover flex-shrink-0"
+              style={{ border: '1px solid var(--t-bg-border)' }}
+            />
+          ) : (
+            <div className="w-2 h-2 rounded-full" style={{ background: 'var(--t-accent)' }} />
+          )}
           <span className="text-sm font-semibold text-fg-primary">{botName}</span>
           {config.webhookUrl ? (
             <span className="text-xs text-fg-muted">● {t('header.online')}</span>
