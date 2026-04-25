@@ -30,8 +30,6 @@ const defaultConfig: ChatConfig = {
   poweredByLabel: 'ELIA AI Assistant',
   poweredByUrl: 'https://www.elia-asistent.com',
   poweredByHide: false,
-  wordCloud: [],
-  wordCloudIdleHours: 24,
   i18n: {
     en: { initialMessages: [], ctaText: 'Hi! How can I help you today?' },
     sk: { initialMessages: [], ctaText: 'Dobrý deň! Ako vám môžem pomôcť?' },

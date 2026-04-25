@@ -150,16 +150,14 @@
 </nav>
 
 <h2 id="prereqs">1. Prerequisites</h2>
-<p>The host app must use the same bundler and styling pipeline that chatui is authored against:</p>
+<p>chatui ships as a pre-built ESM bundle with its CSS pre-compiled. The host needs:</p>
 <ul>
-  <li>React 19</li>
-  <li>Vite (any version that supports <code>import.meta.glob</code>, so 4.x or later)</li>
-  <li>Tailwind CSS v4 via <code>@tailwindcss/vite</code></li>
-  <li>Node 18 or newer</li>
+  <li>React 19 (peer dependency)</li>
+  <li>Any modern bundler that supports ESM and JSON package <code>exports</code> (Vite, Webpack 5+, esbuild, Rollup, etc.)</li>
+  <li>Node 18 or newer (for installing the package)</li>
 </ul>
 <div class="callout info">
-  chatui is shipped as TypeScript source, not a prebuilt bundle. Your host's Vite + Tailwind
-  pipeline compiles it alongside your own code. That is why the prerequisites are strict.
+  No Tailwind required. <code>dist/chatui.css</code> is shipped pre-compiled, so your host doesn't need to know that chatui internally uses Tailwind v4.
 </div>
 
 <h2 id="install">2. Install</h2>
@@ -176,6 +174,40 @@
   }
 }</code></pre>
 <p>Then run <code>npm install</code>. Edits in the chatui repo reflect in the host after a dev-server restart.</p>
+
+<h3>Minimal host <code>package.json</code></h3>
+<p>
+  chatui's bundle already includes <code>i18next</code>, <code>react-i18next</code>, <code>react-markdown</code>,
+  <code>remark-gfm</code>, <code>zustand</code>, and the pre-compiled CSS. Don't redeclare them in your host —
+  doing so risks duplicate copies. The host needs only React, the bundler, and chatui itself:
+</p>
+<pre><code>{
+  <span class="s">"scripts"</span>: {
+    <span class="s">"dev"</span>:   <span class="s">"vite"</span>,
+    <span class="s">"build"</span>: <span class="s">"tsc -b && vite build"</span>
+  },
+  <span class="s">"dependencies"</span>: {
+    <span class="s">"chatui"</span>:    <span class="s">"file:../chatui/chatui-0.0.1.tgz"</span>,
+    <span class="s">"react"</span>:     <span class="s">"^19.0.0"</span>,
+    <span class="s">"react-dom"</span>: <span class="s">"^19.0.0"</span>
+  },
+  <span class="s">"devDependencies"</span>: {
+    <span class="s">"@types/react"</span>:        <span class="s">"^19.0.0"</span>,
+    <span class="s">"@types/react-dom"</span>:    <span class="s">"^19.0.0"</span>,
+    <span class="s">"@vitejs/plugin-react"</span>: <span class="s">"^6.0.0"</span>,
+    <span class="s">"typescript"</span>:          <span class="s">"~5.9.0"</span>,
+    <span class="s">"vite"</span>:                <span class="s">"^8.0.0"</span>
+  }
+}</code></pre>
+<p><strong>Add back only if you need them in your own host code (not for chatui to work):</strong></p>
+<table>
+  <thead><tr><th>Package</th><th>Add when</th></tr></thead>
+  <tbody>
+    <tr><td><code>i18next</code> + <code>react-i18next</code></td><td>You want to register extra locales at runtime (see Languages section) or use <code>useTranslation</code> in your own components.</td></tr>
+    <tr><td><code>zustand</code></td><td>Your host code has its own Zustand stores.</td></tr>
+    <tr><td><code>tailwindcss</code> + <code>@tailwindcss/vite</code></td><td>Your host's own UI uses Tailwind. chatui doesn't need it — its CSS is already compiled.</td></tr>
+  </tbody>
+</table>
 
 <h2 id="mount">3. Minimal mount</h2>
 <p>
@@ -267,6 +299,11 @@ useSettingsStore.getState().setConfig({
   <span class="c">// ─── UI lock ──────────────────────────────────────────────────────</span>
   hideSettings: true,                                <span class="c">// default. Set to false to show the gear, theme picker, and settings modal.</span>
 
+  <span class="c">// ─── "Powered by" footer ─────────────────────────────────────────</span>
+  poweredByLabel: <span class="s">'ELIA AI Assistant'</span>,            <span class="c">// link text shown after the localized "Powered by" prefix</span>
+  poweredByUrl:   <span class="s">'https://www.elia-asistent.com'</span>, <span class="c">// link target</span>
+  poweredByHide:  false,                             <span class="c">// hide the entire footer line</span>
+
   <span class="c">// ─── i18n ─────────────────────────────────────────────────────────</span>
   defaultLanguage:  <span class="s">'en'</span>,
   initialMessages: [<span class="s">'Hello! How can I help?'</span>],    <span class="c">// global fallback</span>
@@ -321,6 +358,9 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>ctaDelay</code></td><td><code>number</code></td><td><code>5000</code></td><td>Milliseconds before the CTA appears.</td></tr>
     <tr><td><code>ctaSound</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Play a Web Audio beep when the CTA shows.</td></tr>
     <tr><td><code>hideSettings</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Hide the built-in gear button, theme picker, and settings modal. Defaults to <code>true</code> for npm consumers; set <code>false</code> to expose the UI.</td></tr>
+    <tr><td><code>poweredByLabel</code></td><td><code>string</code></td><td><code>'ELIA AI Assistant'</code></td><td>Link text after the localized "Powered by" prefix in the input footer.</td></tr>
+    <tr><td><code>poweredByUrl</code></td><td><code>string</code></td><td><code>'https://www.elia-asistent.com'</code></td><td>Link target for the footer.</td></tr>
+    <tr><td><code>poweredByHide</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Hide the entire "Powered by" footer line.</td></tr>
   </tbody>
 </table>
 
@@ -365,7 +405,7 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
 
 <h2 id="avatars">7. Avatars and toggle button icon</h2>
 <p>
-  chatui ships 12 built-in avatars bundled inside <code>node_modules/chatui/src/assets/avatars/</code>.
+  chatui ships 12 built-in avatars inlined as data URLs inside <code>dist/index.js</code>.
   You can reference one by id, supply your own URL, or paste a data URL.
 </p>
 <p>
@@ -382,8 +422,8 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
 
 <h2 id="languages">8. Languages</h2>
 <p>
-  English and Slovak ship bundled inside <code>node_modules/chatui/src/locales/</code>. The widget
-  loads them on demand using Vite code-splitting, no HTTP fetch.
+  English and Slovak ship pre-bundled inside <code>node_modules/chatui/dist/chunks/translation-*.js</code>. The widget
+  loads them on demand via dynamic <code>import()</code>, no HTTP fetch.
 </p>
 <p>To register a new language at runtime (without rebuilding chatui):</p>
 <pre><code><span class="k">import</span> i18n <span class="k">from</span> <span class="s">'i18next'</span>
@@ -391,7 +431,7 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
 i18n.addResourceBundle(<span class="s">'fr'</span>, <span class="s">'translation'</span>, {
   welcome:  { subtitle: <span class="s">'Commencez une conversation.'</span> },
   input:    { placeholder: <span class="s">'Tapez un message...'</span> },
-  <span class="c">// ... full keys: see node_modules/chatui/src/locales/en/translation.json</span>
+  <span class="c">// ... full keys: copy from node_modules/chatui/dist/chunks/translation-*.js</span>
 })
 
 useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre>
@@ -401,33 +441,21 @@ useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre
 
 <h2 id="gotchas">9. Gotchas and troubleshooting</h2>
 
-<h3>SyntaxError: void-elements does not provide an export named 'default'</h3>
+<h3>"Calling <code>require</code> for 'react' in an environment that doesn't expose <code>require</code>"</h3>
 <p>
-  This is a CJS/ESM interop issue in the <code>react-i18next</code> → <code>html-parse-stringify</code>
-  → <code>void-elements</code> chain. Fix it by forcing Vite to pre-bundle <code>html-parse-stringify</code>
-  in your host's <code>vite.config.ts</code>:
+  Vite 8 (Rolldown) pre-bundles <code>node_modules</code> packages by default. For chatui that produces a broken
+  CJS-style interop wrapper for the externalized React peer dep. Since <code>dist/index.js</code> is already
+  a finished ESM bundle, tell Vite to skip pre-bundling it:
 </p>
 <pre><code>export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react()],
   optimizeDeps: {
-    include: [
-      <span class="s">'html-parse-stringify'</span>,
-      <span class="s">'use-sync-external-store/shim'</span>,
-      <span class="s">'style-to-js'</span>,
-      <span class="s">'extend'</span>,
-      <span class="s">'debug'</span>,
-      <span class="s">'ms'</span>,
-    ],
+    exclude: [<span class="s">'chatui'</span>],
   },
 })</code></pre>
-
-<h3>Tailwind classes not applying</h3>
-<p>
-  chatui's CSS contains an <code>@source "./**/*.{ts,tsx}"</code> directive that tells Tailwind to
-  scan its own TSX files. This works automatically in almost every host. If you still see unstyled
-  components, add this line to your own Tailwind entry CSS as a belt-and-braces fix:
-</p>
-<pre><code>@source <span class="s">"../node_modules/chatui/src/**/*.{ts,tsx}"</span>;</code></pre>
+<p>Then clear the Vite cache and restart:</p>
+<pre><code>rm -rf node_modules/.vite   <span class="c"># or on Windows: rmdir /s /q node_modules\.vite</span>
+npm run dev</code></pre>
 
 <h3>"Invalid hook call" or two React copies</h3>
 <p>

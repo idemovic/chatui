@@ -8,11 +8,10 @@ import { InputArea } from './InputArea.tsx'
 import { resolveAvatarUrl } from '../assets/avatars/index.ts'
 
 interface Props {
-  showSidebar: boolean
   onOpenSettings: () => void
 }
 
-export function ChatView({ showSidebar, onOpenSettings }: Props) {
+export function ChatView({ onOpenSettings }: Props) {
   const { t } = useTranslation()
   const activeSessionId = useChatStore((s) => s.activeSessionId)
   const messages = useChatStore((s) =>

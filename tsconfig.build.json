@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.build.tsbuildinfo"
+  },
+  "include": ["src"],
+  "exclude": ["src/main.tsx", "src/vite-env.d.ts", "**/*.test.*"]
+}

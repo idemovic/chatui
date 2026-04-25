@@ -1,4 +1,5 @@
 import './i18n.ts'
+import './index.css'
 import { useState, useEffect } from 'react'
 import { useSettingsStore } from './store/settingsStore.ts'
 import { useChatStore } from './store/chatStore.ts'
@@ -61,10 +62,7 @@ export function App() {
             className="fixed bottom-20 right-4 z-50 w-[380px] h-[560px] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
             style={{ border: '1px solid var(--t-bg-border)', background: 'var(--t-bg-base)' }}
           >
-            <ChatView
-              showSidebar={false}
-              onOpenSettings={openSettings}
-            />
+            <ChatView onOpenSettings={openSettings} />
           </div>
         )}
 
@@ -129,10 +127,7 @@ export function App() {
             </svg>
           </button>
         )}
-        <ChatView
-          showSidebar={showSidebar}
-          onOpenSettings={openSettings}
-        />
+        <ChatView onOpenSettings={openSettings} />
       </div>
 
       {!hideSettings && settingsOpen && (
