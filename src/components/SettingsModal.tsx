@@ -297,6 +297,36 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
 
           <hr style={{ borderColor: 'var(--t-bg-border)' }} />
 
+          {/* ── "Powered by" footer ── */}
+          <Toggle
+            label={t('settings.poweredByHide')}
+            checked={local.poweredByHide ?? false}
+            onChange={(v) => setLocal((l) => ({ ...l, poweredByHide: v }))}
+          />
+          {!local.poweredByHide && (
+            <div className="grid grid-cols-2 gap-3">
+              <Field label={t('settings.poweredByLabel')}>
+                <input
+                  value={local.poweredByLabel ?? ''}
+                  onChange={(e) => setLocal((l) => ({ ...l, poweredByLabel: e.target.value || undefined }))}
+                  placeholder="ELIA AI Assistant"
+                  className="input-field"
+                />
+              </Field>
+              <Field label={t('settings.poweredByUrl')}>
+                <input
+                  type="url"
+                  value={local.poweredByUrl ?? ''}
+                  onChange={(e) => setLocal((l) => ({ ...l, poweredByUrl: e.target.value || undefined }))}
+                  placeholder="https://www.elia-asistent.com"
+                  className="input-field"
+                />
+              </Field>
+            </div>
+          )}
+
+          <hr style={{ borderColor: 'var(--t-bg-border)' }} />
+
           {/* ── Per-language content ── */}
           <div>
             <p className="text-xs font-semibold text-fg-secondary uppercase tracking-wider mb-3">

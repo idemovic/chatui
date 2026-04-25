@@ -18,7 +18,7 @@
     "settings": "Settings"
   },
   "footer": {
-    "poweredBy": "Powered by <a>ELIA AI Assistant</a>"
+    "poweredBy": "Powered by <a>{{label}}</a>"
   },
   "settings": {
     "title": "Settings",
@@ -51,6 +51,9 @@
     "avatarUrlPlaceholder": "or paste a URL",
     "avatarErrorType": "Please choose an image file.",
     "avatarErrorSize": "Image is too large (max 500 KB).",
+    "poweredByLabel": "\"Powered by\" link text",
+    "poweredByUrl": "\"Powered by\" link URL",
+    "poweredByHide": "Hide \"Powered by\" footer",
     "save": "Save",
     "cancel": "Cancel"
   }

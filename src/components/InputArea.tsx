@@ -1,5 +1,9 @@
 import { useState, useRef, useCallback } from 'react'
 import { Trans } from 'react-i18next'
+import { useSettingsStore } from '../store/settingsStore.ts'
+
+const DEFAULT_POWERED_BY_LABEL = 'ELIA AI Assistant'
+const DEFAULT_POWERED_BY_URL = 'https://www.elia-asistent.com'
 
 interface Props {
   onSend: (text: string) => void
@@ -11,6 +15,10 @@ interface Props {
 export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: Props) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const config = useSettingsStore((s) => s.config)
+  const poweredByLabel = config.poweredByLabel ?? DEFAULT_POWERED_BY_LABEL
+  const poweredByUrl = config.poweredByUrl ?? DEFAULT_POWERED_BY_URL
+  const poweredByHide = config.poweredByHide ?? false
 
   const submit = useCallback(() => {
     const text = value.trim()
@@ -86,22 +94,25 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
       </button>
     </div>
 
-    <div className="text-center text-[11px] pb-2 px-3 text-fg-muted">
-      <Trans
-        i18nKey="footer.poweredBy"
-        components={{
-          a: (
-            <a
-              href="https://www.elia-asistent.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline"
-              style={{ color: 'inherit' }}
-            />
-          ),
-        }}
-      />
-    </div>
+    {!poweredByHide && (
+      <div className="text-center text-[11px] pb-2 px-3 text-fg-muted">
+        <Trans
+          i18nKey="footer.poweredBy"
+          values={{ label: poweredByLabel }}
+          components={{
+            a: (
+              <a
+                href={poweredByUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+                style={{ color: 'inherit' }}
+              />
+            ),
+          }}
+        />
+      </div>
+    )}
     </div>
   )
 }

@@ -44,6 +44,13 @@ export interface ChatConfig {
   botAvatar?: string
   /** Popup toggle button icon (window mode). Built-in id, URL, or data URL. */
   toggleButtonIcon?: string
+  // "Powered by" footer
+  /** Link text shown after the localized "Powered by" prefix. Default: 'ELIA AI Assistant'. */
+  poweredByLabel?: string
+  /** Link target URL. Default: 'https://www.elia-asistent.com'. */
+  poweredByUrl?: string
+  /** Hide the entire "Powered by" footer line. */
+  poweredByHide?: boolean
 }
 
 export interface Message {

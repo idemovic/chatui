@@ -18,7 +18,7 @@
     "settings": "Nastavenia"
   },
   "footer": {
-    "poweredBy": "Poháňa <a>ELIA AI Assistant</a>"
+    "poweredBy": "Poháňa <a>{{label}}</a>"
   },
   "settings": {
     "title": "Nastavenia",
@@ -51,6 +51,9 @@
     "avatarUrlPlaceholder": "alebo vložte URL",
     "avatarErrorType": "Vyberte súbor obrázka.",
     "avatarErrorSize": "Obrázok je príliš veľký (max 500 KB).",
+    "poweredByLabel": "Text odkazu \"Poháňa\"",
+    "poweredByUrl": "URL odkazu \"Poháňa\"",
+    "poweredByHide": "Skryť pätičku \"Poháňa\"",
     "save": "Uložiť",
     "cancel": "Zrušiť"
   }
