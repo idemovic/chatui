@@ -27,6 +27,11 @@ const defaultConfig: ChatConfig = {
   ctaDelay: 5000,
   ctaSound: true,
   hideSettings: true,
+  poweredByLabel: 'ELIA AI Assistant',
+  poweredByUrl: 'https://www.elia-asistent.com',
+  poweredByHide: false,
+  wordCloud: [],
+  wordCloudIdleHours: 24,
   i18n: {
     en: { initialMessages: [], ctaText: 'Hi! How can I help you today?' },
     sk: { initialMessages: [], ctaText: 'Dobrý deň! Ako vám môžem pomôcť?' },
@@ -58,6 +63,16 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'chatui-settings',
+      // Deep-merge so newly-added default config fields appear for existing users
+      // (Zustand's default merge replaces top-level keys, dropping new defaults inside `config`).
+      merge: (persisted, current) => {
+        const p = persisted as Partial<SettingsState>
+        return {
+          ...current,
+          ...p,
+          config: { ...current.config, ...(p.config ?? {}) },
+        }
+      },
     },
   ),
 )
