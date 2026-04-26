@@ -7,7 +7,7 @@ import type { ChatConfig } from './types/index.ts'
 export interface CreateChatOptions extends Partial<ChatConfig> {
   /** CSS selector or DOM element where the chat will mount. */
   target: string | HTMLElement
-  /** Initial UI language code (e.g. 'en', 'sk'). Same as setting `defaultLanguage` but applied immediately. */
+  /** Initial UI language code (e.g. 'en', 'sk'). Applied immediately via `setLanguage()`. */
   language?: string
 }
 
@@ -41,8 +41,7 @@ export function createChat(opts: CreateChatOptions): ChatInstance {
   const store = useSettingsStore.getState()
   store.setConfig(config as Partial<ChatConfig>)
   if (config.theme) store.setTheme(config.theme)
-  const lang = language ?? config.defaultLanguage
-  if (lang) store.setLanguage(lang)
+  if (language) store.setLanguage(language)
 
   const root: Root = createRoot(el)
   root.render(createElement(App))

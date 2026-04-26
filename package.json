@@ -1,6 +1,6 @@
 {
   "name": "@elia-assistant/chatui",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -49,10 +49,6 @@
   "peerDependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
-  },
-  "peerDependenciesMeta": {
-    "react": { "optional": true },
-    "react-dom": { "optional": true }
   },
   "dependencies": {
     "i18next": "^25.0.0",

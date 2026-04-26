@@ -376,7 +376,9 @@ useSettingsStore.getState().setConfig({
   },
 
   <span class="c">// ─── i18n ─────────────────────────────────────────────────────────</span>
-  defaultLanguage:  <span class="s">'en'</span>,
+  <span class="c">// To set the initial language, call setLanguage('sk') after setConfig()</span>
+  <span class="c">// (or pass language: 'sk' to createChat). On a fresh browser, falls back</span>
+  <span class="c">// to navigator.language → 'en'.</span>
   initialMessages: [<span class="s">'Hello! How can I help?'</span>],    <span class="c">// global fallback</span>
   i18n: {
     en: {
@@ -423,7 +425,6 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>botName</code></td><td><code>string</code></td><td><code>'Assistant'</code></td><td>Global fallback bot name.</td></tr>
     <tr><td><code>botAvatar</code></td><td><code>string</code></td><td>-</td><td>Built-in avatar id, full URL, or data URL. See Avatars section.</td></tr>
     <tr><td><code>toggleButtonIcon</code></td><td><code>string</code></td><td>-</td><td>Image shown inside the floating toggle button in <code>window</code> / <code>mixed</code> mode. Same value forms as <code>botAvatar</code>.</td></tr>
-    <tr><td><code>defaultLanguage</code></td><td><code>string</code></td><td><code>'en'</code></td><td>Initial UI language code.</td></tr>
     <tr><td><code>initialMessages</code></td><td><code>string[]</code></td><td><code>[]</code></td><td>Global fallback initial bot messages.</td></tr>
     <tr><td><code>i18n</code></td><td><code>Record&lt;string, LangOverride&gt;</code></td><td>-</td><td>Per-language overrides. See sub-table.</td></tr>
     <tr><td><code>showCta</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Show the CTA speech bubble above the floating button.</td></tr>

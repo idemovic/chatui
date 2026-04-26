@@ -168,9 +168,10 @@ A tab is shown only if its block has `feedUrl` or `items`. If neither tab is con
 
 | Parameter | Type | Description |
 |---|---|---|
-| `defaultLanguage` | `string` | Initial UI language code (`'en'`, `'sk'`, …) |
 | `initialMessages` | `string[]` | Global fallback initial bot messages |
 | `i18n[lang]` | `LangOverride` | Per-language content overrides |
+
+To set the initial UI language, call `useSettingsStore.getState().setLanguage('sk')` after `setConfig()` (or pass `language: 'sk'` to `createChat()`). On a fresh browser, the default falls back to `navigator.language` then `'en'`.
 
 `LangOverride` fields: `initialMessages`, `ctaText`, `botName`, `welcomeSubtitle`, `tabs.{notifications,help,chat}.title`.
 

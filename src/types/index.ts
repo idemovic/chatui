@@ -51,7 +51,6 @@ export interface ChatConfig {
   chatSessionKey?: string
   metadata?: Record<string, unknown>
   showWelcomeScreen?: boolean
-  defaultLanguage?: string
   /** Global fallback initial messages — per-language overrides live in i18n[lang].initialMessages */
   initialMessages?: string[]
   allowFileUploads?: boolean
