@@ -165,16 +165,39 @@
 
 <h3>Option A: from a tarball (recommended for sharing)</h3>
 <p>Run <code>npm pack</code> in the chatui repo to produce <code>chatui-X.Y.Z.tgz</code>. Then in your host:</p>
-<pre><code>npm install /absolute/path/to/chatui-0.0.1.tgz</code></pre>
+<pre><code>npm install /absolute/path/to/elia-assistant-chatui-0.0.1.tgz</code></pre>
 
 <h3>Option B: local file path (recommended for parallel development)</h3>
 <p>In your host's <code>package.json</code>:</p>
 <pre><code>{
   <span class="s">"dependencies"</span>: {
-    <span class="s">"chatui"</span>: <span class="s">"file:../chatui"</span>
+    <span class="s">"@elia-assistant/chatui"</span>: <span class="s">"file:../chatui"</span>
   }
 }</code></pre>
 <p>Then run <code>npm install</code>. Edits in the chatui repo reflect in the host after a dev-server restart.</p>
+
+<h3>Option C: from a CDN — no install, no bundler</h3>
+<p>
+  The package ships an IIFE bundle with React + ReactDOM included. Drop two lines into any HTML page and you're done.
+  jsdelivr and unpkg auto-mirror the published package once it's on npm:
+</p>
+<pre><code>&lt;link
+  rel=<span class="s">"stylesheet"</span>
+  href=<span class="s">"https://cdn.jsdelivr.net/npm/@elia-assistant/chatui/dist/chatui.iife.css"</span>
+/&gt;
+&lt;script src=<span class="s">"https://cdn.jsdelivr.net/npm/@elia-assistant/chatui/dist/chatui.iife.js"</span>&gt;&lt;/script&gt;
+&lt;div id=<span class="s">"chat"</span>&gt;&lt;/div&gt;
+&lt;script&gt;
+  Chatui.createChat({
+    target: <span class="s">'#chat'</span>,
+    webhookUrl: <span class="s">'https://your-n8n.example.com/webhook/abc'</span>,
+    mode: <span class="s">'window'</span>,
+  })
+&lt;/script&gt;</code></pre>
+<p>
+  See section 4 below for the full <code>createChat()</code> API. <code>unpkg.com</code> works the same way:
+  <code>https://unpkg.com/@elia-assistant/chatui/dist/chatui.iife.js</code>.
+</p>
 
 <h3>Minimal host <code>package.json</code></h3>
 <p>
@@ -188,9 +211,9 @@
     <span class="s">"build"</span>: <span class="s">"tsc -b && vite build"</span>
   },
   <span class="s">"dependencies"</span>: {
-    <span class="s">"chatui"</span>:    <span class="s">"file:../chatui/chatui-0.0.1.tgz"</span>,
-    <span class="s">"react"</span>:     <span class="s">"^19.0.0"</span>,
-    <span class="s">"react-dom"</span>: <span class="s">"^19.0.0"</span>
+    <span class="s">"@elia-assistant/chatui"</span>: <span class="s">"file:../chatui/elia-assistant-chatui-0.0.1.tgz"</span>,
+    <span class="s">"react"</span>:                  <span class="s">"^19.0.0"</span>,
+    <span class="s">"react-dom"</span>:              <span class="s">"^19.0.0"</span>
   },
   <span class="s">"devDependencies"</span>: {
     <span class="s">"@types/react"</span>:        <span class="s">"^19.0.0"</span>,
@@ -220,9 +243,9 @@
 <span class="k">import</span> { StrictMode } <span class="k">from</span> <span class="s">'react'</span>
 <span class="k">import</span> { createRoot } <span class="k">from</span> <span class="s">'react-dom/client'</span>
 
-<span class="k">import</span> { App <span class="k">as</span> ChatWidget } <span class="k">from</span> <span class="s">'chatui'</span>
-<span class="k">import</span> { useSettingsStore }    <span class="k">from</span> <span class="s">'chatui/store'</span>
-<span class="k">import</span>                            <span class="s">'chatui/css'</span>
+<span class="k">import</span> { App <span class="k">as</span> ChatWidget } <span class="k">from</span> <span class="s">'@elia-assistant/chatui'</span>
+<span class="k">import</span> { useSettingsStore }    <span class="k">from</span> <span class="s">'@elia-assistant/chatui/store'</span>
+<span class="k">import</span>                            <span class="s">'@elia-assistant/chatui/css'</span>
 
 <span class="c">// Configure BEFORE the first render. setConfig merges into the persisted store.</span>
 useSettingsStore.getState().setConfig({
@@ -253,13 +276,38 @@ createRoot(rootEl).render(
   <code>localStorage.removeItem('chatui-settings')</code> before calling <code>setConfig</code>.
 </div>
 
+<h3>Same thing without React (vanilla / CDN)</h3>
+<p>
+  The package also exports a <code>createChat()</code> function. Use it from a non-React host or
+  a plain <code>&lt;script&gt;</code> tag — all options on the React entry are accepted, plus a required
+  <code>target</code> selector or element.
+</p>
+<pre><code><span class="c">// ESM (bundler — same package, different entry)</span>
+<span class="k">import</span> { createChat } <span class="k">from</span> <span class="s">'@elia-assistant/chatui'</span>
+<span class="k">import</span>                   <span class="s">'@elia-assistant/chatui/css'</span>
+
+<span class="k">const</span> instance = createChat({
+  target:     <span class="s">'#chat'</span>,                            <span class="c">// CSS selector or HTMLElement</span>
+  webhookUrl: <span class="s">'https://your-n8n.example.com/...'</span>,
+  mode:       <span class="s">'window'</span>,
+  language:   <span class="s">'sk'</span>,                             <span class="c">// optional shortcut for setLanguage()</span>
+})
+
+<span class="c">// Later, if you need to remove it:</span>
+instance.unmount()</code></pre>
+<p>From a <code>&lt;script&gt;</code> tag the global is named <code>Chatui</code>:</p>
+<pre><code>&lt;script src=<span class="s">"https://cdn.jsdelivr.net/npm/@elia-assistant/chatui/dist/chatui.iife.js"</span>&gt;&lt;/script&gt;
+&lt;script&gt;
+  Chatui.createChat({ target: <span class="s">'#chat'</span>, webhookUrl: <span class="s">'...'</span> })
+&lt;/script&gt;</code></pre>
+
 <h2 id="full-config">4. Full static configuration</h2>
 <p>
   Every option available, with defaults and realistic values. Drop this into the bootstrap file
   and delete the fields you do not need.
 </p>
 
-<pre><code><span class="k">import</span> { useSettingsStore } <span class="k">from</span> <span class="s">'chatui/store'</span>
+<pre><code><span class="k">import</span> { useSettingsStore } <span class="k">from</span> <span class="s">'@elia-assistant/chatui/store'</span>
 
 useSettingsStore.getState().setConfig({
 
@@ -454,7 +502,7 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
 
 <h2 id="languages">8. Languages</h2>
 <p>
-  English and Slovak ship pre-bundled inside <code>node_modules/chatui/dist/chunks/translation-*.js</code>. The widget
+  English and Slovak ship pre-bundled inside <code>node_modules/@elia-assistant/chatui/dist/chunks/translation-*.js</code>. The widget
   loads them on demand via dynamic <code>import()</code>, no HTTP fetch.
 </p>
 <p>To register a new language at runtime (without rebuilding chatui):</p>
@@ -463,7 +511,7 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
 i18n.addResourceBundle(<span class="s">'fr'</span>, <span class="s">'translation'</span>, {
   welcome:  { subtitle: <span class="s">'Commencez une conversation.'</span> },
   input:    { placeholder: <span class="s">'Tapez un message...'</span> },
-  <span class="c">// ... full keys: copy from node_modules/chatui/dist/chunks/translation-*.js</span>
+  <span class="c">// ... full keys: copy from node_modules/@elia-assistant/chatui/dist/chunks/translation-*.js</span>
 })
 
 useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre>
@@ -571,7 +619,7 @@ useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre
 <pre><code>export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    exclude: [<span class="s">'chatui'</span>],
+    exclude: [<span class="s">'@elia-assistant/chatui'</span>],
   },
 })</code></pre>
 

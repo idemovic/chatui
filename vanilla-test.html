@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>chatui IIFE test page</title>
+
+  <!-- Pre-compiled stylesheet from the IIFE build -->
+  <link rel="stylesheet" href="./dist/chatui.iife.css" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    header {
+      padding: 1rem 1.5rem;
+      background: #1e293b;
+      color: white;
+      font-weight: 600;
+    }
+    main {
+      max-width: 720px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    h1 { margin: 0 0 1rem; font-size: 1.5rem; }
+    p { line-height: 1.6; }
+    code {
+      background: #e2e8f0;
+      padding: .1em .35em;
+      border-radius: 4px;
+      font-family: 'SF Mono', Menlo, Consolas, monospace;
+      font-size: .9em;
+    }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: .85rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+<header>chatui — vanilla JS / IIFE test</header>
+
+<main>
+  <h1>Drop-in widget test</h1>
+  <p>
+    This page loads <code>dist/chatui.iife.js</code> directly via a <code>&lt;script&gt;</code> tag —
+    no bundler, no React in the host page. The widget mounts via <code>Chatui.createChat()</code>
+    once the script is loaded.
+  </p>
+  <p>
+    The toggle button should appear in the bottom-right. Click it to open the chat.
+    Settings -> Powered by, Tabs, theme picker — everything works just like the bundler-based mount.
+  </p>
+
+  <pre>&lt;link rel="stylesheet" href="./dist/chatui.iife.css"&gt;
+&lt;script src="./dist/chatui.iife.js"&gt;&lt;/script&gt;
+&lt;div id="chat"&gt;&lt;/div&gt;
+&lt;script&gt;
+  Chatui.createChat({
+    target:     '#chat',
+    webhookUrl: 'https://your-n8n/webhook/...',
+    mode:       'window',
+  })
+&lt;/script&gt;</pre>
+</main>
+
+<!-- The mount target. It can be invisible — `mode: 'window'` overlays a fixed button. -->
+<div id="chat"></div>
+
+<!-- The IIFE bundle. Exposes the global `Chatui`. -->
+<script src="./dist/chatui.iife.js"></script>
+
+<script>
+  // Dev-time webhook URL — replace with yours, or leave blank to test the unconfigured state.
+  Chatui.createChat({
+    target: '#chat',
+    webhookUrl: '',
+    mode: 'window',
+    botName: 'IIFE Test',
+    showCta: true,
+    ctaText: 'Hello from the IIFE bundle!',
+    ctaDelay: 1000,
+    hideSettings: false,
+    tabs: {
+      notifications: {
+        items: [
+          {
+            title: 'Inline notification',
+            message: 'This card came from inline config — no fetch.',
+            tags: [{ label: 'Demo', variant: 'success' }],
+            cta: { url: 'https://example.com', title: 'Read more' },
+          },
+        ],
+      },
+      help: {
+        items: [
+          { question: 'How does this work?', answer: 'You loaded a single .js file from disk.' },
+          { question: 'Where is React?', answer: 'Bundled inside chatui.iife.js — host page has none.' },
+        ],
+      },
+    },
+  })
+</script>
+
+</body>
+</html>

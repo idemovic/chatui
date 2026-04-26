@@ -22,7 +22,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        index:        'src/App.tsx',
+        index:        'src/index.ts',
         store:        'src/store/settingsStore.ts',
         'chat-store': 'src/store/chatStore.ts',
         types:        'src/types/index.ts',
@@ -30,7 +30,7 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime'],
+      external: [/^react($|\/)/, /^react-dom($|\/)/],
       output: {
         chunkFileNames: 'chunks/[name]-[hash].js',
         assetFileNames: (info) => {
