@@ -1,0 +1,15 @@
+## Files generated locally for debugging but not shipped to consumers.
+
+# Sourcemaps — bloat the tarball (1+ MB each) without value to consumers.
+# They stay on disk in dist/ for your own debugging.
+*.map
+
+# Build cache / TS state
+node_modules/.tmp
+*.tsbuildinfo
+
+# Dev/test artifacts
+vanilla-test.html
+example.html
+.env
+.env.*

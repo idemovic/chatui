@@ -1,6 +1,6 @@
 {
   "name": "@elia-assistant/chatui",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -10,6 +10,7 @@
   "jsdelivr": "./dist/chatui.iife.js",
   "files": [
     "dist",
+    "!dist/**/*.map",
     "README.md",
     "LICENSE"
   ],
