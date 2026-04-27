@@ -34,9 +34,8 @@ export default defineConfig({
       // Bundle EVERYTHING — including React — so the file works on a bare HTML page.
       external: [],
       output: {
-        // IIFE can't have separate chunks; locales etc. must be inlined.
-        inlineDynamicImports: true,
         // Don't overwrite the ESM build's chatui.css.
+        // IIFE format implies a single chunk, so dynamic imports are inlined automatically.
         assetFileNames: (info) => {
           if (info.name && info.name.endsWith('.css')) return 'chatui.iife.css'
           return 'assets/[name]-[hash][extname]'

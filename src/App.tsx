@@ -171,7 +171,18 @@ export function App() {
 
   return (
     <>
-      {fullscreenContent}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+          zIndex: 30,
+        }}
+      >
+        {fullscreenContent}
+      </div>
       {!hideSettings && settingsOpen && (
         <SettingsModal onClose={() => setSettingsOpen(false)} />
       )}
