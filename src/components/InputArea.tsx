@@ -73,11 +73,12 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
         placeholder={placeholder ?? 'Type a message… (Enter to send, Shift+Enter for newline)'}
         disabled={disabled}
         rows={1}
-        className="flex-1 resize-none rounded-xl px-4 py-2.5 text-sm leading-relaxed focus:outline-none disabled:opacity-50 min-h-[42px]"
+        className="flex-1 rounded-xl px-4 py-2.5 text-sm leading-relaxed focus:outline-none disabled:opacity-50 min-h-[42px]"
         style={{
           background: 'var(--t-bg-surface)',
           color: 'var(--t-fg-primary)',
           border: '1px solid var(--t-bg-border)',
+          resize: 'none',
         }}
       />
 
