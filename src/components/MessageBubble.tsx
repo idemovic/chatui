@@ -55,7 +55,7 @@ export function MessageBubble({ message }: Props) {
         <BotAvatar />
       )}
 
-      <div className={`flex flex-col gap-1 max-w-[75%] ${isUser ? 'items-end' : 'items-start'}`}>
+      <div className={`flex flex-col gap-1 max-w-[88%] ${isUser ? 'items-end' : 'items-start'}`}>
         {/* Bubble */}
         <div
           className="px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words"
