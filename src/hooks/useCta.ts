@@ -24,11 +24,10 @@ function playNotificationSound() {
   }
 }
 
-export function useCta(config: ChatConfig, language: string) {
+export function useCta(config: ChatConfig, language: string, isWindow: boolean) {
   const [showCta, setShowCta] = useState(false)
   const shownRef = useRef(false)
 
-  const isWindow = config.mode === 'window'
   const shouldShow = isWindow && (config.showCta ?? true)
   const delay = config.ctaDelay ?? 5000
   const sound = config.ctaSound ?? true

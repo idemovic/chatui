@@ -32,17 +32,25 @@ export function App() {
   const activeSessionId = useChatStore((s) => s.activeSessionId)
   const createSession = useChatStore((s) => s.createSession)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [windowOpen, setWindowOpen] = useState(false)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const language = useSettingsStore((s) => s.language)
-  const { showCta, ctaText, dismiss: dismissCta } = useCta(config, language)
   const isDesktop = useIsDesktop()
 
   // 'mixed' = window on desktop, fullscreen on mobile
   const isWindow =
     config.mode === 'window' || (config.mode === 'mixed' && isDesktop)
+
+  // The chat is "permanent" (no toggle, no close) only in pure fullscreen mode
+  // without the bottom-sheet variant. In every other case the user can dismiss
+  // the chat and a floating toggle button reopens it.
+  const isPermanent = config.mode === 'fullscreen' && !config.fullscreenSheet
+
+  const [chatOpen, setChatOpen] = useState(isPermanent)
+
   const showSidebar = !isWindow && (config.showSidebar ?? false)
   const hideSettings = config.hideSettings ?? false
+
+  const { showCta, ctaText, dismiss: dismissCta } = useCta(config, language, isWindow)
 
   const openSettings = () => {
     if (!hideSettings) setSettingsOpen(true)
@@ -53,44 +61,13 @@ export function App() {
     if (!activeSessionId) createSession()
   }, [activeSessionId, createSession])
 
-  if (isWindow) {
-    return (
-      <>
-        {/* Floating window */}
-        {windowOpen && (
-          <div
-            className="fixed bottom-20 right-4 z-50 w-[380px] h-[560px] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
-            style={{ border: '1px solid var(--t-bg-border)', background: 'var(--t-bg-base)' }}
-          >
-            <ChatView onOpenSettings={openSettings} />
-          </div>
-        )}
-
-        {/* CTA popup */}
-        {showCta && !windowOpen && (
-          <div className="fixed bottom-20 right-4 z-50">
-            <CtaPopup text={ctaText} onDismiss={dismissCta} />
-          </div>
-        )}
-
-        {/* Toggle button */}
-        <ToggleButton
-          open={windowOpen}
-          iconSrc={resolveAvatarUrl(config.toggleButtonIcon)}
-          onClick={() => {
-            dismissCta()
-            setWindowOpen((o) => !o)
-          }}
-        />
-
-        {!hideSettings && settingsOpen && (
-          <SettingsModal onClose={() => setSettingsOpen(false)} />
-        )}
-      </>
-    )
+  const closeChat = () => setChatOpen(false)
+  const openChat = () => {
+    dismissCta()
+    setChatOpen(true)
   }
 
-  // Fullscreen mode
+  // Fullscreen-style content (used by all non-window layouts)
   const fullscreenContent = (
     <div className="flex h-full w-full" style={{ background: 'var(--t-bg-base)' }}>
       {/* Mobile sidebar backdrop */}
@@ -127,40 +104,38 @@ export function App() {
             </svg>
           </button>
         )}
-        <ChatView onOpenSettings={openSettings} />
+        <ChatView
+          onOpenSettings={openSettings}
+          onClose={isPermanent ? undefined : closeChat}
+        />
       </div>
     </div>
   )
 
-  if (config.fullscreenSheet) {
-    const sheetHeight = config.fullscreenSheetHeight ?? '75vh'
+  // ── Window mode (or 'mixed' on desktop) ─────────────────────────────────
+  if (isWindow) {
     return (
       <>
-        {/* Dimmed backdrop above the sheet */}
-        <div
-          className="fixed inset-0 z-40 pointer-events-none"
-          style={{ background: 'rgba(0, 0, 0, 0.4)' }}
-        />
-        {/* Bottom sheet */}
-        <div
-          className="fixed inset-x-0 bottom-0 z-50 flex flex-col overflow-hidden"
-          style={{
-            height: sheetHeight,
-            borderTopLeftRadius: '20px',
-            borderTopRightRadius: '20px',
-            background: 'var(--t-bg-base)',
-            boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.18)',
-          }}
-        >
-          {/* Drag handle */}
-          <div className="flex justify-center pt-2 pb-1 flex-shrink-0">
-            <div
-              className="w-10 h-1 rounded-full"
-              style={{ background: 'var(--t-bg-border)' }}
-            />
+        {chatOpen && (
+          <div
+            className="fixed bottom-20 right-4 z-50 w-[380px] h-[560px] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            style={{ border: '1px solid var(--t-bg-border)', background: 'var(--t-bg-base)' }}
+          >
+            <ChatView onOpenSettings={openSettings} onClose={closeChat} />
           </div>
-          <div className="flex-1 min-h-0">{fullscreenContent}</div>
-        </div>
+        )}
+
+        {showCta && !chatOpen && (
+          <div className="fixed bottom-20 right-4 z-50">
+            <CtaPopup text={ctaText} onDismiss={dismissCta} />
+          </div>
+        )}
+
+        <ToggleButton
+          open={chatOpen}
+          iconSrc={resolveAvatarUrl(config.toggleButtonIcon)}
+          onClick={() => (chatOpen ? closeChat() : openChat())}
+        />
 
         {!hideSettings && settingsOpen && (
           <SettingsModal onClose={() => setSettingsOpen(false)} />
@@ -169,20 +144,63 @@ export function App() {
     )
   }
 
+  // ── Pure fullscreen — always visible, no toggle/close ───────────────────
+  if (isPermanent) {
+    return (
+      <>
+        <div className="fixed inset-0 z-30">{fullscreenContent}</div>
+        {!hideSettings && settingsOpen && (
+          <SettingsModal onClose={() => setSettingsOpen(false)} />
+        )}
+      </>
+    )
+  }
+
+  // ── Bottom-sheet OR mixed-on-mobile — dismissable, with toggle button ───
+  const sheetHeight = config.fullscreenSheetHeight ?? '75vh'
+  const useSheet = config.fullscreenSheet === true
+
   return (
     <>
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0,
-          zIndex: 30,
-        }}
-      >
-        {fullscreenContent}
-      </div>
+      {chatOpen ? (
+        useSheet ? (
+          <>
+            {/* Dimmed backdrop above the sheet */}
+            <div
+              className="fixed inset-0 z-40 pointer-events-none"
+              style={{ background: 'rgba(0, 0, 0, 0.4)' }}
+            />
+            <div
+              className="fixed inset-x-0 bottom-0 z-50 flex flex-col overflow-hidden"
+              style={{
+                height: sheetHeight,
+                borderTopLeftRadius: '20px',
+                borderTopRightRadius: '20px',
+                background: 'var(--t-bg-base)',
+                boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.18)',
+              }}
+            >
+              <div className="flex justify-center pt-2 pb-1 flex-shrink-0">
+                <div
+                  className="w-10 h-1 rounded-full"
+                  style={{ background: 'var(--t-bg-border)' }}
+                />
+              </div>
+              <div className="flex-1 min-h-0">{fullscreenContent}</div>
+            </div>
+          </>
+        ) : (
+          // Mixed mode on mobile: full-screen overlay with close button in header
+          <div className="fixed inset-0 z-50">{fullscreenContent}</div>
+        )
+      ) : (
+        <ToggleButton
+          open={false}
+          iconSrc={resolveAvatarUrl(config.toggleButtonIcon)}
+          onClick={openChat}
+        />
+      )}
+
       {!hideSettings && settingsOpen && (
         <SettingsModal onClose={() => setSettingsOpen(false)} />
       )}
