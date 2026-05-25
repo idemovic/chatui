@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, type ReactNode } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../store/settingsStore.ts'
 import { builtInAvatarIds, builtInAvatars, resolveAvatarUrl } from '../assets/avatars/index.ts'
 import { ThemePicker } from './ThemePicker.tsx'
@@ -12,14 +12,14 @@ interface Props {
 }
 
 const KNOWN_LANGS = [
-  { code: 'en', label: 'EN – English' },
-  { code: 'sk', label: 'SK – Slovak' },
-  { code: 'de', label: 'DE – German' },
-  { code: 'cs', label: 'CS – Czech' },
-  { code: 'pl', label: 'PL – Polish' },
-  { code: 'hu', label: 'HU – Hungarian' },
-  { code: 'fr', label: 'FR – French' },
-  { code: 'es', label: 'ES – Spanish' },
+  { code: 'en', label: 'EN - English' },
+  { code: 'sk', label: 'SK - Slovak' },
+  { code: 'de', label: 'DE - German' },
+  { code: 'cs', label: 'CS - Czech' },
+  { code: 'pl', label: 'PL - Polish' },
+  { code: 'hu', label: 'HU - Hungarian' },
+  { code: 'fr', label: 'FR - French' },
+  { code: 'es', label: 'ES - Spanish' },
 ]
 
 export function SettingsModal({ onClose }: Props) {
@@ -143,7 +143,10 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
         {showExport ? (
           <div className="px-6 py-5 space-y-3 overflow-y-auto flex-1">
             <p className="text-xs text-fg-secondary leading-relaxed">
-              Paste this into your host app's bootstrap file (e.g. <code>src/main.tsx</code>) before the first React render. See <code>example.html</code> for the full integration guide.
+              <Trans
+                i18nKey="settings.exportHint"
+                components={{ code: <code /> }}
+              />
             </p>
             <textarea
               readOnly
@@ -160,411 +163,464 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
             />
           </div>
         ) : (
-        <div className="px-6 py-5 space-y-5 overflow-y-auto flex-1">
+          <div className="px-6 py-5 space-y-5 overflow-y-auto flex-1">
 
-          {/* ── Interface language ── */}
-          <Field label={t('settings.language')}>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { code: 'en', label: 'EN' },
-                { code: 'sk', label: 'SK' },
-              ].map((l) => (
-                <button
-                  key={l.code}
-                  onClick={() => setLanguage(l.code)}
-                  className="px-3 py-1 rounded-lg text-sm transition-colors"
-                  style={
-                    language === l.code
-                      ? { background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }
-                      : { background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }
-                  }
-                >
-                  {l.label}
-                </button>
-              ))}
-            </div>
-          </Field>
-
-          {/* ── Theme ── */}
-          <Field label={t('settings.theme') ?? 'Theme'}>
-            <ThemePicker />
-          </Field>
-
-          <hr style={{ borderColor: 'var(--t-bg-border)' }} />
-
-          {/* ── Webhook + keys ── */}
-          <Field label={t('settings.webhookUrl')} required>
-            <input
-              type="url"
-              value={local.webhookUrl}
-              onChange={(e) => setLocal((l) => ({ ...l, webhookUrl: e.target.value }))}
-              placeholder="https://your-n8n.app.n8n.cloud/webhook/..."
-              className="input-field"
-            />
-          </Field>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={t('settings.chatInputKey')}>
-              <input
-                value={local.chatInputKey ?? 'chatInput'}
-                onChange={(e) => setLocal((l) => ({ ...l, chatInputKey: e.target.value }))}
-                className="input-field"
-              />
-            </Field>
-            <Field label={t('settings.sessionKey')}>
-              <input
-                value={local.chatSessionKey ?? 'sessionId'}
-                onChange={(e) => setLocal((l) => ({ ...l, chatSessionKey: e.target.value }))}
-                className="input-field"
-              />
-            </Field>
-          </div>
-
-          <Field label={t('settings.botName')}>
-            <input
-              value={local.botName ?? ''}
-              onChange={(e) => setLocal((l) => ({ ...l, botName: e.target.value }))}
-              placeholder="Assistant"
-              className="input-field"
-            />
-          </Field>
-
-          <Field label={t('settings.botAvatar')}>
-            <AvatarPicker
-              value={local.botAvatar}
-              onChange={(v) => setLocal((l) => ({ ...l, botAvatar: v }))}
-              shape="circle"
-            />
-          </Field>
-
-          <Field label={t('settings.metadata')} error={metaError}>
-            <textarea
-              value={metaRaw}
-              onChange={(e) => { setMetaRaw(e.target.value); setMetaError('') }}
-              rows={2}
-              className="input-field font-mono text-xs resize-none"
-              placeholder="{}"
-            />
-          </Field>
-
-          {/* ── Toggles ── */}
-          <div className="space-y-2">
-            <Toggle label={t('settings.streaming')} checked={local.streaming ?? false}
-              onChange={(v) => setLocal((l) => ({ ...l, streaming: v }))} />
-            <Toggle label={t('settings.welcomeScreen')} checked={local.showWelcomeScreen ?? true}
-              onChange={(v) => setLocal((l) => ({ ...l, showWelcomeScreen: v }))} />
-            <Toggle label={t('settings.sidebar')} checked={local.showSidebar ?? false}
-              onChange={(v) => setLocal((l) => ({ ...l, showSidebar: v }))} />
-            <Toggle label={t('settings.fileUploads')} checked={local.allowFileUploads ?? false}
-              onChange={(v) => setLocal((l) => ({ ...l, allowFileUploads: v }))} />
-          </div>
-
-          {/* ── Mode ── */}
-          <Field label={t('settings.mode')}>
-            <div className="flex gap-2">
-              {(['fullscreen', 'window', 'mixed'] as const).map((m) => (
-                <button key={m} onClick={() => setLocal((l) => ({ ...l, mode: m }))}
-                  className="flex-1 py-1.5 rounded-lg text-sm capitalize transition-colors"
-                  style={local.mode === m
-                    ? { background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }
-                    : { background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }
-                  }
-                >{m}</button>
-              ))}
-            </div>
-          </Field>
-
-          {(local.mode === 'fullscreen' || local.mode === 'mixed') && (
-            <div className="space-y-3 pl-3 border-l-2" style={{ borderColor: 'var(--t-accent)' }}>
-              <Toggle label={t('settings.fullscreenSheet')} checked={local.fullscreenSheet ?? false}
-                onChange={(v) => setLocal((l) => ({ ...l, fullscreenSheet: v }))} />
-              {local.fullscreenSheet && (
-                <Field label={t('settings.fullscreenSheetHeight')}>
-                  <input
-                    value={local.fullscreenSheetHeight ?? '75vh'}
-                    onChange={(e) => setLocal((l) => ({ ...l, fullscreenSheetHeight: e.target.value || undefined }))}
-                    placeholder="75vh"
-                    className="input-field"
-                  />
-                </Field>
-              )}
-            </div>
-          )}
-
-          <hr style={{ borderColor: 'var(--t-bg-border)' }} />
-
-          {/* ── Tabs (notifications / help feeds) ── */}
-          <div>
-            <p className="text-xs font-semibold text-fg-secondary uppercase tracking-wider mb-3">
-              {t('settings.tabsSection')}
-            </p>
-
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <Field label={t('settings.tabsNotificationsTitle')}>
-                  <input
-                    value={local.tabs?.notifications?.title ?? ''}
-                    onChange={(e) =>
-                      setLocal((l) => ({
-                        ...l,
-                        tabs: {
-                          ...l.tabs,
-                          notifications: {
-                            ...l.tabs?.notifications,
-                            title: e.target.value || undefined,
-                          },
-                        },
-                      }))
+            {/* ── Interface language ── */}
+            <Field label={t('settings.language')}>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { code: 'en', label: 'EN' },
+                  { code: 'sk', label: 'SK' },
+                ].map((l) => (
+                  <button
+                    key={l.code}
+                    onClick={() => setLanguage(l.code)}
+                    className="px-3 py-1 rounded-lg text-sm transition-colors"
+                    style={
+                      language === l.code
+                        ? { background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }
+                        : { background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }
                     }
-                    placeholder={t('tabs.notifications')}
-                    className="input-field"
-                  />
-                </Field>
-                <Field label={t('settings.tabsNotificationsFeedUrl')}>
-                  <input
-                    type="url"
-                    value={local.tabs?.notifications?.feedUrl ?? ''}
-                    onChange={(e) =>
-                      setLocal((l) => ({
-                        ...l,
-                        tabs: {
-                          ...l.tabs,
-                          notifications: {
-                            ...l.tabs?.notifications,
-                            feedUrl: e.target.value || undefined,
-                          },
-                        },
-                      }))
-                    }
-                    placeholder="/notifications.json"
-                    className="input-field"
-                  />
-                </Field>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <Field label={t('settings.tabsHelpTitle')}>
-                  <input
-                    value={local.tabs?.help?.title ?? ''}
-                    onChange={(e) =>
-                      setLocal((l) => ({
-                        ...l,
-                        tabs: {
-                          ...l.tabs,
-                          help: { ...l.tabs?.help, title: e.target.value || undefined },
-                        },
-                      }))
-                    }
-                    placeholder={t('tabs.help')}
-                    className="input-field"
-                  />
-                </Field>
-                <Field label={t('settings.tabsHelpFeedUrl')}>
-                  <input
-                    type="url"
-                    value={local.tabs?.help?.feedUrl ?? ''}
-                    onChange={(e) =>
-                      setLocal((l) => ({
-                        ...l,
-                        tabs: {
-                          ...l.tabs,
-                          help: { ...l.tabs?.help, feedUrl: e.target.value || undefined },
-                        },
-                      }))
-                    }
-                    placeholder="/faq.json"
-                    className="input-field"
-                  />
-                </Field>
-              </div>
-
-              <Field label={t('settings.tabsChatTitle')}>
-                <input
-                  value={local.tabs?.chat?.title ?? ''}
-                  onChange={(e) =>
-                    setLocal((l) => ({
-                      ...l,
-                      tabs: {
-                        ...l.tabs,
-                        chat: { ...l.tabs?.chat, title: e.target.value || undefined },
-                      },
-                    }))
-                  }
-                  placeholder={t('tabs.chat')}
-                  className="input-field"
-                />
-              </Field>
-            </div>
-          </div>
-
-          {local.mode === 'window' && (
-            <div className="space-y-3 pl-3 border-l-2" style={{ borderColor: 'var(--t-accent)' }}>
-              <Toggle label={t('settings.cta')} checked={local.showCta ?? true}
-                onChange={(v) => setLocal((l) => ({ ...l, showCta: v }))} />
-              <Toggle label={t('settings.ctaSound')} checked={local.ctaSound ?? true}
-                onChange={(v) => setLocal((l) => ({ ...l, ctaSound: v }))} />
-              <Field label={t('settings.ctaDelay')}>
-                <input type="number" value={local.ctaDelay ?? 5000}
-                  onChange={(e) => setLocal((l) => ({ ...l, ctaDelay: Number(e.target.value) }))}
-                  className="input-field" min={0} step={500} />
-              </Field>
-              <Field label={t('settings.toggleButtonIcon')}>
-                <AvatarPicker
-                  value={local.toggleButtonIcon}
-                  onChange={(v) => setLocal((l) => ({ ...l, toggleButtonIcon: v }))}
-                  shape="circle"
-                />
-              </Field>
-            </div>
-          )}
-
-          <hr style={{ borderColor: 'var(--t-bg-border)' }} />
-
-          {/* ── "Powered by" footer ── */}
-          <Toggle
-            label={t('settings.poweredByHide')}
-            checked={local.poweredByHide ?? false}
-            onChange={(v) => setLocal((l) => ({ ...l, poweredByHide: v }))}
-          />
-          {!local.poweredByHide && (
-            <div className="grid grid-cols-2 gap-3">
-              <Field label={t('settings.poweredByLabel')}>
-                <input
-                  value={local.poweredByLabel ?? ''}
-                  onChange={(e) => setLocal((l) => ({ ...l, poweredByLabel: e.target.value || undefined }))}
-                  placeholder="ELIA AI Assistant"
-                  className="input-field"
-                />
-              </Field>
-              <Field label={t('settings.poweredByUrl')}>
-                <input
-                  type="url"
-                  value={local.poweredByUrl ?? ''}
-                  onChange={(e) => setLocal((l) => ({ ...l, poweredByUrl: e.target.value || undefined }))}
-                  placeholder="https://www.elia-asistent.com"
-                  className="input-field"
-                />
-              </Field>
-            </div>
-          )}
-
-          <hr style={{ borderColor: 'var(--t-bg-border)' }} />
-
-          {/* ── Per-language content ── */}
-          <div>
-            <p className="text-xs font-semibold text-fg-secondary uppercase tracking-wider mb-3">
-              {t('settings.perLanguage')}
-            </p>
-
-            {/* Language tabs */}
-            <div className="flex flex-wrap gap-1 mb-4">
-              {allLangTabs.map((lang) => (
-                <button
-                  key={lang}
-                  onClick={() => setActiveLangTab(lang)}
-                  className="px-3 py-1 rounded-lg text-xs font-medium uppercase transition-colors"
-                  style={
-                    activeLangTab === lang
-                      ? { background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }
-                      : { background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }
-                  }
-                >
-                  {lang}
-                </button>
-              ))}
-
-              {/* Add language */}
-              {showAddLang ? (
-                <div className="flex gap-1 items-center">
-                  <select
-                    value={newLangCode}
-                    onChange={(e) => setNewLangCode(e.target.value)}
-                    className="input-field py-1 text-xs"
-                    style={{ width: 'auto' }}
                   >
-                    <option value="">Pick…</option>
-                    {KNOWN_LANGS.filter((l) => !allLangTabs.includes(l.code)).map((l) => (
-                      <option key={l.code} value={l.code}>{l.label}</option>
-                    ))}
-                    <option value="__custom">Custom code…</option>
-                  </select>
-                  {newLangCode === '__custom' && (
-                    <input
-                      placeholder="e.g. fr"
-                      maxLength={5}
-                      className="input-field py-1 text-xs w-20"
-                      onChange={(e) => setNewLangCode(e.target.value)}
-                    />
-                  )}
-                  <button onClick={handleAddLang}
-                    className="px-2 py-1 rounded-lg text-xs transition-colors"
-                    style={{ background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }}>
-                    Add
+                    {l.label}
                   </button>
-                  <button onClick={() => setShowAddLang(false)}
-                    className="px-2 py-1 rounded-lg text-xs text-fg-muted hover:text-fg-primary">
-                    ✕
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowAddLang(true)}
-                  className="px-3 py-1 rounded-lg text-xs text-fg-muted hover:text-fg-primary hover:bg-bg-surface2 transition-colors"
-                >
-                  + {t('settings.addLanguage')}
-                </button>
-              )}
+                ))}
+              </div>
+            </Field>
+
+            {/* ── Theme ── */}
+            <Field label={t('settings.theme') ?? 'Theme'}>
+              <ThemePicker />
+            </Field>
+
+            <hr style={{ borderColor: 'var(--t-bg-border)' }} />
+
+            {/* ── Webhook + keys ── */}
+            <Field label={t('settings.webhookUrl')} required>
+              <input
+                type="url"
+                value={local.webhookUrl}
+                onChange={(e) => setLocal((l) => ({ ...l, webhookUrl: e.target.value }))}
+                placeholder="https://your-n8n.app.n8n.cloud/webhook/..."
+                className="input-field"
+              />
+            </Field>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label={t('settings.chatInputKey')}>
+                <input
+                  value={local.chatInputKey ?? 'chatInput'}
+                  onChange={(e) => setLocal((l) => ({ ...l, chatInputKey: e.target.value }))}
+                  className="input-field"
+                />
+              </Field>
+              <Field label={t('settings.sessionKey')}>
+                <input
+                  value={local.chatSessionKey ?? 'sessionId'}
+                  onChange={(e) => setLocal((l) => ({ ...l, chatSessionKey: e.target.value }))}
+                  className="input-field"
+                />
+              </Field>
             </div>
 
-            {/* Per-language fields */}
-            <div className="space-y-3">
-              <Field label={t('settings.botNameOverride')}>
-                <input
-                  value={activeLangData.botName ?? ''}
-                  onChange={(e) => setLangData(activeLangTab, { botName: e.target.value || undefined })}
-                  placeholder={local.botName ?? 'Assistant'}
-                  className="input-field"
-                />
-              </Field>
+            <Field label={t('settings.botName')}>
+              <input
+                value={local.botName ?? ''}
+                onChange={(e) => setLocal((l) => ({ ...l, botName: e.target.value }))}
+                placeholder="Assistant"
+                className="input-field"
+              />
+            </Field>
 
-              <Field label={t('settings.welcomeSubtitle')}>
-                <input
-                  value={activeLangData.welcomeSubtitle ?? ''}
-                  onChange={(e) => setLangData(activeLangTab, { welcomeSubtitle: e.target.value || undefined })}
-                  placeholder={t('welcome.subtitle')}
-                  className="input-field"
-                />
-              </Field>
+            <Field label={t('settings.botAvatar')}>
+              <AvatarPicker
+                value={local.botAvatar}
+                onChange={(v) => setLocal((l) => ({ ...l, botAvatar: v }))}
+                shape="circle"
+              />
+            </Field>
 
-              <Field label={t('settings.initialMessages')}>
-                <textarea
-                  value={(activeLangData.initialMessages ?? []).join('\n')}
-                  onChange={(e) =>
-                    setLangData(activeLangTab, {
-                      initialMessages: e.target.value
-                        ? e.target.value.split('\n').filter(Boolean)
-                        : [],
-                    })
-                  }
-                  rows={4}
-                  className="input-field resize-none text-sm"
-                  placeholder={t('settings.initialMessagesPlaceholder')}
-                />
-              </Field>
+            <Field label={t('settings.metadata')} error={metaError}>
+              <textarea
+                value={metaRaw}
+                onChange={(e) => { setMetaRaw(e.target.value); setMetaError('') }}
+                rows={2}
+                className="input-field font-mono text-xs resize-none"
+                placeholder="{}"
+              />
+            </Field>
 
-              {local.mode === 'window' && (
-                <Field label={t('settings.ctaTextLabel')}>
+            {/* ── Live agent (separate SSE channel for human-agent replies) ── */}
+            <div>
+              <p className="text-xs font-semibold text-fg-secondary uppercase tracking-wider mb-1">
+                {t('settings.agentStreamSection')}
+              </p>
+              <p className="text-xs text-fg-muted mb-3 leading-relaxed">
+                {t('settings.agentStreamHint')}
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label={t('settings.agentStreamApiBaseUrl')}>
                   <input
-                    value={activeLangData.ctaText ?? ''}
-                    onChange={(e) => setLangData(activeLangTab, { ctaText: e.target.value || undefined })}
-                    placeholder={local.ctaText ?? 'Hi! How can I help you today?'}
+                    type="url"
+                    value={local.agentStream?.apiBaseUrl ?? ''}
+                    onChange={(e) =>
+                      setLocal((l) => {
+                        const apiBaseUrl = e.target.value
+                        const tenantId = l.agentStream?.tenantId ?? ''
+                        return {
+                          ...l,
+                          agentStream:
+                            apiBaseUrl || tenantId
+                              ? { apiBaseUrl, tenantId }
+                              : undefined,
+                        }
+                      })
+                    }
+                    placeholder="https://api.elia-asistent.com"
                     className="input-field"
                   />
                 </Field>
-              )}
+                <Field label={t('settings.agentStreamTenantId')}>
+                  <input
+                    value={local.agentStream?.tenantId ?? ''}
+                    onChange={(e) =>
+                      setLocal((l) => {
+                        const tenantId = e.target.value
+                        const apiBaseUrl = l.agentStream?.apiBaseUrl ?? ''
+                        return {
+                          ...l,
+                          agentStream:
+                            apiBaseUrl || tenantId
+                              ? { apiBaseUrl, tenantId }
+                              : undefined,
+                        }
+                      })
+                    }
+                    placeholder="00000000-0000-0000-0000-000000000000"
+                    className="input-field font-mono text-xs"
+                  />
+                </Field>
+              </div>
+            </div>
+
+            {/* ── Toggles ── */}
+            <div className="space-y-2">
+              <Toggle label={t('settings.streaming')} checked={local.streaming ?? false}
+                onChange={(v) => setLocal((l) => ({ ...l, streaming: v }))} />
+              <Toggle label={t('settings.welcomeScreen')} checked={local.showWelcomeScreen ?? true}
+                onChange={(v) => setLocal((l) => ({ ...l, showWelcomeScreen: v }))} />
+              <Toggle label={t('settings.sidebar')} checked={local.showSidebar ?? false}
+                onChange={(v) => setLocal((l) => ({ ...l, showSidebar: v }))} />
+              <Toggle label={t('settings.fileUploads')} checked={local.allowFileUploads ?? false}
+                onChange={(v) => setLocal((l) => ({ ...l, allowFileUploads: v }))} />
+            </div>
+
+            {/* ── Mode ── */}
+            <Field label={t('settings.mode')}>
+              <div className="flex gap-2">
+                {(['fullscreen', 'window', 'mixed'] as const).map((m) => (
+                  <button key={m} onClick={() => setLocal((l) => ({ ...l, mode: m }))}
+                    className="flex-1 py-1.5 rounded-lg text-sm capitalize transition-colors"
+                    style={local.mode === m
+                      ? { background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }
+                      : { background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }
+                    }
+                  >{m}</button>
+                ))}
+              </div>
+            </Field>
+
+            {(local.mode === 'fullscreen' || local.mode === 'mixed') && (
+              <div className="space-y-3 pl-3 border-l-2" style={{ borderColor: 'var(--t-accent)' }}>
+                <Toggle label={t('settings.fullscreenSheet')} checked={local.fullscreenSheet ?? false}
+                  onChange={(v) => setLocal((l) => ({ ...l, fullscreenSheet: v }))} />
+                {local.fullscreenSheet && (
+                  <Field label={t('settings.fullscreenSheetHeight')}>
+                    <input
+                      value={local.fullscreenSheetHeight ?? '75vh'}
+                      onChange={(e) => setLocal((l) => ({ ...l, fullscreenSheetHeight: e.target.value || undefined }))}
+                      placeholder="75vh"
+                      className="input-field"
+                    />
+                  </Field>
+                )}
+              </div>
+            )}
+
+            <hr style={{ borderColor: 'var(--t-bg-border)' }} />
+
+            {/* ── Tabs (notifications / help feeds) ── */}
+            <div>
+              <p className="text-xs font-semibold text-fg-secondary uppercase tracking-wider mb-3">
+                {t('settings.tabsSection')}
+              </p>
+
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label={t('settings.tabsNotificationsTitle')}>
+                    <input
+                      value={local.tabs?.notifications?.title ?? ''}
+                      onChange={(e) =>
+                        setLocal((l) => ({
+                          ...l,
+                          tabs: {
+                            ...l.tabs,
+                            notifications: {
+                              ...l.tabs?.notifications,
+                              title: e.target.value || undefined,
+                            },
+                          },
+                        }))
+                      }
+                      placeholder={t('tabs.notifications')}
+                      className="input-field"
+                    />
+                  </Field>
+                  <Field label={t('settings.tabsNotificationsFeedUrl')}>
+                    <input
+                      type="url"
+                      value={local.tabs?.notifications?.feedUrl ?? ''}
+                      onChange={(e) =>
+                        setLocal((l) => ({
+                          ...l,
+                          tabs: {
+                            ...l.tabs,
+                            notifications: {
+                              ...l.tabs?.notifications,
+                              feedUrl: e.target.value || undefined,
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="/notifications.json"
+                      className="input-field"
+                    />
+                  </Field>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label={t('settings.tabsHelpTitle')}>
+                    <input
+                      value={local.tabs?.help?.title ?? ''}
+                      onChange={(e) =>
+                        setLocal((l) => ({
+                          ...l,
+                          tabs: {
+                            ...l.tabs,
+                            help: { ...l.tabs?.help, title: e.target.value || undefined },
+                          },
+                        }))
+                      }
+                      placeholder={t('tabs.help')}
+                      className="input-field"
+                    />
+                  </Field>
+                  <Field label={t('settings.tabsHelpFeedUrl')}>
+                    <input
+                      type="url"
+                      value={local.tabs?.help?.feedUrl ?? ''}
+                      onChange={(e) =>
+                        setLocal((l) => ({
+                          ...l,
+                          tabs: {
+                            ...l.tabs,
+                            help: { ...l.tabs?.help, feedUrl: e.target.value || undefined },
+                          },
+                        }))
+                      }
+                      placeholder="/faq.json"
+                      className="input-field"
+                    />
+                  </Field>
+                </div>
+
+                <Field label={t('settings.tabsChatTitle')}>
+                  <input
+                    value={local.tabs?.chat?.title ?? ''}
+                    onChange={(e) =>
+                      setLocal((l) => ({
+                        ...l,
+                        tabs: {
+                          ...l.tabs,
+                          chat: { ...l.tabs?.chat, title: e.target.value || undefined },
+                        },
+                      }))
+                    }
+                    placeholder={t('tabs.chat')}
+                    className="input-field"
+                  />
+                </Field>
+              </div>
+            </div>
+
+            {local.mode === 'window' && (
+              <div className="space-y-3 pl-3 border-l-2" style={{ borderColor: 'var(--t-accent)' }}>
+                <Toggle label={t('settings.cta')} checked={local.showCta ?? true}
+                  onChange={(v) => setLocal((l) => ({ ...l, showCta: v }))} />
+                <Toggle label={t('settings.ctaSound')} checked={local.ctaSound ?? true}
+                  onChange={(v) => setLocal((l) => ({ ...l, ctaSound: v }))} />
+                <Field label={t('settings.ctaDelay')}>
+                  <input type="number" value={local.ctaDelay ?? 5000}
+                    onChange={(e) => setLocal((l) => ({ ...l, ctaDelay: Number(e.target.value) }))}
+                    className="input-field" min={0} step={500} />
+                </Field>
+                <Field label={t('settings.toggleButtonIcon')}>
+                  <AvatarPicker
+                    value={local.toggleButtonIcon}
+                    onChange={(v) => setLocal((l) => ({ ...l, toggleButtonIcon: v }))}
+                    shape="circle"
+                  />
+                </Field>
+              </div>
+            )}
+
+            <hr style={{ borderColor: 'var(--t-bg-border)' }} />
+
+            {/* ── "Powered by" footer ── */}
+            <Toggle
+              label={t('settings.poweredByHide')}
+              checked={local.poweredByHide ?? false}
+              onChange={(v) => setLocal((l) => ({ ...l, poweredByHide: v }))}
+            />
+            {!local.poweredByHide && (
+              <div className="grid grid-cols-2 gap-3">
+                <Field label={t('settings.poweredByLabel')}>
+                  <input
+                    value={local.poweredByLabel ?? ''}
+                    onChange={(e) => setLocal((l) => ({ ...l, poweredByLabel: e.target.value || undefined }))}
+                    placeholder="ELIA AI Assistant"
+                    className="input-field"
+                  />
+                </Field>
+                <Field label={t('settings.poweredByUrl')}>
+                  <input
+                    type="url"
+                    value={local.poweredByUrl ?? ''}
+                    onChange={(e) => setLocal((l) => ({ ...l, poweredByUrl: e.target.value || undefined }))}
+                    placeholder="https://www.elia-asistent.com"
+                    className="input-field"
+                  />
+                </Field>
+              </div>
+            )}
+
+            <hr style={{ borderColor: 'var(--t-bg-border)' }} />
+
+            {/* ── Per-language content ── */}
+            <div>
+              <p className="text-xs font-semibold text-fg-secondary uppercase tracking-wider mb-3">
+                {t('settings.perLanguage')}
+              </p>
+
+              {/* Language tabs */}
+              <div className="flex flex-wrap gap-1 mb-4">
+                {allLangTabs.map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => setActiveLangTab(lang)}
+                    className="px-3 py-1 rounded-lg text-xs font-medium uppercase transition-colors"
+                    style={
+                      activeLangTab === lang
+                        ? { background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }
+                        : { background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }
+                    }
+                  >
+                    {lang}
+                  </button>
+                ))}
+
+                {/* Add language */}
+                {showAddLang ? (
+                  <div className="flex gap-1 items-center">
+                    <select
+                      value={newLangCode}
+                      onChange={(e) => setNewLangCode(e.target.value)}
+                      className="input-field py-1 text-xs"
+                      style={{ width: 'auto' }}
+                    >
+                      <option value="">Pick…</option>
+                      {KNOWN_LANGS.filter((l) => !allLangTabs.includes(l.code)).map((l) => (
+                        <option key={l.code} value={l.code}>{l.label}</option>
+                      ))}
+                      <option value="__custom">Custom code…</option>
+                    </select>
+                    {newLangCode === '__custom' && (
+                      <input
+                        placeholder="e.g. fr"
+                        maxLength={5}
+                        className="input-field py-1 text-xs w-20"
+                        onChange={(e) => setNewLangCode(e.target.value)}
+                      />
+                    )}
+                    <button onClick={handleAddLang}
+                      className="px-2 py-1 rounded-lg text-xs transition-colors"
+                      style={{ background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }}>
+                      Add
+                    </button>
+                    <button onClick={() => setShowAddLang(false)}
+                      className="px-2 py-1 rounded-lg text-xs text-fg-muted hover:text-fg-primary">
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowAddLang(true)}
+                    className="px-3 py-1 rounded-lg text-xs text-fg-muted hover:text-fg-primary hover:bg-bg-surface2 transition-colors"
+                  >
+                    + {t('settings.addLanguage')}
+                  </button>
+                )}
+              </div>
+
+              {/* Per-language fields */}
+              <div className="space-y-3">
+                <Field label={t('settings.botNameOverride')}>
+                  <input
+                    value={activeLangData.botName ?? ''}
+                    onChange={(e) => setLangData(activeLangTab, { botName: e.target.value || undefined })}
+                    placeholder={local.botName ?? 'Assistant'}
+                    className="input-field"
+                  />
+                </Field>
+
+                <Field label={t('settings.welcomeSubtitle')}>
+                  <input
+                    value={activeLangData.welcomeSubtitle ?? ''}
+                    onChange={(e) => setLangData(activeLangTab, { welcomeSubtitle: e.target.value || undefined })}
+                    placeholder={t('welcome.subtitle')}
+                    className="input-field"
+                  />
+                </Field>
+
+                <Field label={t('settings.initialMessages')}>
+                  <textarea
+                    value={(activeLangData.initialMessages ?? []).join('\n')}
+                    onChange={(e) =>
+                      setLangData(activeLangTab, {
+                        initialMessages: e.target.value
+                          ? e.target.value.split('\n').filter(Boolean)
+                          : [],
+                      })
+                    }
+                    rows={4}
+                    className="input-field resize-none text-sm"
+                    placeholder={t('settings.initialMessagesPlaceholder')}
+                  />
+                </Field>
+
+                {local.mode === 'window' && (
+                  <Field label={t('settings.ctaTextLabel')}>
+                    <input
+                      value={activeLangData.ctaText ?? ''}
+                      onChange={(e) => setLangData(activeLangTab, { ctaText: e.target.value || undefined })}
+                      placeholder={local.ctaText ?? 'Hi! How can I help you today?'}
+                      className="input-field"
+                    />
+                  </Field>
+                )}
+              </div>
             </div>
           </div>
-        </div>
         )}
 
         {/* Footer */}
@@ -576,19 +632,19 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
             <>
               <button onClick={() => setShowExport(false)}
                 className="px-4 py-2 rounded-lg text-sm text-fg-secondary hover:text-fg-primary hover:bg-bg-surface2 transition-colors">
-                ← Back
+                ← {t('settings.back')}
               </button>
               <button onClick={handleCopy}
                 className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                 style={{ background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }}>
-                {copied ? '✓ Copied' : 'Copy to clipboard'}
+                {copied ? `✓ ${t('settings.copied')}` : t('settings.copyToClipboard')}
               </button>
             </>
           ) : (
             <>
               <button onClick={() => setShowExport(true)}
                 className="px-4 py-2 rounded-lg text-sm text-fg-secondary hover:text-fg-primary hover:bg-bg-surface2 transition-colors">
-                Export config
+                {t('settings.exportConfig')}
               </button>
               <div className="flex gap-2">
                 <button onClick={onClose}
@@ -619,6 +675,9 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
           transition: border-color 0.15s;
         }
         .input-field:focus { border-color: var(--t-accent); }
+        @media (max-width: 767px) {
+          .input-field { font-size: 1rem; }
+        }
       `}</style>
     </div>
   )

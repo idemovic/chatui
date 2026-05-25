@@ -5,20 +5,23 @@ import { useSettingsStore } from './store/settingsStore.ts'
 import { useChatStore } from './store/chatStore.ts'
 import { useTheme } from './hooks/useTheme.ts'
 import { useCta } from './hooks/useCta.ts'
+import { useAgentStream } from './hooks/useAgentStream.ts'
 import { Sidebar } from './components/Sidebar.tsx'
 import { ChatView } from './components/ChatView.tsx'
 import { SettingsModal } from './components/SettingsModal.tsx'
 import { CtaPopup } from './components/CtaPopup.tsx'
 import { resolveAvatarUrl } from './assets/avatars/index.ts'
 
-/** Tracks whether the viewport is ≥ 768 px (Tailwind's md breakpoint). */
+/** Tracks whether the viewport qualifies as desktop.
+ *  Requires both min-width: 768px and min-height: 600px so phones in
+ *  landscape (wide but short) fall back to fullscreen instead of the
+ *  fixed-height floating window. */
 function useIsDesktop(): boolean {
-  const [isDesktop, setIsDesktop] = useState(
-    () => window.matchMedia('(min-width: 768px)').matches,
-  )
+  const MQ = '(min-width: 768px) and (min-height: 600px)'
+  const [isDesktop, setIsDesktop] = useState(() => window.matchMedia(MQ).matches)
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px)')
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
+    const mq = window.matchMedia(MQ)
+    const handler = () => setIsDesktop(mq.matches)
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
   }, [])
@@ -27,6 +30,7 @@ function useIsDesktop(): boolean {
 
 export function App() {
   useTheme()
+  useAgentStream()
 
   const config = useSettingsStore((s) => s.config)
   const activeSessionId = useChatStore((s) => s.activeSessionId)
@@ -50,7 +54,7 @@ export function App() {
   const showSidebar = !isWindow && (config.showSidebar ?? false)
   const hideSettings = config.hideSettings ?? false
 
-  const { showCta, ctaText, dismiss: dismissCta } = useCta(config, language, isWindow)
+  const { showCta, ctaText, dismiss: dismissCta } = useCta(config, language, !isPermanent)
 
   const openSettings = () => {
     if (!hideSettings) setSettingsOpen(true)
@@ -118,8 +122,8 @@ export function App() {
       <>
         {chatOpen && (
           <div
-            className="fixed bottom-20 right-4 z-50 w-[380px] h-[560px] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
-            style={{ border: '1px solid var(--t-bg-border)', background: 'var(--t-bg-base)' }}
+            className="fixed bottom-4 right-4 z-50 w-[380px] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            style={{ border: '1px solid var(--t-bg-border)', background: 'var(--t-bg-base)', height: 'min(560px, calc(100vh - 32px))' }}
           >
             <ChatView onOpenSettings={openSettings} onClose={closeChat} />
           </div>
@@ -131,11 +135,13 @@ export function App() {
           </div>
         )}
 
-        <ToggleButton
-          open={chatOpen}
-          iconSrc={resolveAvatarUrl(config.toggleButtonIcon)}
-          onClick={() => (chatOpen ? closeChat() : openChat())}
-        />
+        {!chatOpen && (
+          <ToggleButton
+            open={false}
+            iconSrc={resolveAvatarUrl(config.toggleButtonIcon)}
+            onClick={openChat}
+          />
+        )}
 
         {!hideSettings && settingsOpen && (
           <SettingsModal onClose={() => setSettingsOpen(false)} />
@@ -194,11 +200,18 @@ export function App() {
           <div className="fixed inset-0 z-50">{fullscreenContent}</div>
         )
       ) : (
-        <ToggleButton
-          open={false}
-          iconSrc={resolveAvatarUrl(config.toggleButtonIcon)}
-          onClick={openChat}
-        />
+        <>
+          {showCta && (
+            <div className="fixed bottom-20 right-4 z-50">
+              <CtaPopup text={ctaText} onDismiss={dismissCta} />
+            </div>
+          )}
+          <ToggleButton
+            open={false}
+            iconSrc={resolveAvatarUrl(config.toggleButtonIcon)}
+            onClick={openChat}
+          />
+        </>
       )}
 
       {!hideSettings && settingsOpen && (
@@ -222,7 +235,7 @@ function ToggleButton({
     <button
       className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 overflow-hidden"
       style={{
-        background: showImage ? 'transparent' : 'var(--t-accent)',
+        background: 'var(--t-chatbutton-bg)',
         color: 'var(--t-accent-fg)',
       }}
       onClick={onClick}

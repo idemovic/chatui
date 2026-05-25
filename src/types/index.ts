@@ -54,7 +54,7 @@ export interface ChatConfig {
   /** Global fallback initial messages — per-language overrides live in i18n[lang].initialMessages */
   initialMessages?: string[]
   allowFileUploads?: boolean
-  allowedFilesMimeTypes?: string
+  allowedFileExtensions?: string
   /** Per-language content: initial messages, CTA text, bot name, welcome subtitle */
   i18n?: Record<string, LangOverride>
   // Extended options
@@ -87,6 +87,15 @@ export interface ChatConfig {
   fullscreenSheet?: boolean
   /** Sheet height as a CSS length (vh, %, px). Default: '75vh'. */
   fullscreenSheetHeight?: string
+  /** Live-agent SSE stream. When set, the widget opens an EventSource against the ELIA backend
+   *  and receives agent replies pushed in real time. The bot turn (synchronous response from the
+   *  n8n webhook) keeps working exactly as before. */
+  agentStream?: {
+    /** Base URL of the ELIA backend, e.g. 'https://api.elia-asistent.com'. */
+    apiBaseUrl: string
+    /** Tenant identifier — same UUID embedded in the n8n webhook URL. */
+    tenantId: string
+  }
   /** Optional tabs above the chat panel. Tab is active iff its block has feedUrl OR items. */
   tabs?: {
     notifications?: {
@@ -105,11 +114,24 @@ export interface ChatConfig {
   }
 }
 
+export interface Attachment {
+  name: string
+  url: string
+  size?: number
+  mimeType?: string
+}
+
 export interface Message {
   id: string
   role: 'user' | 'bot'
   content: string
   ts: number
+  attachments?: Attachment[]
+  /**
+   * Delivery status for user messages. <c>undefined</c> on persisted history (treated as
+   * <c>'sent'</c>) and on every bot message — bots don't have a sender-side delivery state.
+   */
+  status?: 'sending' | 'sent' | 'failed'
 }
 
 export interface Session {
@@ -120,21 +142,7 @@ export interface Session {
 
 export interface ThemeDef {
   id: string
-  label: string
-  scheme: 'dark' | 'light'
-  vars: ThemeVars
-}
-
-export interface ThemeVars {
-  bgBase: string
-  bgSurface: string
-  bgSurface2: string
-  bgBorder: string
-  accent: string
-  accentFg: string
-  fgPrimary: string
-  fgSecondary: string
-  fgMuted: string
-  userBubble: string
-  userBubbleFg: string
+  label: string    
+  baseColor: string
+  accentColor: string
 }

@@ -12,14 +12,12 @@ export function ThemePicker() {
           title={t.label}
           onClick={() => setTheme(t.id)}
           className="relative w-7 h-7 rounded-full transition-transform hover:scale-110 focus:outline-none"
-          style={{ background: t.vars.accent }}
+          style={{ background: t.accentColor}}
         >
           {activeTheme === t.id && (
             <span
               className="absolute inset-0 rounded-full"
-              style={{
-                boxShadow: `0 0 0 2px ${t.vars.bgBase}, 0 0 0 4px ${t.vars.accent}`,
-              }}
+              style={{ boxShadow: `0 0 0 2px ${t.baseColor}, 0 0 0 4px ${t.baseColor}`}}
             />
           )}
         </button>

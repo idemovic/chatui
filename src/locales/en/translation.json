@@ -1,4 +1,8 @@
 {
+  "errors": {
+    "failedToSend": "Failed to send",
+    "retry": "Retry"
+  },
   "welcome": {
     "subtitle": "Start a conversation. I'm here to help."
   },
@@ -40,7 +44,11 @@
     "sessionKey": "Session key",
     "botName": "Bot name (global fallback)",
     "metadata": "Metadata (JSON)",
-    "streaming": "Enable streaming (SSE)",
+    "streaming": "Stream bot response token-by-token",
+    "agentStreamSection": "Live agent",
+    "agentStreamHint": "When set, agent replies pushed from the dashboard appear in the chat in real time. Leave both fields empty to disable.",
+    "agentStreamApiBaseUrl": "Backend URL",
+    "agentStreamTenantId": "Tenant ID",
     "welcomeScreen": "Show welcome screen",
     "sidebar": "Show conversation sidebar",
     "fileUploads": "Allow file uploads",
@@ -75,6 +83,12 @@
     "poweredByUrl": "\"Powered by\" link URL",
     "poweredByHide": "Hide \"Powered by\" footer",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "theme": "Theme",
+    "exportConfig": "Export config",
+    "exportHint": "Paste this into your host app's bootstrap file (e.g. <code>src/main.tsx</code>) before the first React render. See <code>example.html</code> for the full integration guide.",
+    "back": "Back",
+    "copyToClipboard": "Copy to clipboard",
+    "copied": "Copied"
   }
 }

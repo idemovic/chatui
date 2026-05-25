@@ -327,7 +327,7 @@ useSettingsStore.getState().setConfig({
   streaming:             false,                      <span class="c">// expect SSE from n8n</span>
   showWelcomeScreen:     true,
   allowFileUploads:      false,
-  allowedFilesMimeTypes: <span class="s">'image/*,application/pdf'</span>,
+  allowedFileExtensions: <span class="s">'.pdf,.docx,.png,.jpg,.jpeg'</span>,
 
   <span class="c">// ─── Layout ───────────────────────────────────────────────────────</span>
   mode:        <span class="s">'window'</span>,                         <span class="c">// 'fullscreen' | 'window' | 'mixed'</span>
@@ -420,7 +420,7 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>fullscreenSheetHeight</code></td><td><code>string</code></td><td><code>'75vh'</code></td><td>Sheet height as any CSS length. Only used when <code>fullscreenSheet</code> is true.</td></tr>
     <tr><td><code>showWelcomeScreen</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Welcome screen when the conversation is empty.</td></tr>
     <tr><td><code>allowFileUploads</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Show the file-attachment button in the input bar.</td></tr>
-    <tr><td><code>allowedFilesMimeTypes</code></td><td><code>string</code></td><td>-</td><td>Comma-separated MIME list passed to <code>&lt;input accept&gt;</code>.</td></tr>
+    <tr><td><code>allowedFileExtensions</code></td><td><code>string</code></td><td><code>'.pdf,.docx,.png,.jpg,.jpeg'</code></td><td>Comma-separated extension list. Filters the file picker and is enforced on selection.</td></tr>
     <tr><td><code>theme</code></td><td><code>string</code></td><td><code>'midnight'</code></td><td>Initial theme id. See Themes section for the full list.</td></tr>
     <tr><td><code>botName</code></td><td><code>string</code></td><td><code>'Assistant'</code></td><td>Global fallback bot name.</td></tr>
     <tr><td><code>botAvatar</code></td><td><code>string</code></td><td>-</td><td>Built-in avatar id, full URL, or data URL. See Avatars section.</td></tr>
@@ -477,12 +477,44 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>cosmos</code></td><td>Cosmos</td><td>Dark</td><td><span class="swatch" style="background:#a855f7"></span>#a855f7</td></tr>
     <tr><td><code>forest</code></td><td>Forest</td><td>Dark</td><td><span class="swatch" style="background:#22c55e"></span>#22c55e</td></tr>
     <tr><td><code>ocean</code></td><td>Ocean</td><td>Dark</td><td><span class="swatch" style="background:#06b6d4"></span>#06b6d4</td></tr>
-    <tr><td><code>cherry</code></td><td>Cherry</td><td>Dark</td><td><span class="swatch" style="background:#ef4444"></span>#ef4444</td></tr>
+    <tr><td><code>cherry</code></td><td>Cherry</td><td>Light</td><td><span class="swatch" style="background:#ef4444"></span>#ef4444</td></tr>
     <tr><td><code>navy</code></td><td>Navy</td><td>Dark</td><td><span class="swatch" style="background:#3b82f6"></span>#3b82f6</td></tr>
     <tr><td><code>lavender</code></td><td>Lavender</td><td>Light</td><td><span class="swatch" style="background:#8b5cf6"></span>#8b5cf6</td></tr>
     <tr><td><code>amber</code></td><td>Amber</td><td>Dark</td><td><span class="swatch" style="background:#f59e0b"></span>#f59e0b</td></tr>
   </tbody>
 </table>
+
+<h3>Customizing colors</h3>
+<p>
+  Every theme is a set of CSS custom properties scoped under <code>[data-theme="&lt;id&gt;"]</code>. To match your brand, pick the closest built-in theme via <code>config.theme</code>, then add a stylesheet on your page that overrides only the variables you care about. The override must come <em>after</em> the chatui stylesheet is loaded.
+</p>
+<pre><code><span class="k">&lt;style&gt;</span>
+  [data-theme=<span class="s">"midnight"</span>] {
+    --t-accent:       <span class="s">#ff5722</span>;
+    --t-user-bubble:  <span class="s">#ff5722</span>;
+    --t-bg-base:      <span class="s">#111111</span>;
+  }
+<span class="k">&lt;/style&gt;</span></code></pre>
+<p>Variables you can override:</p>
+<table>
+  <thead><tr><th>Variable</th><th>What it styles</th></tr></thead>
+  <tbody>
+    <tr><td><code>--t-bg-base</code></td><td>Outermost background of the widget.</td></tr>
+    <tr><td><code>--t-bg-surface</code></td><td>Panels, input field, bot bubbles.</td></tr>
+    <tr><td><code>--t-bg-surface2</code></td><td>Raised surfaces (hover states, modals).</td></tr>
+    <tr><td><code>--t-bg-border</code></td><td>Borders and dividers.</td></tr>
+    <tr><td><code>--t-accent</code></td><td>Primary accent (send button, links, focus rings).</td></tr>
+    <tr><td><code>--t-accent-fg</code></td><td>Text color on accent backgrounds.</td></tr>
+    <tr><td><code>--t-fg-primary</code></td><td>Primary text color.</td></tr>
+    <tr><td><code>--t-fg-secondary</code></td><td>Secondary text (subtitles, hints).</td></tr>
+    <tr><td><code>--t-fg-muted</code></td><td>Muted text (placeholders, timestamps).</td></tr>
+    <tr><td><code>--t-user-bubble</code></td><td>Background of the user's message bubbles.</td></tr>
+    <tr><td><code>--t-user-fg</code></td><td>Text color inside user message bubbles.</td></tr>
+  </tbody>
+</table>
+<p>
+  Replace <code>midnight</code> in the selector with whichever theme id you passed to <code>config.theme</code>. Adding a fully new theme id (not in the table above) requires building chatui from source.
+</p>
 
 <h2 id="avatars">7. Avatars and toggle button icon</h2>
 <p>

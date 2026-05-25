@@ -1,4 +1,8 @@
 {
+  "errors": {
+    "failedToSend": "Správu sa nepodarilo odoslať",
+    "retry": "Skúsiť znova"
+  },
   "welcome": {
     "subtitle": "Začnite konverzáciu. Som tu pre vás."
   },
@@ -18,7 +22,7 @@
     "settings": "Nastavenia"
   },
   "footer": {
-    "poweredBy": "Poháňa <a>{{label}}</a>"
+    "poweredBy": "Poskytuje <a>{{label}}</a>"
   },
   "tabs": {
     "notifications": "Tipy",
@@ -40,7 +44,11 @@
     "sessionKey": "Kľúč relácie",
     "botName": "Meno bota (globálna záloha)",
     "metadata": "Metadáta (JSON)",
-    "streaming": "Povoliť streaming (SSE)",
+    "streaming": "Streamovať odpoveď bota po tokenoch",
+    "agentStreamSection": "Živý operátor",
+    "agentStreamHint": "Keď je nastavené, odpovede operátora poslané z dashboardu sa zobrazia v chate v reálnom čase. Pre vypnutie nechajte obe polia prázdne.",
+    "agentStreamApiBaseUrl": "URL backendu",
+    "agentStreamTenantId": "ID tenanta",
     "welcomeScreen": "Zobraziť uvítaciu obrazovku",
     "sidebar": "Zobraziť históriu konverzácií",
     "fileUploads": "Povoliť nahrávanie súborov",
@@ -75,6 +83,12 @@
     "poweredByUrl": "URL odkazu \"Poháňa\"",
     "poweredByHide": "Skryť pätičku \"Poháňa\"",
     "save": "Uložiť",
-    "cancel": "Zrušiť"
+    "cancel": "Zrušiť",
+    "theme": "Téma",
+    "exportConfig": "Exportovať konfiguráciu",
+    "exportHint": "Vložte toto do bootstrap súboru vašej hostiteľskej aplikácie (napr. <code>src/main.tsx</code>) pred prvým renderom Reactu. Pozrite <code>example.html</code> pre kompletný návod na integráciu.",
+    "back": "Späť",
+    "copyToClipboard": "Kopírovať do schránky",
+    "copied": "Skopírované"
   }
 }

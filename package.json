@@ -1,6 +1,6 @@
 {
   "name": "@elia-assistant/chatui",
-  "version": "1.0.5",
+  "version": "1.0.12",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -44,7 +44,7 @@
     "build": "tsc -b --noEmit && vite build && vite build --config vite.iife.config.ts && tsc -p tsconfig.build.json",
     "preview": "vite preview",
     "pack:dry": "npm pack --dry-run",
-    "prepublishOnly": "npm run build"
+    "prepack": "npm run build"
   },
   "peerDependencies": {
     "react": "^19.0.0",

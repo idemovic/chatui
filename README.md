@@ -189,7 +189,7 @@ Resolution chain: `i18n[activeLang].X` -> `i18n['en'].X` -> global `config.X`.
 | `cosmos` | Cosmos | Dark | Purple `#a855f7` |
 | `forest` | Forest | Dark | Green `#22c55e` |
 | `ocean` | Ocean | Dark | Cyan `#06b6d4` |
-| `cherry` | Cherry | Dark | Red `#ef4444` |
+| `cherry` | Cherry | Light | Red `#ef4444` |
 | `navy` | Navy | Dark | Blue `#3b82f6` |
 | `lavender` | Lavender | Light | Violet `#8b5cf6` |
 | `amber` | Amber | Dark | Amber `#f59e0b` |

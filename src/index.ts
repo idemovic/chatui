@@ -8,7 +8,6 @@ export type {
   Message,
   Session,
   ThemeDef,
-  ThemeVars,
   NotificationItem,
   NotificationTag,
   NotificationTagVariant,

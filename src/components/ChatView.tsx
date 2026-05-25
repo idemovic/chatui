@@ -26,10 +26,13 @@ export function ChatView({ onOpenSettings, onClose }: Props) {
   )
   const createSession = useChatStore((s) => s.createSession)
   const isStreaming = useChatStore((s) => s.isStreaming)
+  const awaitingAgent = useChatStore((s) =>
+    activeSessionId ? !!s.awaitingAgentReply[activeSessionId] : false,
+  )
   const config = useSettingsStore((s) => s.config)
   const language = useSettingsStore((s) => s.language)
   const hideSettings = config.hideSettings ?? false
-  const { send } = useChat()
+  const { send, retry } = useChat()
 
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -106,7 +109,7 @@ export function ChatView({ onOpenSettings, onClose }: Props) {
               src={resolveAvatarUrl(config.botAvatar)}
               alt=""
               className="w-7 h-7 rounded-full object-cover flex-shrink-0"
-              style={{ border: '1px solid var(--t-bg-border)' }}
+              style={{ border: '1px solid var(--t-bg-border)', background: 'var(--t-avatar-bg)' }}
             />
           ) : (
             <div className="w-2 h-2 rounded-full" style={{ background: 'var(--t-accent)' }} />
@@ -179,11 +182,12 @@ export function ChatView({ onOpenSettings, onClose }: Props) {
                     msg.role === 'bot' &&
                     msg.content === ''
                   if (isEmptyBotPlaceholder) return null
-                  return <MessageBubble key={msg.id} message={msg} />
+                  return <MessageBubble key={msg.id} message={msg} onRetry={retry} />
                 })}
-                {isStreaming &&
+                {((isStreaming &&
                   messages[messages.length - 1]?.role === 'bot' &&
-                  messages[messages.length - 1]?.content === '' && <TypingIndicator />}
+                  messages[messages.length - 1]?.content === '') ||
+                  awaitingAgent) && <TypingIndicator />}
               </>
             )}
             <div ref={bottomRef} />

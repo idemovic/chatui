@@ -10,9 +10,12 @@ import omar from './avatar-omar.svg'
 import priya from './avatar-priya.svg'
 import samuel from './avatar-samuel.svg'
 import sofia from './avatar-sofia.svg'
+import bean from './avatar-bean.svg'
+import owl from './avatar-owl.svg'
+import bubble from './avatar-bubble.svg'
 
 export const builtInAvatars: Record<string, string> = {
-  amara, david, elena, kenji, luca, marcus, mei, nadia, omar, priya, samuel, sofia,
+  amara, david, elena, kenji, luca, marcus, mei, nadia, omar, priya, samuel, sofia, bean, owl, bubble
 }
 
 export const builtInAvatarIds = Object.keys(builtInAvatars)
