@@ -35,6 +35,8 @@ export function ChatView({ onOpenSettings, onClose }: Props) {
   const { send, retry } = useChat()
 
   const bottomRef = useRef<HTMLDivElement>(null)
+  const isFirstScroll = useRef(true)
+  const prevMessageCount = useRef(0)
 
   // Per-language content resolution: i18n[lang] → i18n['en'] → global fallbacks
   const langData = config.i18n?.[language] ?? config.i18n?.['en'] ?? {}
@@ -88,10 +90,21 @@ export function ChatView({ onOpenSettings, onClose }: Props) {
 
   // Auto-scroll to bottom
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const count = messages.length
+    if (isFirstScroll.current) {
+      // On initial mount (or session restore) jump instantly so we don't
+      // animate through the entire history.
+      bottomRef.current?.scrollIntoView({ behavior: 'auto' })
+      isFirstScroll.current = false
+    } else if (count > prevMessageCount.current || isStreaming) {
+      // Smooth-scroll only when new messages arrive or while streaming.
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+    prevMessageCount.current = count
   }, [messages, isStreaming])
 
-  const showWelcome = config.showWelcomeScreen && messages.length === 0 && !isStreaming
+  const hasInitialMessages = initialMessages.length > 0
+  const showWelcome = config.showWelcomeScreen && messages.length === 0 && !isStreaming && !hasInitialMessages
   const welcomeSubtitle = langData.welcomeSubtitle ?? t('welcome.subtitle')
 
   const showChat = !tabsEnabled || activeTab === 'chat'
@@ -219,7 +232,7 @@ function WelcomeScreen({ botName, subtitle }: { botName: string; subtitle: strin
       </div>
       <div>
         <h2 className="text-lg font-semibold text-fg-primary mb-1">{botName}</h2>
-        <p className="text-sm text-fg-secondary">{subtitle}</p>
+        <p className="text-sm text-fg-secondary whitespace-pre-line">{subtitle}</p>
       </div>
     </div>
   )

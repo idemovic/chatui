@@ -11,7 +11,7 @@
     "placeholderUnconfigured": "Configure webhook URL in settings…"
   },
   "header": {
-    "assistant": "Assistant",
+    "assistant": "Bot",
     "online": "online",
     "notConfigured": "Not configured"
   },
@@ -52,6 +52,7 @@
     "welcomeScreen": "Show welcome screen",
     "sidebar": "Show conversation sidebar",
     "fileUploads": "Allow file uploads",
+    "allowedFileExtensions": "Allowed file extensions",
     "mode": "Display mode",
     "fullscreenSheet": "Bottom-sheet style (don't cover full screen)",
     "fullscreenSheetHeight": "Sheet height (CSS length, e.g. 75vh, 600px)",
@@ -79,9 +80,6 @@
     "avatarUrlPlaceholder": "or paste a URL",
     "avatarErrorType": "Please choose an image file.",
     "avatarErrorSize": "Image is too large (max 500 KB).",
-    "poweredByLabel": "\"Powered by\" link text",
-    "poweredByUrl": "\"Powered by\" link URL",
-    "poweredByHide": "Hide \"Powered by\" footer",
     "save": "Save",
     "cancel": "Cancel",
     "theme": "Theme",

@@ -112,7 +112,6 @@ All options live on `ChatConfig`. Set them once at boot via `setConfig()` (or pa
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `mode` | `'fullscreen' \| 'window' \| 'mixed'` | `'fullscreen'` | Display mode |
-| `showSidebar` | `boolean` | `false` | Conversation history sidebar (fullscreen only) |
 | `fullscreenSheet` | `boolean` | `false` | Render fullscreen as a bottom sheet (rounded top, dimmed backdrop) |
 | `fullscreenSheetHeight` | `string` | `'75vh'` | Sheet height as any CSS length |
 | `showWelcomeScreen` | `boolean` | `true` | Show welcome screen when no messages |
@@ -135,14 +134,6 @@ All options live on `ChatConfig`. Set them once at boot via `setConfig()` (or pa
 | `ctaText` | `string` | `'Hi! How can I help you today?'` | Global fallback CTA text |
 | `ctaDelay` | `number` | `5000` | Milliseconds before CTA appears |
 | `ctaSound` | `boolean` | `true` | Play a Web Audio chime when CTA shows |
-
-### "Powered by" footer
-
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `poweredByLabel` | `string` | `'ELIA AI Assistant'` | Link text |
-| `poweredByUrl` | `string` | `'https://www.elia-asistent.com'` | Link URL |
-| `poweredByHide` | `boolean` | `false` | Hide the entire footer line |
 
 ### Tabs (optional, opt-in)
 

@@ -4,9 +4,6 @@ import { useSettingsStore } from '../store/settingsStore.ts'
 import { useChatStore } from '../store/chatStore.ts'
 import type { Attachment } from '../types/index.ts'
 
-const DEFAULT_POWERED_BY_LABEL = 'ELIA AI Assistant'
-const DEFAULT_POWERED_BY_URL = 'https://www.elia-asistent.com'
-
 interface Props {
   onSend: (text: string, attachments?: Attachment[]) => void
   disabled?: boolean
@@ -52,10 +49,6 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
 
   const config = useSettingsStore((s) => s.config)
   const activeSessionId = useChatStore((s) => s.activeSessionId)
-
-  const poweredByLabel = config.poweredByLabel ?? DEFAULT_POWERED_BY_LABEL
-  const poweredByUrl = config.poweredByUrl ?? DEFAULT_POWERED_BY_URL
-  const poweredByHide = config.poweredByHide ?? false
 
   const submit = useCallback(() => {
     const text = value.trim()
@@ -263,25 +256,23 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
         </button>
       </div>
 
-      {!poweredByHide && (
-        <div className="text-center text-[11px] pb-2 px-3 text-fg-muted">
-          <Trans
-            i18nKey="footer.poweredBy"
-            values={{ label: poweredByLabel }}
-            components={{
-              a: (
-                <a
-                  href={poweredByUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                  style={{ color: 'inherit' }}
-                />
-              ),
-            }}
-          />
-        </div>
-      )}
+      <div className="text-center text-[11px] pb-2 px-3 text-fg-muted">
+        <Trans
+          i18nKey="footer.poweredBy"
+          values={{ label: 'ELIA AI Assistant' }}
+          components={{
+            a: (
+              <a
+                href="https://www.elia-asistent.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+                style={{ color: 'inherit' }}
+              />
+            ),
+          }}
+        />
+      </div>
     </div>
   )
 }

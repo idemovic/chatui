@@ -331,7 +331,6 @@ useSettingsStore.getState().setConfig({
 
   <span class="c">// ─── Layout ───────────────────────────────────────────────────────</span>
   mode:        <span class="s">'window'</span>,                         <span class="c">// 'fullscreen' | 'window' | 'mixed'</span>
-  showSidebar: false,                                <span class="c">// fullscreen mode only</span>
 
   <span class="c">// ─── Bottom-sheet style (fullscreen / mixed-on-mobile) ──────────</span>
   fullscreenSheet:       false,                      <span class="c">// don't fully cover the viewport; sheet docked to bottom</span>
@@ -351,11 +350,6 @@ useSettingsStore.getState().setConfig({
 
   <span class="c">// ─── UI lock ──────────────────────────────────────────────────────</span>
   hideSettings: true,                                <span class="c">// default. Set to false to show the gear, theme picker, and settings modal.</span>
-
-  <span class="c">// ─── "Powered by" footer ─────────────────────────────────────────</span>
-  poweredByLabel: <span class="s">'ELIA AI Assistant'</span>,            <span class="c">// link text shown after the localized "Powered by" prefix</span>
-  poweredByUrl:   <span class="s">'https://www.elia-asistent.com'</span>, <span class="c">// link target</span>
-  poweredByHide:  false,                             <span class="c">// hide the entire footer line</span>
 
   <span class="c">// ─── Tabs (Notifications + FAQ) — see "Tabs" section ─────────────</span>
   tabs: {
@@ -415,7 +409,6 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>metadata</code></td><td><code>object</code></td><td>-</td><td>Extra fields merged into every request body.</td></tr>
     <tr><td><code>streaming</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Parse the response as Server-Sent Events.</td></tr>
     <tr><td><code>mode</code></td><td><code>'fullscreen' | 'window' | 'mixed'</code></td><td><code>'fullscreen'</code></td><td><code>mixed</code> = fullscreen on mobile, floating window on desktop.</td></tr>
-    <tr><td><code>showSidebar</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Conversation history sidebar. Fullscreen mode only.</td></tr>
     <tr><td><code>fullscreenSheet</code></td><td><code>boolean</code></td><td><code>false</code></td><td>In fullscreen layout (and mixed-on-mobile), present the chat as a bottom sheet (rounded top, drag handle, dimmed backdrop above) instead of fully covering the viewport.</td></tr>
     <tr><td><code>fullscreenSheetHeight</code></td><td><code>string</code></td><td><code>'75vh'</code></td><td>Sheet height as any CSS length. Only used when <code>fullscreenSheet</code> is true.</td></tr>
     <tr><td><code>showWelcomeScreen</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Welcome screen when the conversation is empty.</td></tr>
@@ -432,9 +425,6 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>ctaDelay</code></td><td><code>number</code></td><td><code>5000</code></td><td>Milliseconds before the CTA appears.</td></tr>
     <tr><td><code>ctaSound</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Play a Web Audio beep when the CTA shows.</td></tr>
     <tr><td><code>hideSettings</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Hide the built-in gear button, theme picker, and settings modal. Defaults to <code>true</code> for npm consumers; set <code>false</code> to expose the UI.</td></tr>
-    <tr><td><code>poweredByLabel</code></td><td><code>string</code></td><td><code>'ELIA AI Assistant'</code></td><td>Link text after the localized "Powered by" prefix in the input footer.</td></tr>
-    <tr><td><code>poweredByUrl</code></td><td><code>string</code></td><td><code>'https://www.elia-asistent.com'</code></td><td>Link target for the footer.</td></tr>
-    <tr><td><code>poweredByHide</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Hide the entire "Powered by" footer line.</td></tr>
     <tr><td><code>tabs.notifications.title</code></td><td><code>string</code></td><td>i18n <code>tabs.notifications</code></td><td>Notifications tab label. Per-language override at <code>i18n[lang].tabs.notifications.title</code>.</td></tr>
     <tr><td><code>tabs.notifications.feedUrl</code></td><td><code>string</code></td><td>-</td><td>JSON feed URL. Returns <code>{ items: NotificationItem[] }</code>. See "Tabs" section.</td></tr>
     <tr><td><code>tabs.notifications.items</code></td><td><code>NotificationItem[]</code></td><td>-</td><td>Inline items (dev/static alternative). URL wins when both are set.</td></tr>

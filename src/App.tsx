@@ -1,6 +1,6 @@
 import './i18n.ts'
 import './index.css'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSettingsStore } from './store/settingsStore.ts'
 import { useChatStore } from './store/chatStore.ts'
 import { useTheme } from './hooks/useTheme.ts'
@@ -29,7 +29,8 @@ function useIsDesktop(): boolean {
 }
 
 export function App() {
-  useTheme()
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  useTheme({ elementRef: wrapperRef })
   useAgentStream()
 
   const config = useSettingsStore((s) => s.config)
@@ -44,17 +45,12 @@ export function App() {
   const isWindow =
     config.mode === 'window' || (config.mode === 'mixed' && isDesktop)
 
-  // The chat is "permanent" (no toggle, no close) only in pure fullscreen mode
-  // without the bottom-sheet variant. In every other case the user can dismiss
-  // the chat and a floating toggle button reopens it.
-  const isPermanent = config.mode === 'fullscreen' && !config.fullscreenSheet
+  const [chatOpen, setChatOpen] = useState(false)
 
-  const [chatOpen, setChatOpen] = useState(isPermanent)
-
-  const showSidebar = !isWindow && (config.showSidebar ?? false)
+  const showSidebar = !isWindow
   const hideSettings = config.hideSettings ?? false
 
-  const { showCta, ctaText, dismiss: dismissCta } = useCta(config, language, !isPermanent)
+  const { showCta, ctaText, dismiss: dismissCta } = useCta(config, language, true)
 
   const openSettings = () => {
     if (!hideSettings) setSettingsOpen(true)
@@ -110,7 +106,7 @@ export function App() {
         )}
         <ChatView
           onOpenSettings={openSettings}
-          onClose={isPermanent ? undefined : closeChat}
+          onClose={closeChat}
         />
       </div>
     </div>
@@ -119,7 +115,7 @@ export function App() {
   // ── Window mode (or 'mixed' on desktop) ─────────────────────────────────
   if (isWindow) {
     return (
-      <>
+      <div className="chat-ui" ref={wrapperRef}>
         {chatOpen && (
           <div
             className="fixed bottom-4 right-4 z-50 w-[380px] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
@@ -146,19 +142,7 @@ export function App() {
         {!hideSettings && settingsOpen && (
           <SettingsModal onClose={() => setSettingsOpen(false)} />
         )}
-      </>
-    )
-  }
-
-  // ── Pure fullscreen — always visible, no toggle/close ───────────────────
-  if (isPermanent) {
-    return (
-      <>
-        <div className="fixed inset-0 z-30">{fullscreenContent}</div>
-        {!hideSettings && settingsOpen && (
-          <SettingsModal onClose={() => setSettingsOpen(false)} />
-        )}
-      </>
+      </div>
     )
   }
 
@@ -167,7 +151,7 @@ export function App() {
   const useSheet = config.fullscreenSheet === true
 
   return (
-    <>
+    <div className="chat-ui" ref={wrapperRef}>
       {chatOpen ? (
         useSheet ? (
           <>
@@ -217,7 +201,7 @@ export function App() {
       {!hideSettings && settingsOpen && (
         <SettingsModal onClose={() => setSettingsOpen(false)} />
       )}
-    </>
+    </div>
   )
 }
 

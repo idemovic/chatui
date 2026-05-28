@@ -11,7 +11,7 @@
     "placeholderUnconfigured": "Nastavte webhook URL v nastaveniach…"
   },
   "header": {
-    "assistant": "Asistent",
+    "assistant": "Bot",
     "online": "online",
     "notConfigured": "Nenakonfigurované"
   },
@@ -52,6 +52,7 @@
     "welcomeScreen": "Zobraziť uvítaciu obrazovku",
     "sidebar": "Zobraziť históriu konverzácií",
     "fileUploads": "Povoliť nahrávanie súborov",
+    "allowedFileExtensions": "Povolené prípony súborov",
     "mode": "Režim zobrazenia",
     "fullscreenSheet": "Štýl spodného panela (nepokryje celú obrazovku)",
     "fullscreenSheetHeight": "Výška panela (CSS dĺžka, napr. 75vh, 600px)",
@@ -79,9 +80,6 @@
     "avatarUrlPlaceholder": "alebo vložte URL",
     "avatarErrorType": "Vyberte súbor obrázka.",
     "avatarErrorSize": "Obrázok je príliš veľký (max 500 KB).",
-    "poweredByLabel": "Text odkazu \"Poháňa\"",
-    "poweredByUrl": "URL odkazu \"Poháňa\"",
-    "poweredByHide": "Skryť pätičku \"Poháňa\"",
     "save": "Uložiť",
     "cancel": "Zrušiť",
     "theme": "Téma",

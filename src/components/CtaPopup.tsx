@@ -20,7 +20,7 @@ export function CtaPopup({ text, onDismiss }: Props) {
       >
         ×
       </button>
-      <p className="pr-5 leading-snug">{text}</p>
+      <p className="pr-5 leading-snug whitespace-pre-line">{text}</p>
     </div>
   )
 }

@@ -25,7 +25,7 @@ function getInitialLang(): string {
   } catch {
     // ignore
   }
-  return navigator.language.split('-')[0] ?? 'en'
+  return 'en'
 }
 
 void i18n

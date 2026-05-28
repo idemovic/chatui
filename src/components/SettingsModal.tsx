@@ -1,11 +1,9 @@
-import { useState, useCallback, useRef, type ReactNode } from 'react'
+import { useState, useCallback, type ReactNode } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../store/settingsStore.ts'
 import { builtInAvatarIds, builtInAvatars, resolveAvatarUrl } from '../assets/avatars/index.ts'
 import { ThemePicker } from './ThemePicker.tsx'
 import type { ChatConfig, LangOverride } from '../types/index.ts'
-
-const MAX_UPLOAD_BYTES = 500 * 1024
 
 interface Props {
   onClose: () => void
@@ -227,7 +225,7 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
               <input
                 value={local.botName ?? ''}
                 onChange={(e) => setLocal((l) => ({ ...l, botName: e.target.value }))}
-                placeholder="Assistant"
+                placeholder="Bot"
                 className="input-field"
               />
             </Field>
@@ -236,6 +234,14 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
               <AvatarPicker
                 value={local.botAvatar}
                 onChange={(v) => setLocal((l) => ({ ...l, botAvatar: v }))}
+                shape="circle"
+              />
+            </Field>
+
+            <Field label={t('settings.toggleButtonIcon')}>
+              <AvatarPicker
+                value={local.toggleButtonIcon}
+                onChange={(v) => setLocal((l) => ({ ...l, toggleButtonIcon: v }))}
                 shape="circle"
               />
             </Field>
@@ -309,10 +315,19 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
                 onChange={(v) => setLocal((l) => ({ ...l, streaming: v }))} />
               <Toggle label={t('settings.welcomeScreen')} checked={local.showWelcomeScreen ?? true}
                 onChange={(v) => setLocal((l) => ({ ...l, showWelcomeScreen: v }))} />
-              <Toggle label={t('settings.sidebar')} checked={local.showSidebar ?? false}
-                onChange={(v) => setLocal((l) => ({ ...l, showSidebar: v }))} />
               <Toggle label={t('settings.fileUploads')} checked={local.allowFileUploads ?? false}
-                onChange={(v) => setLocal((l) => ({ ...l, allowFileUploads: v }))} />
+                onChange={(v) => setLocal((l) => ({ ...l, allowFileUploads: v, allowedFileExtensions: v ? (l.allowedFileExtensions ?? '.pdf,.docx,.png,.jpg,.jpeg') : l.allowedFileExtensions }))} />
+              {local.allowFileUploads && (
+                <Field label={t('settings.allowedFileExtensions')}>
+                  <input
+                    type="text"
+                    value={local.allowedFileExtensions ?? ''}
+                    onChange={(e) => setLocal((l) => ({ ...l, allowedFileExtensions: e.target.value }))}
+                    placeholder=".pdf,.docx,.png,.jpg,.jpeg"
+                    className="input-field text-xs"
+                  />
+                </Field>
+              )}
             </div>
 
             {/* ── Mode ── */}
@@ -464,45 +479,10 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
                     onChange={(e) => setLocal((l) => ({ ...l, ctaDelay: Number(e.target.value) }))}
                     className="input-field" min={0} step={500} />
                 </Field>
-                <Field label={t('settings.toggleButtonIcon')}>
-                  <AvatarPicker
-                    value={local.toggleButtonIcon}
-                    onChange={(v) => setLocal((l) => ({ ...l, toggleButtonIcon: v }))}
-                    shape="circle"
-                  />
-                </Field>
               </div>
             )}
 
             <hr style={{ borderColor: 'var(--t-bg-border)' }} />
-
-            {/* ── "Powered by" footer ── */}
-            <Toggle
-              label={t('settings.poweredByHide')}
-              checked={local.poweredByHide ?? false}
-              onChange={(v) => setLocal((l) => ({ ...l, poweredByHide: v }))}
-            />
-            {!local.poweredByHide && (
-              <div className="grid grid-cols-2 gap-3">
-                <Field label={t('settings.poweredByLabel')}>
-                  <input
-                    value={local.poweredByLabel ?? ''}
-                    onChange={(e) => setLocal((l) => ({ ...l, poweredByLabel: e.target.value || undefined }))}
-                    placeholder="ELIA AI Assistant"
-                    className="input-field"
-                  />
-                </Field>
-                <Field label={t('settings.poweredByUrl')}>
-                  <input
-                    type="url"
-                    value={local.poweredByUrl ?? ''}
-                    onChange={(e) => setLocal((l) => ({ ...l, poweredByUrl: e.target.value || undefined }))}
-                    placeholder="https://www.elia-asistent.com"
-                    className="input-field"
-                  />
-                </Field>
-              </div>
-            )}
 
             <hr style={{ borderColor: 'var(--t-bg-border)' }} />
 
@@ -578,7 +558,7 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
                   <input
                     value={activeLangData.botName ?? ''}
                     onChange={(e) => setLangData(activeLangTab, { botName: e.target.value || undefined })}
-                    placeholder={local.botName ?? 'Assistant'}
+                    placeholder={local.botName ?? 'Bot'}
                     className="input-field"
                   />
                 </Field>
@@ -723,30 +703,8 @@ function AvatarPicker({
   shape: 'circle' | 'square'
 }) {
   const { t } = useTranslation()
-  const fileRef = useRef<HTMLInputElement>(null)
-  const [uploadError, setUploadError] = useState('')
   const previewUrl = resolveAvatarUrl(value)
   const radius = shape === 'circle' ? 'rounded-full' : 'rounded-lg'
-
-  const handleFile = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      setUploadError(t('settings.avatarErrorType'))
-      return
-    }
-    if (file.size > MAX_UPLOAD_BYTES) {
-      setUploadError(t('settings.avatarErrorSize'))
-      return
-    }
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const result = e.target?.result
-      if (typeof result === 'string') {
-        onChange(result)
-        setUploadError('')
-      }
-    }
-    reader.readAsDataURL(file)
-  }
 
   return (
     <div className="space-y-3">
@@ -769,7 +727,7 @@ function AvatarPicker({
         {value && (
           <button
             type="button"
-            onClick={() => { onChange(undefined); setUploadError('') }}
+            onClick={() => onChange(undefined)}
             className="px-2 py-1 rounded-lg text-xs text-fg-muted hover:text-fg-primary hover:bg-bg-surface2 transition-colors"
           >
             {t('settings.avatarClear')}
@@ -785,7 +743,7 @@ function AvatarPicker({
             <button
               key={id}
               type="button"
-              onClick={() => { onChange(id); setUploadError('') }}
+              onClick={() => onChange(id)}
               className={`${radius} overflow-hidden transition-transform hover:scale-105`}
               style={{
                 outline: selected ? '2px solid var(--t-accent)' : '1px solid var(--t-bg-border)',
@@ -799,41 +757,17 @@ function AvatarPicker({
         })}
       </div>
 
-      {/* Upload + URL */}
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="px-3 py-1.5 rounded-lg text-xs transition-colors"
-          style={{ background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }}
-        >
-          {t('settings.avatarUpload')}
-        </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const f = e.target.files?.[0]
-            if (f) handleFile(f)
-            e.target.value = ''
-          }}
-        />
-        <input
-          type="url"
-          placeholder={t('settings.avatarUrlPlaceholder')}
-          value={value && !(value in builtInAvatars) && !value.startsWith('data:') ? value : ''}
-          onChange={(e) => {
-            const v = e.target.value.trim()
-            onChange(v || undefined)
-            setUploadError('')
-          }}
-          className="input-field flex-1 text-xs"
-        />
-      </div>
-
-      {uploadError && <p className="text-xs text-red-400">{uploadError}</p>}
+      {/* URL */}
+      <input
+        type="url"
+        placeholder={t('settings.avatarUrlPlaceholder')}
+        value={value && !(value in builtInAvatars) && !value.startsWith('data:') ? value : ''}
+        onChange={(e) => {
+          const v = e.target.value.trim()
+          onChange(v || undefined)
+        }}
+        className="input-field w-full text-xs"
+      />
     </div>
   )
 }

@@ -61,7 +61,8 @@ export interface ChatConfig {
   streaming?: boolean
   botName?: string
   theme?: string
-  showSidebar?: boolean
+  /** Override individual CSS variables on the widget root, e.g. { '--t-avatar-bg': '#ff0000' } */
+  cssVars?: Record<string, string>
   mode?: 'window' | 'fullscreen' | 'mixed'
   // CTA popup (window mode only)
   showCta?: boolean
@@ -74,13 +75,6 @@ export interface ChatConfig {
   botAvatar?: string
   /** Popup toggle button icon (window mode). Built-in id, URL, or data URL. */
   toggleButtonIcon?: string
-  // "Powered by" footer
-  /** Link text shown after the localized "Powered by" prefix. Default: 'ELIA AI Assistant'. */
-  poweredByLabel?: string
-  /** Link target URL. Default: 'https://www.elia-asistent.com'. */
-  poweredByUrl?: string
-  /** Hide the entire "Powered by" footer line. */
-  poweredByHide?: boolean
   /** In fullscreen layout, present the chat as a bottom sheet (rounded top, drag handle, dimmed
    *  backdrop above) instead of fully covering the viewport. Applies to mode 'fullscreen' and to
    *  'mixed' on mobile. Default: false. */

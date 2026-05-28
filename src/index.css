@@ -1,10 +1,11 @@
 @import "tailwindcss";
+
 @source "./**/*.{ts,tsx}";
 
 /* ─── Raw theme variables ─────────────────────────────────────────────────── */
 
-:root,
-[data-theme="midnight"] {
+.chat-ui,
+.chat-ui[data-theme="midnight"] {
   --t-bg-base:      #0f1117;
   --t-bg-surface:   #1a1d27;
   --t-bg-surface2:  #22263a;
@@ -21,7 +22,7 @@
   color-scheme: dark;
 }
 
-[data-theme="ivory"] {
+.chat-ui[data-theme="ivory"] {
   --t-bg-base:      #ffffff;
   --t-bg-surface:   #f1f5f9;
   --t-bg-surface2:  #e2e8f0;
@@ -38,7 +39,7 @@
   color-scheme: light;
 }
 
-[data-theme="sunrise"] {
+.chat-ui[data-theme="sunrise"] {
   --t-bg-base:      #ffffff;
   --t-bg-surface:   #fff7ed;
   --t-bg-surface2:  #ffedd5;
@@ -55,7 +56,7 @@
   color-scheme: light;
 }
 
-[data-theme="cosmos"] {
+.chat-ui[data-theme="cosmos"] {
   --t-bg-base:      #0d0a1a;
   --t-bg-surface:   #15102b;
   --t-bg-surface2:  #1e1840;
@@ -72,7 +73,7 @@
   color-scheme: dark;
 }
 
-[data-theme="forest"] {
+.chat-ui[data-theme="forest"] {
   --t-bg-base:      #0a1410;
   --t-bg-surface:   #111f18;
   --t-bg-surface2:  #162b1f;
@@ -89,7 +90,7 @@
   color-scheme: dark;
 }
 
-[data-theme="ocean"] {
+.chat-ui[data-theme="ocean"] {
   --t-bg-base:      #060f1a;
   --t-bg-surface:   #0c1b2e;
   --t-bg-surface2:  #112440;
@@ -106,7 +107,7 @@
   color-scheme: dark;
 }
 
-[data-theme="cherryDark"] {
+.chat-ui[data-theme="cherryDark"] {
   --t-bg-base:      #120608;
   --t-bg-surface:   #1e0c10;
   --t-bg-surface2:  #2a1016;
@@ -123,7 +124,7 @@
   color-scheme: dark;
 }
 
-[data-theme="cherry"] {
+.chat-ui[data-theme="cherry"] {
   --t-bg-base:      #ffffff;
   --t-bg-surface:   #f4f4f9;
   --t-bg-surface2:  #ffe4e6;
@@ -140,7 +141,7 @@
   color-scheme: light;
 }
 
-[data-theme="navy"] {
+.chat-ui[data-theme="navy"] {
   --t-bg-base:      #080f1e;
   --t-bg-surface:   #0f1a33;
   --t-bg-surface2:  #162348;
@@ -157,7 +158,7 @@
   color-scheme: dark;
 }
 
-[data-theme="lavender"] {
+.chat-ui[data-theme="lavender"] {
   --t-bg-base:      #faf5ff;
   --t-bg-surface:   #f3e8ff;
   --t-bg-surface2:  #e9d5ff;
@@ -174,7 +175,7 @@
   color-scheme: light;
 }
 
-[data-theme="amber"] {
+.chat-ui[data-theme="amber"] {
   --t-bg-base:      #0f0a00;
   --t-bg-surface:   #1c1400;
   --t-bg-surface2:  #2a1d00;
@@ -205,35 +206,45 @@
   --color-fg-muted:     var(--t-fg-muted);
   --color-user-bubble:  var(--t-user-bubble);
   --color-user-fg:      var(--t-user-fg);
-  --t-avatar-bg:    #ffffff;
-  --t-chatbutton-bg:  #ffffff;
 }
+
 
 /* ─── Base styles ─────────────────────────────────────────────────────────── */
 
-*, *::before, *::after {
+*, .chat-ui::before, .chat-ui::after {
   box-sizing: border-box;
 }
 
-html, body, #root {
+.chat-ui {
   height: 100%;
   margin: 0;
   padding: 0;
+  scroll-behavior: smooth;
 }
 
-body {
+.chat-ui  {
+  margin: 0;
   background-color: var(--t-bg-base);
   color: var(--t-fg-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.chat-ui button, .chat-ui a {
+  cursor: pointer;
+}
+
+.chat-ui button[aria-label="Toggle chat"] {
+  z-index: 60;
 }
 
 /* ─── Scrollbar ───────────────────────────────────────────────────────────── */
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--t-bg-border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--t-fg-muted); }
+.chat-ui ::-webkit-scrollbar { width: 30px; height: 6px; }
+.chat-ui ::-webkit-scrollbar-track { background: transparent; }
+.chat-ui ::-webkit-scrollbar-thumb { background: var(--t-bg-border); border-radius: 3px; }
+.chat-ui ::-webkit-scrollbar-thumb:hover { background: var(--t-fg-muted); }
 
 /* ─── Typing indicator animation ─────────────────────────────────────────── */
 
@@ -242,7 +253,7 @@ body {
   30%            { transform: translateY(-4px); opacity: 1; }
 }
 
-.typing-dot {
+.chat-ui .typing-dot {
   display: inline-block;
   width: 6px;
   height: 6px;
@@ -250,12 +261,12 @@ body {
   background: var(--t-fg-muted);
   animation: typing-dot 1.2s infinite;
 }
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+.chat-ui .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.chat-ui .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
 /* ─── CTA popup speech bubble tail ───────────────────────────────────────── */
 
-.cta-bubble::before {
+.chat-ui .cta-bubble::before {
   content: '';
   position: absolute;
   bottom: -11px;
@@ -267,7 +278,7 @@ body {
   border-top: 10px solid var(--t-bg-border);
 }
 
-.cta-bubble::after {
+.chat-ui .cta-bubble::after {
   content: '';
   position: absolute;
   bottom: -8px;
