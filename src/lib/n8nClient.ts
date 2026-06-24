@@ -58,6 +58,7 @@ export async function sendMessage(
     [chatSessionKey]: sessionId,
     ...(language ? { language } : {}),
     ...(attachments && attachments.length > 0 ? { attachments } : {}),
+    ...(config.isTest ? { isTest: true } : {}),
     ...config.metadata,
   }
 

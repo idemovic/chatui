@@ -44,7 +44,11 @@ export function useAgentStream(): void {
 
     const open = async () => {
       try {
-        const initRes = await fetch(`${stream.apiBaseUrl.replace(/\/$/, '')}/api/public/chat-stream/init`, {
+        // apiBaseUrl may be passed as either the bare origin ("https://api.example.com") or with
+        // the "/api" prefix already attached ("https://api.example.com/api") depending on how the
+        // host app configures it. Normalise so we never end up with a duplicated "/api/api/".
+        const origin = stream.apiBaseUrl.replace(/\/+$/, '').replace(/\/api$/, '')
+        const initRes = await fetch(`${origin}/api/public/chat-stream/init`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ tenantId: stream.tenantId, sessionId: activeSessionId }),

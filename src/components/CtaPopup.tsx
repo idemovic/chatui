@@ -15,7 +15,7 @@ export function CtaPopup({ text, onDismiss }: Props) {
     >
       <button
         onClick={onDismiss}
-        className="absolute top-1/2 -translate-y-1/2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-fg-muted hover:text-fg-primary transition-colors text-base leading-none"
+        className="absolute inset-y-0 my-auto right-2 w-5 h-5 rounded-full flex items-center justify-center text-fg-muted hover:text-fg-primary transition-colors text-base leading-none"
         aria-label="Dismiss"
       >
         ×

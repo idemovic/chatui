@@ -4,10 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>chatui IIFE test page</title>
-
-  <!-- Pre-compiled stylesheet from the IIFE build -->
-  <link rel="stylesheet" href="./dist/chatui.iife.css" />
-
   <style>
     body {
       margin: 0;
@@ -62,7 +58,7 @@
     Settings -> Powered by, Tabs, theme picker — everything works just like the bundler-based mount.
   </p>
 
-  <pre>&lt;link rel="stylesheet" href="./dist/chatui.iife.css"&gt;
+  <pre>
 &lt;script src="./dist/chatui.iife.js"&gt;&lt;/script&gt;
 &lt;div id="chat"&gt;&lt;/div&gt;
 &lt;script&gt;
@@ -83,7 +79,7 @@
 <script>
   // Dev-time webhook URL — replace with yours, or leave blank to test the unconfigured state.
   Chatui.createChat({
-    target: '#chat',
+    //target: '#chat',
     theme: 'cherry',
     webhookUrl: '',
     mode: 'mixed',

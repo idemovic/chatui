@@ -19,7 +19,6 @@ npm install @elia-assistant/chatui
 // src/main.tsx
 import { App as ChatWidget } from '@elia-assistant/chatui'
 import { useSettingsStore } from '@elia-assistant/chatui/store'
-import '@elia-assistant/chatui/css'
 
 useSettingsStore.getState().setConfig({
   webhookUrl: 'https://your-n8n.example.com/webhook/abc',
@@ -34,8 +33,6 @@ The host's `vite.config.ts` needs `optimizeDeps.exclude: ['@elia-assistant/chatu
 ### Plain HTML (CDN, no bundler)
 
 ```html
-<link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@elia-assistant/chatui/dist/chatui.iife.css">
 <script src="https://cdn.jsdelivr.net/npm/@elia-assistant/chatui/dist/chatui.iife.js"></script>
 <div id="chat"></div>
 <script>
@@ -53,7 +50,6 @@ The host's `vite.config.ts` needs `optimizeDeps.exclude: ['@elia-assistant/chatu
 
 ```ts
 import { createChat } from '@elia-assistant/chatui'
-import '@elia-assistant/chatui/css'
 
 const instance = createChat({
   target: '#chat',
@@ -304,10 +300,10 @@ npm run pack:dry     # preview the npm tarball contents
 Build output:
 - `dist/index.js` — ESM, React externalized as peer dep (~325 kB / 75 kB gzipped)
 - `dist/chatui.iife.js` — single-file IIFE for `<script>` tags, React + ReactDOM bundled in (~485 kB / 144 kB gzipped, production-mode)
-- `dist/chatui.css` — pre-compiled stylesheet for ESM consumers
-- `dist/chatui.iife.css` — same styles, paired naming for CDN consumers
 - `dist/**/*.d.ts` — TypeScript declarations
 - `dist/chunks/translation-*.js` — code-split locale bundles
+
+CSS is inlined into the JS bundles and injected into a shadow root at mount time — no `.css` file is emitted and host pages don't need to load one.
 
 To smoke-test the IIFE locally without publishing:
 ```bash
@@ -325,7 +321,7 @@ See [example.html](./example.html) for the full integration guide and [vanilla-t
 | Concern | Library |
 |---|---|
 | Build | Vite 8 + Rolldown + `@vitejs/plugin-react` |
-| Styling (internal) | Tailwind CSS v4 — pre-compiled into `dist/chatui.css`; consumers don't need it |
+| Styling (internal) | Tailwind CSS v4 — inlined into the JS bundle and injected into a shadow root at mount time; consumers don't load any CSS |
 | State | Zustand 5 with `persist` middleware |
 | Markdown | `react-markdown` + `remark-gfm` |
 | i18n | `react-i18next` + `i18next-resources-to-backend` (locales code-split, no HTTP fetch) |

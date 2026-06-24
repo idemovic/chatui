@@ -15,10 +15,11 @@ function BotAvatar() {
   const botAvatar = useSettingsStore((s) => s.config.botAvatar)
   const url = resolveAvatarUrl(botAvatar)
   if (url) {
+    const isBubble = botAvatar === 'bubble'
     return (
       <div
         className="w-7 h-7 rounded-full flex-shrink-0 overflow-hidden"
-        style={{ background: 'var(--t-avatar-bg)' }}
+        style={{ background: isBubble ? 'var(--t-accent)' : 'var(--t-avatar-bg)' }}
       >
         <img src={url} alt="" className="w-full h-full object-cover" />
       </div>

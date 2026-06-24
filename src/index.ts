@@ -12,4 +12,5 @@ export type {
   NotificationTag,
   NotificationTagVariant,
   FaqItem,
+  Attachment,
 } from './types/index.ts'

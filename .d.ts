@@ -1,0 +1,1 @@
+declare module 'virtual:css-injected-by-js'

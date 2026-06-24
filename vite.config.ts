@@ -1,21 +1,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { writeFileSync, mkdirSync } from 'fs'
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
+
 import { resolve } from 'path'
 
+console.log('adfadsfasd')
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    cssInjectedByJsPlugin({
+      jsAssetsFilterFunction: (chunk) => chunk.fileName === 'index.js',
+    }),
     {
-      // The `chatui/css` subpath export points at a real .css file, but TypeScript's
-      // `noUncheckedSideEffectImports` requires a .d.ts alongside it.
-      name: 'chatui-css-dts',
-      apply: 'build',
-      closeBundle() {
-        mkdirSync(resolve('dist'), { recursive: true })
-        writeFileSync(resolve('dist/chatui.css.d.ts'), 'export {}\n')
+      name: 'graceful-exit',
+      configureServer(server) {
+        process.on('SIGINT', () => {
+          server.close().then(() => process.exit(0))
+        })
       },
     },
   ],
@@ -25,7 +28,7 @@ export default defineConfig({
         index:        'src/index.ts',
         store:        'src/store/settingsStore.ts',
         'chat-store': 'src/store/chatStore.ts',
-        types:        'src/types/index.ts',
+         types:        'src/types/index.ts',        
       },
       formats: ['es'],
     },
@@ -33,10 +36,7 @@ export default defineConfig({
       external: [/^react($|\/)/, /^react-dom($|\/)/],
       output: {
         chunkFileNames: 'chunks/[name]-[hash].js',
-        assetFileNames: (info) => {
-          if (info.name && info.name.endsWith('.css')) return 'chatui.css'
-          return 'assets/[name]-[hash][extname]'
-        },
+        assetFileNames: 'assets/[name]-[hash][extname]',
       },
     },
     cssCodeSplit: false,
@@ -52,6 +52,10 @@ export default defineConfig({
       'use-sync-external-store/shim/index.js': resolve('src/shims/use-sync-external-store-shim.ts'),
       'use-sync-external-store/shim': resolve('src/shims/use-sync-external-store-shim.ts'),
     },
+  },
+   server: {
+    host: "0.0.0.0",
+    port: 2222
   },
   optimizeDeps: {
     // Dev-server only: the host's vite config doesn't need this once consuming

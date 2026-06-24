@@ -50,6 +50,7 @@ export interface ChatConfig {
   chatInputKey?: string
   chatSessionKey?: string
   metadata?: Record<string, unknown>
+  isTest?: boolean
   showWelcomeScreen?: boolean
   /** Global fallback initial messages — per-language overrides live in i18n[lang].initialMessages */
   initialMessages?: string[]

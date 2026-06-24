@@ -1,12 +1,48 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat</title>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="module">
+    import { createChat } from './src/createChat'
+
+    createChat({
+      //target: '#chat',
+      theme: 'cherry',
+      webhookUrl: '',
+      mode: 'mixed',
+      botName: 'Test',
+      showCta: true,
+      ctaText: 'Hello from the Test!',
+      ctaDelay: 1000,
+      hideSettings: false,
+      tabs: {
+        notifications: {
+          items: [
+            {
+              title: 'Inline notification',
+              message: 'This card came from inline config — no fetch.',
+              tags: [{ label: 'Demo', variant: 'success' }],
+              cta: { url: 'https://example.com', title: 'Read more' },
+            },
+          ],
+        },
+        help: {
+          items: [        
+            { question: 'How does this work?', answer: 'You loaded a single .js file from disk.' },
+            { question: 'Where is React?', answer: 'Bundled inside chatui.iife.js — host page has none.' },
+          ],
+        },
+      }
+    })
+  </script>
+</body>
+
 </html>

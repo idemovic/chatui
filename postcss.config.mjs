@@ -3,6 +3,7 @@ export default {
     "@tailwindcss/postcss": {},
     "postcss-prefix-selector": {
       prefix: ".chat-ui",
+      includeFiles: [/src[\\/]index\.css$/],
       transform(prefix, selector, prefixedSelector) {
         if (selector.startsWith(".chat-ui")) {
           return selector;

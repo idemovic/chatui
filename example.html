@@ -158,7 +158,7 @@
   <li>Node 18 or newer (for installing the package)</li>
 </ul>
 <div class="callout info">
-  No Tailwind required. <code>dist/chatui.css</code> is shipped pre-compiled, so your host doesn't need to know that chatui internally uses Tailwind v4.
+  No Tailwind required, and no stylesheet to load. chatui inlines its CSS into the JS bundle and injects it into a shadow root at mount time, so your host page never sees chatui's styles and chatui never sees yours.
 </div>
 
 <h2 id="install">2. Install</h2>
@@ -181,19 +181,20 @@
   The package ships an IIFE bundle with React + ReactDOM included. Drop two lines into any HTML page and you're done.
   jsdelivr and unpkg auto-mirror the published package once it's on npm:
 </p>
-<pre><code>&lt;link
-  rel=<span class="s">"stylesheet"</span>
-  href=<span class="s">"https://cdn.jsdelivr.net/npm/@elia-assistant/chatui/dist/chatui.iife.css"</span>
-/&gt;
-&lt;script src=<span class="s">"https://cdn.jsdelivr.net/npm/@elia-assistant/chatui/dist/chatui.iife.js"</span>&gt;&lt;/script&gt;
-&lt;div id=<span class="s">"chat"</span>&gt;&lt;/div&gt;
+<pre><code>&lt;script src=<span class="s">"https://cdn.jsdelivr.net/npm/@elia-assistant/chatui/dist/chatui.iife.js"</span>&gt;&lt;/script&gt;
 &lt;script&gt;
   Chatui.createChat({
-    target: <span class="s">'#chat'</span>,
     webhookUrl: <span class="s">'https://your-n8n.example.com/webhook/abc'</span>,
     mode: <span class="s">'window'</span>,
   })
 &lt;/script&gt;</code></pre>
+<p>
+  The <code>target</code> option (CSS selector or element) is <strong>optional</strong>.
+  When omitted, <code>createChat</code> appends a new <code>&lt;div&gt;</code> to
+  <code>&lt;body&gt;</code> automatically and mounts the widget inside a shadow root
+  attached to that div. If you prefer an existing element, pass its selector as
+  shown below.
+</p>
 <p>
   See section 4 below for the full <code>createChat()</code> API. <code>unpkg.com</code> works the same way:
   <code>https://unpkg.com/@elia-assistant/chatui/dist/chatui.iife.js</code>.
@@ -245,7 +246,6 @@
 
 <span class="k">import</span> { App <span class="k">as</span> ChatWidget } <span class="k">from</span> <span class="s">'@elia-assistant/chatui'</span>
 <span class="k">import</span> { useSettingsStore }    <span class="k">from</span> <span class="s">'@elia-assistant/chatui/store'</span>
-<span class="k">import</span>                            <span class="s">'@elia-assistant/chatui/css'</span>
 
 <span class="c">// Configure BEFORE the first render. setConfig merges into the persisted store.</span>
 useSettingsStore.getState().setConfig({
@@ -284,13 +284,12 @@ createRoot(rootEl).render(
 </p>
 <pre><code><span class="c">// ESM (bundler — same package, different entry)</span>
 <span class="k">import</span> { createChat } <span class="k">from</span> <span class="s">'@elia-assistant/chatui'</span>
-<span class="k">import</span>                   <span class="s">'@elia-assistant/chatui/css'</span>
 
 <span class="k">const</span> instance = createChat({
-  target:     <span class="s">'#chat'</span>,                            <span class="c">// CSS selector or HTMLElement</span>
   webhookUrl: <span class="s">'https://your-n8n.example.com/...'</span>,
   mode:       <span class="s">'window'</span>,
   language:   <span class="s">'sk'</span>,                             <span class="c">// optional shortcut for setLanguage()</span>
+  <span class="c">// target: '#chat',                          // optional — see note below</span>
 })
 
 <span class="c">// Later, if you need to remove it:</span>
@@ -298,8 +297,17 @@ instance.unmount()</code></pre>
 <p>From a <code>&lt;script&gt;</code> tag the global is named <code>Chatui</code>:</p>
 <pre><code>&lt;script src=<span class="s">"https://cdn.jsdelivr.net/npm/@elia-assistant/chatui/dist/chatui.iife.js"</span>&gt;&lt;/script&gt;
 &lt;script&gt;
-  Chatui.createChat({ target: <span class="s">'#chat'</span>, webhookUrl: <span class="s">'...'</span> })
+  Chatui.createChat({ webhookUrl: <span class="s">'...'</span> })
 &lt;/script&gt;</code></pre>
+<div class="callout info">
+  <strong>Optional <code>target</code>.</strong> When you omit <code>target</code> (or pass a
+  selector that does not match any element), <code>createChat</code> creates a new
+  <code>&lt;div&gt;</code>, appends it to <code>&lt;body&gt;</code>, and attaches the
+  shadow root to that div. The widget then renders inside the shadow root so its
+  styles are fully isolated from the host page. If you want to control placement
+  yourself, create a <code>&lt;div id="chat"&gt;</code> and pass
+  <code>target: '#chat'</code>.
+</div>
 
 <h2 id="full-config">4. Full static configuration</h2>
 <p>
@@ -415,6 +423,7 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>allowFileUploads</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Show the file-attachment button in the input bar.</td></tr>
     <tr><td><code>allowedFileExtensions</code></td><td><code>string</code></td><td><code>'.pdf,.docx,.png,.jpg,.jpeg'</code></td><td>Comma-separated extension list. Filters the file picker and is enforced on selection.</td></tr>
     <tr><td><code>theme</code></td><td><code>string</code></td><td><code>'midnight'</code></td><td>Initial theme id. See Themes section for the full list.</td></tr>
+    <tr><td><code>cssVars</code></td><td><code>Record&lt;string, string&gt;</code></td><td>-</td><td>Per-instance overrides for the widget's CSS custom properties. See "Customizing colors" under Themes.</td></tr>
     <tr><td><code>botName</code></td><td><code>string</code></td><td><code>'Assistant'</code></td><td>Global fallback bot name.</td></tr>
     <tr><td><code>botAvatar</code></td><td><code>string</code></td><td>-</td><td>Built-in avatar id, full URL, or data URL. See Avatars section.</td></tr>
     <tr><td><code>toggleButtonIcon</code></td><td><code>string</code></td><td>-</td><td>Image shown inside the floating toggle button in <code>window</code> / <code>mixed</code> mode. Same value forms as <code>botAvatar</code>.</td></tr>
@@ -476,15 +485,17 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
 
 <h3>Customizing colors</h3>
 <p>
-  Every theme is a set of CSS custom properties scoped under <code>[data-theme="&lt;id&gt;"]</code>. To match your brand, pick the closest built-in theme via <code>config.theme</code>, then add a stylesheet on your page that overrides only the variables you care about. The override must come <em>after</em> the chatui stylesheet is loaded.
+  Every theme is a set of CSS custom properties. Because the widget renders inside a shadow root, host-page stylesheets cannot reach inside it - pass overrides through the <code>cssVars</code> config option instead. The values are applied as inline styles on the widget root and take effect immediately. Pick the closest built-in theme via <code>config.theme</code>, then override only the variables you care about.
 </p>
-<pre><code><span class="k">&lt;style&gt;</span>
-  [data-theme=<span class="s">"midnight"</span>] {
-    --t-accent:       <span class="s">#ff5722</span>;
-    --t-user-bubble:  <span class="s">#ff5722</span>;
-    --t-bg-base:      <span class="s">#111111</span>;
-  }
-<span class="k">&lt;/style&gt;</span></code></pre>
+<pre><code>createChat({
+  target:    <span class="s">'#chat'</span>,
+  theme:     <span class="s">'midnight'</span>,
+  cssVars: {
+    <span class="s">'--t-accent'</span>:       <span class="s">'#ff5722'</span>,
+    <span class="s">'--t-user-bubble'</span>:  <span class="s">'#ff5722'</span>,
+    <span class="s">'--t-bg-base'</span>:      <span class="s">'#111111'</span>,
+  },
+})</code></pre>
 <p>Variables you can override:</p>
 <table>
   <thead><tr><th>Variable</th><th>What it styles</th></tr></thead>

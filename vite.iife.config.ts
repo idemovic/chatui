@@ -5,10 +5,15 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 import { resolve } from 'path'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    cssInjectedByJsPlugin(),
+  ],
   // Replace Node-only globals at build time so the IIFE runs in raw browsers.
   // (For the ESM build, the consumer's bundler does this — for IIFE we must.)
   define: {
@@ -33,14 +38,6 @@ export default defineConfig({
     rollupOptions: {
       // Bundle EVERYTHING — including React — so the file works on a bare HTML page.
       external: [],
-      output: {
-        // Don't overwrite the ESM build's chatui.css.
-        // IIFE format implies a single chunk, so dynamic imports are inlined automatically.
-        assetFileNames: (info) => {
-          if (info.name && info.name.endsWith('.css')) return 'chatui.iife.css'
-          return 'assets/[name]-[hash][extname]'
-        },
-      },
     },
     cssCodeSplit: false,
     sourcemap: true,

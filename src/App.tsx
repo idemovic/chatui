@@ -47,7 +47,7 @@ export function App() {
 
   const [chatOpen, setChatOpen] = useState(false)
 
-  const showSidebar = !isWindow
+  const showSidebar = false; // not using sidebar currently
   const hideSettings = config.hideSettings ?? false
 
   const { showCta, ctaText, dismiss: dismissCta } = useCta(config, language, true)
@@ -135,6 +135,7 @@ export function App() {
           <ToggleButton
             open={false}
             iconSrc={resolveAvatarUrl(config.toggleButtonIcon)}
+            iconKey={config.toggleButtonIcon}
             onClick={openChat}
           />
         )}
@@ -193,6 +194,7 @@ export function App() {
           <ToggleButton
             open={false}
             iconSrc={resolveAvatarUrl(config.toggleButtonIcon)}
+            iconKey={config.toggleButtonIcon}
             onClick={openChat}
           />
         </>
@@ -208,18 +210,21 @@ export function App() {
 function ToggleButton({
   open,
   iconSrc,
+  iconKey,
   onClick,
 }: {
   open: boolean
   iconSrc: string | undefined
+  iconKey?: string
   onClick: () => void
 }) {
   const showImage = Boolean(iconSrc) && !open
+  const isBubble = !iconKey || iconKey === 'bubble'
   return (
     <button
       className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 overflow-hidden"
       style={{
-        background: 'var(--t-chatbutton-bg)',
+        background: isBubble ? 'var(--t-accent)' : 'var(--t-chatbutton-bg)',
         color: 'var(--t-accent-fg)',
       }}
       onClick={onClick}

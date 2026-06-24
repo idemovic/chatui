@@ -2,6 +2,7 @@
 
 @source "./**/*.{ts,tsx}";
 
+
 /* ─── Raw theme variables ─────────────────────────────────────────────────── */
 
 .chat-ui,
@@ -211,37 +212,34 @@
 
 /* ─── Base styles ─────────────────────────────────────────────────────────── */
 
-*, .chat-ui::before, .chat-ui::after {
+.chat-ui, .chat-ui *, .chat-ui ::before, .chat-ui ::after {
   box-sizing: border-box;
 }
 
 .chat-ui {
+  all: revert;
+  box-sizing: border-box;
   height: 100%;
   margin: 0;
   padding: 0;
   scroll-behavior: smooth;
-}
-
-.chat-ui  {
   margin: 0;
+  text-align: left;
   background-color: var(--t-bg-base);
   color: var(--t-fg-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  z-index: 10000;
 }
 
 .chat-ui button, .chat-ui a {
   cursor: pointer;
 }
 
-.chat-ui button[aria-label="Toggle chat"] {
-  z-index: 60;
-}
-
 /* ─── Scrollbar ───────────────────────────────────────────────────────────── */
 
-.chat-ui ::-webkit-scrollbar { width: 30px; height: 6px; }
+.chat-ui ::-webkit-scrollbar { width: 6px; height: 6px; }
 .chat-ui ::-webkit-scrollbar-track { background: transparent; }
 .chat-ui ::-webkit-scrollbar-thumb { background: var(--t-bg-border); border-radius: 3px; }
 .chat-ui ::-webkit-scrollbar-thumb:hover { background: var(--t-fg-muted); }

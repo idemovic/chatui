@@ -122,14 +122,14 @@ export function ChatView({ onOpenSettings, onClose }: Props) {
               src={resolveAvatarUrl(config.botAvatar)}
               alt=""
               className="w-7 h-7 rounded-full object-cover flex-shrink-0"
-              style={{ border: '1px solid var(--t-bg-border)', background: 'var(--t-avatar-bg)' }}
+              style={{ border: '1px solid var(--t-bg-border)', background: config.botAvatar === 'bubble' ? 'var(--t-accent)' : 'var(--t-avatar-bg)' }}
             />
           ) : (
             <div className="w-2 h-2 rounded-full" style={{ background: 'var(--t-accent)' }} />
           )}
           <span className="text-sm font-semibold text-fg-primary">{botName}</span>
           {config.webhookUrl ? (
-            <span className="text-xs text-fg-muted">● {t('header.online')}</span>
+            <span className="text-xs text-fg-muted"><span style={{ color: '#22c55e' }}>●</span> {t('header.online')}</span>
           ) : (
             <span className="text-xs text-fg-muted">{t('header.notConfigured')}</span>
           )}
