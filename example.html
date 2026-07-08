@@ -347,14 +347,14 @@ useSettingsStore.getState().setConfig({
   <span class="c">// ─── Appearance ───────────────────────────────────────────────────</span>
   theme:     <span class="s">'midnight'</span>,                         <span class="c">// see Themes section</span>
   botName:   <span class="s">'Assistant'</span>,                        <span class="c">// global fallback (per-lang overrides below)</span>
-  botAvatar: <span class="s">'amara'</span>,                            <span class="c">// built-in id, URL, or data URL. See Avatars section.</span>
+  botAvatar: <span class="s">'bubble'</span>,                            <span class="c">// built-in id, URL, or data URL. See Avatars section.</span>
 
   <span class="c">// ─── CTA popup (window mode) ─────────────────────────────────────</span>
   showCta:  true,
   ctaText:  <span class="s">'Hi! How can I help?'</span>,                <span class="c">// global fallback</span>
   ctaDelay: 5000,                                    <span class="c">// ms before it appears</span>
   ctaSound: true,                                    <span class="c">// Web Audio beep</span>
-  toggleButtonIcon: <span class="s">'priya'</span>,                      <span class="c">// replaces the default chat bubble. Same value forms as botAvatar.</span>
+  <span class="c">// toggleButtonIcon: 'orb',               // omit → uses same icon as botAvatar. Special ids: 'elia', 'orb', 'bubble'.</span>
 
   <span class="c">// ─── UI lock ──────────────────────────────────────────────────────</span>
   hideSettings: true,                                <span class="c">// default. Set to false to show the gear, theme picker, and settings modal.</span>
@@ -416,17 +416,17 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>chatSessionKey</code></td><td><code>string</code></td><td><code>'sessionId'</code></td><td>Body key holding the session id.</td></tr>
     <tr><td><code>metadata</code></td><td><code>object</code></td><td>-</td><td>Extra fields merged into every request body.</td></tr>
     <tr><td><code>streaming</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Parse the response as Server-Sent Events.</td></tr>
-    <tr><td><code>mode</code></td><td><code>'fullscreen' | 'window' | 'mixed'</code></td><td><code>'fullscreen'</code></td><td><code>mixed</code> = fullscreen on mobile, floating window on desktop.</td></tr>
+    <tr><td><code>mode</code></td><td><code>'fullscreen' | 'window' | 'mixed'</code></td><td><code>'window'</code></td><td><code>mixed</code> = fullscreen on mobile, floating window on desktop.</td></tr>
     <tr><td><code>fullscreenSheet</code></td><td><code>boolean</code></td><td><code>false</code></td><td>In fullscreen layout (and mixed-on-mobile), present the chat as a bottom sheet (rounded top, drag handle, dimmed backdrop above) instead of fully covering the viewport.</td></tr>
     <tr><td><code>fullscreenSheetHeight</code></td><td><code>string</code></td><td><code>'75vh'</code></td><td>Sheet height as any CSS length. Only used when <code>fullscreenSheet</code> is true.</td></tr>
     <tr><td><code>showWelcomeScreen</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Welcome screen when the conversation is empty.</td></tr>
     <tr><td><code>allowFileUploads</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Show the file-attachment button in the input bar.</td></tr>
-    <tr><td><code>allowedFileExtensions</code></td><td><code>string</code></td><td><code>'.pdf,.docx,.png,.jpg,.jpeg'</code></td><td>Comma-separated extension list. Filters the file picker and is enforced on selection.</td></tr>
+    <tr><td><code>allowedFileExtensions</code></td><td><code>string</code></td><td>-</td><td>Comma-separated extension list. Filters the file picker and is enforced on selection.</td></tr>
     <tr><td><code>theme</code></td><td><code>string</code></td><td><code>'midnight'</code></td><td>Initial theme id. See Themes section for the full list.</td></tr>
     <tr><td><code>cssVars</code></td><td><code>Record&lt;string, string&gt;</code></td><td>-</td><td>Per-instance overrides for the widget's CSS custom properties. See "Customizing colors" under Themes.</td></tr>
-    <tr><td><code>botName</code></td><td><code>string</code></td><td><code>'Assistant'</code></td><td>Global fallback bot name.</td></tr>
-    <tr><td><code>botAvatar</code></td><td><code>string</code></td><td>-</td><td>Built-in avatar id, full URL, or data URL. See Avatars section.</td></tr>
-    <tr><td><code>toggleButtonIcon</code></td><td><code>string</code></td><td>-</td><td>Image shown inside the floating toggle button in <code>window</code> / <code>mixed</code> mode. Same value forms as <code>botAvatar</code>.</td></tr>
+    <tr><td><code>botName</code></td><td><code>string</code></td><td><code>'Bot'</code></td><td>Global fallback bot name.</td></tr>
+    <tr><td><code>botAvatar</code></td><td><code>string</code></td><td>-</td><td>Built-in avatar id, full URL, or data URL. See Avatars section. Unknown built-in ids fall back to <code>'bubble'</code>.</td></tr>
+    <tr><td><code>toggleButtonIcon</code></td><td><code>string</code></td><td>-</td><td>Icon shown inside the floating toggle button (<code>window</code> / <code>mixed</code> mode). When omitted, the toggle button displays the same icon as <code>botAvatar</code>. Recommended special ids: <code>'elia'</code>, <code>'orb'</code>, <code>'bubble'</code>. Accepts the same value forms as <code>botAvatar</code>.</td></tr>
     <tr><td><code>initialMessages</code></td><td><code>string[]</code></td><td><code>[]</code></td><td>Global fallback initial bot messages.</td></tr>
     <tr><td><code>i18n</code></td><td><code>Record&lt;string, LangOverride&gt;</code></td><td>-</td><td>Per-language overrides. See sub-table.</td></tr>
     <tr><td><code>showCta</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Show the CTA speech bubble above the floating button.</td></tr>
@@ -519,19 +519,39 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
 
 <h2 id="avatars">7. Avatars and toggle button icon</h2>
 <p>
-  chatui ships 12 built-in avatars inlined as data URLs inside <code>dist/index.js</code>.
+  chatui ships 30 built-in portrait avatars, all inlined as data URLs inside <code>dist/index.js</code>. 
   You can reference one by id, supply your own URL, or paste a data URL.
 </p>
 <p>
   Both <code>botAvatar</code> and <code>toggleButtonIcon</code> accept the same value forms:
 </p>
 <ul>
-  <li><strong>Built-in id</strong>: <code>'amara'</code>, <code>'david'</code>, <code>'elena'</code>, <code>'kenji'</code>, <code>'luca'</code>, <code>'marcus'</code>, <code>'mei'</code>, <code>'nadia'</code>, <code>'omar'</code>, <code>'priya'</code>, <code>'samuel'</code>, <code>'sofia'</code></li>
+  <li><strong>Built-in id</strong> — portrait avatars (sample): <code>'amara'</code>, <code>'david'</code>, <code>'elena'</code>, <code>'kenji'</code>, <code>'mei'</code>, <code>'nadia'</code>, <code>'priya'</code>, <code>'samuel'</code>, <code>'sofia'</code>, and ~80 more.</li>
+  <li><strong>Built-in id</strong> — special/icon avatars: <code>'elia'</code>, <code>'orb'</code>, <code>'bubble'</code>, <code>'bean'</code>, <code>'owl'</code>.</li>
   <li><strong>URL</strong>: any <code>http(s)://…</code> or root-relative path such as <code>'/img/my-avatar.png'</code></li>
   <li><strong>Data URL</strong>: <code>'data:image/png;base64,…'</code> (what the built-in file picker produces)</li>
 </ul>
+<div class="callout info">
+  <strong>Unknown id fallback.</strong> If <code>botAvatar</code> or <code>toggleButtonIcon</code> is
+  set to a built-in id that no longer exists (e.g. an id removed from the set), the widget
+  automatically falls back to displaying the <code>'bubble'</code> icon so the UI never shows a
+  broken image. External URLs are passed through as-is.
+</div>
+<h3>Toggle button icon</h3>
 <p>
-  If the settings UI is visible (<code>hideSettings: false</code>), end users can pick a built-in, upload a file (max 500 KB), or paste a URL from the settings modal. The toggle button icon picker only appears in <code>window</code> / <code>mixed</code> mode.
+  When <code>toggleButtonIcon</code> is <strong>omitted</strong>, the floating button shows the same
+  icon as <code>botAvatar</code>. Set it explicitly only when you want a different icon on the
+  button. The recommended choices are the special icon avatars: <code>'elia'</code>,
+  <code>'orb'</code>, and <code>'bubble'</code>.
+</p>
+<p>
+  When the settings UI is visible (<code>hideSettings: false</code>), a "Same as Bot avatar"
+  checkbox controls this: checked = inherits <code>botAvatar</code>, unchecked = lets the user pick
+  from the three special icons.
+</p>
+<p>
+  If the settings UI is visible (<code>hideSettings: false</code>), end users can also pick a
+  portrait avatar, upload a file (max 500 KB), or paste a URL from the settings modal.
 </p>
 
 <h2 id="languages">8. Languages</h2>

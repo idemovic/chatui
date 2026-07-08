@@ -193,6 +193,57 @@
   color-scheme: dark;
 }
 
+.chat-ui[data-theme="slate"] {
+  --t-bg-base:      #334155;
+  --t-bg-surface:   #3d4f63;
+  --t-bg-surface2:  #475d72;
+  --t-bg-border:    #546880;
+  --t-accent:       #38bdf8;
+  --t-accent-fg:    #ffffff;
+  --t-fg-primary:   #f1f5f9;
+  --t-fg-secondary: #94a3b8;
+  --t-fg-muted:     #64748b;
+  --t-user-bubble:  #0284c7;
+  --t-user-fg:      #ffffff;
+  --t-avatar-bg:    #38bdf8;
+  --t-chatbutton-bg:#38bdf8;
+  color-scheme: dark;
+}
+
+.chat-ui[data-theme="graphite"] {
+  --t-bg-base:      #424242;
+  --t-bg-surface:   #4e4e4e;
+  --t-bg-surface2:  #5a5a5a;
+  --t-bg-border:    #686868;
+  --t-accent:       #f472b6;
+  --t-accent-fg:    #ffffff;
+  --t-fg-primary:   #f5f5f5;
+  --t-fg-secondary: #a3a3a3;
+  --t-fg-muted:     #737373;
+  --t-user-bubble:  #db2777;
+  --t-user-fg:      #ffffff;
+  --t-avatar-bg:    #f472b6;
+  --t-chatbutton-bg:#f472b6;
+  color-scheme: dark;
+}
+
+.chat-ui[data-theme="stone"] {
+  --t-bg-base:      #44403c;
+  --t-bg-surface:   #514d49;
+  --t-bg-surface2:  #5e5a55;
+  --t-bg-border:    #6b6660;
+  --t-accent:       #fbbf24;
+  --t-accent-fg:    #1c1917;
+  --t-fg-primary:   #fafaf9;
+  --t-fg-secondary: #a8a29e;
+  --t-fg-muted:     #78716c;
+  --t-user-bubble:  #d97706;
+  --t-user-fg:      #ffffff;
+  --t-avatar-bg:    #fbbf24;
+  --t-chatbutton-bg:#fbbf24;
+  color-scheme: dark;
+}
+
 /* ─── Tailwind design tokens (reference CSS vars so runtime theme changes work) */
 
 @theme {

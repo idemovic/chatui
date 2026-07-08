@@ -87,10 +87,10 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
 
     setUploadError(null)
 
-    // 1. Enforce 5MB size limit on ChatUI side
-    const maxSizeBytes = 5 * 1024 * 1024 // 5MB
+    // 1. Enforce 1MB size limit on ChatUI side
+    const maxSizeBytes = 1 * 1024 * 1024 // 1MB
     if (file.size > maxSizeBytes) {
-      setUploadError("File size exceeds the maximum limit of 5MB.")
+      setUploadError("File size exceeds the maximum limit of 1MB.")
       e.target.value = ''
       return
     }

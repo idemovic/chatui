@@ -69,7 +69,7 @@ const instance = createChat({
 - **Optional tabs** — surface a Notifications feed (URL or inline JSON) and a searchable FAQ alongside the chat
 - **SSE streaming** — optional word-by-word bot responses
 - **10 built-in themes** — Midnight, Ivory, Sunrise, Cosmos, Forest, Ocean, Cherry, Navy, Lavender, Amber; switch at runtime
-- **12 built-in avatars** + file upload (max 500 KB) or URL — same picker for the floating button icon
+- **30 built-in avatars** + file upload (max 500 KB) or URL — same picker for the floating button icon
 - **CTA popup** — timed speech-bubble with optional Web Audio notification, window mode only
 - **Conversation history** — optional sidebar with persistent multi-session history
 - **Per-language content** — initial messages, bot name, CTA text, welcome subtitle, tab titles, all configurable per language

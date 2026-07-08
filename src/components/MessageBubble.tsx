@@ -2,7 +2,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../store/settingsStore.ts'
-import { resolveAvatarUrl } from '../assets/avatars/index.ts'
+import { effectiveAvatarKey, resolveAvatarUrl } from '../assets/avatars/index.ts'
 import type { Message } from '../types/index.ts'
 
 interface Props {
@@ -15,7 +15,7 @@ function BotAvatar() {
   const botAvatar = useSettingsStore((s) => s.config.botAvatar)
   const url = resolveAvatarUrl(botAvatar)
   if (url) {
-    const isBubble = botAvatar === 'bubble'
+    const isBubble = effectiveAvatarKey(botAvatar) === 'bubble'
     return (
       <div
         className="w-7 h-7 rounded-full flex-shrink-0 overflow-hidden"
@@ -35,15 +35,15 @@ function BotAvatar() {
   )
 }
 
-function formatTime(ts: number): string {
-  return new Intl.DateTimeFormat(undefined, {
+function formatTime(ts: number, lang?: string): string {
+  return new Intl.DateTimeFormat(lang, {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(ts))
 }
 
 export function MessageBubble({ message, onRetry }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const isUser = message.role === 'user'
   const isFailed = isUser && message.status === 'failed'
   const isSending = isUser && message.status === 'sending'
@@ -194,7 +194,7 @@ export function MessageBubble({ message, onRetry }: Props) {
               )}
             </>
           ) : (
-            <span className="text-xs text-fg-muted">{formatTime(message.ts)}</span>
+            <span className="text-xs text-fg-muted">{formatTime(message.ts, i18n.language)}</span>
           )}
         </div>
       </div>

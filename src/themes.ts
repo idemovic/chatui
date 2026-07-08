@@ -22,7 +22,7 @@ export const themes: ThemeDef[] = [
   {
     id: 'cosmos',
     label: 'Cosmos',
-    baseColor: '#0d0a1a',
+    baseColor: '#1e1a30',
     accentColor: '#a855f7'
   },
   {
@@ -60,6 +60,30 @@ export const themes: ThemeDef[] = [
     label: 'Amber',
     baseColor: '#0f0a00',
     accentColor: '#f59e0b'
+  },
+  {
+    id: 'slate',
+    label: 'Slate',
+    baseColor: '#334155',
+    accentColor: '#38bdf8'
+  },
+  {
+    id: 'graphite',
+    label: 'Graphite',
+    baseColor: '#424242',
+    accentColor: '#f472b6'
+  },
+  {
+    id: 'teal',
+    label: 'Teal',
+    baseColor: '#F1F5F9',
+    accentColor: '#0D9488'
+  },
+  {
+    id: 'stone',
+    label: 'Stone',
+    baseColor: '#44403c',
+    accentColor: '#fbbf24'
   },
 ]
 

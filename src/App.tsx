@@ -10,7 +10,7 @@ import { Sidebar } from './components/Sidebar.tsx'
 import { ChatView } from './components/ChatView.tsx'
 import { SettingsModal } from './components/SettingsModal.tsx'
 import { CtaPopup } from './components/CtaPopup.tsx'
-import { resolveAvatarUrl } from './assets/avatars/index.ts'
+import { effectiveAvatarKey, resolveAvatarUrl } from './assets/avatars/index.ts'
 
 /** Tracks whether the viewport qualifies as desktop.
  *  Requires both min-width: 768px and min-height: 600px so phones in
@@ -134,8 +134,8 @@ export function App() {
         {!chatOpen && (
           <ToggleButton
             open={false}
-            iconSrc={resolveAvatarUrl(config.toggleButtonIcon)}
-            iconKey={config.toggleButtonIcon}
+            iconSrc={resolveAvatarUrl(config.toggleButtonIcon ?? config.botAvatar)}
+            iconKey={config.toggleButtonIcon ?? config.botAvatar}
             onClick={openChat}
           />
         )}
@@ -193,8 +193,8 @@ export function App() {
           )}
           <ToggleButton
             open={false}
-            iconSrc={resolveAvatarUrl(config.toggleButtonIcon)}
-            iconKey={config.toggleButtonIcon}
+            iconSrc={resolveAvatarUrl(config.toggleButtonIcon ?? config.botAvatar)}
+            iconKey={config.toggleButtonIcon ?? config.botAvatar}
             onClick={openChat}
           />
         </>
@@ -219,13 +219,15 @@ function ToggleButton({
   onClick: () => void
 }) {
   const showImage = Boolean(iconSrc) && !open
-  const isBubble = !iconKey || iconKey === 'bubble'
+  const resolvedKey = effectiveAvatarKey(iconKey)
+  const isBubble = !resolvedKey || resolvedKey === 'bubble'
   return (
     <button
-      className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 overflow-hidden"
+      className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full flex items-center justify-center transition-transform hover:scale-105 overflow-hidden"
       style={{
         background: isBubble ? 'var(--t-accent)' : 'var(--t-chatbutton-bg)',
         color: 'var(--t-accent-fg)',
+        boxShadow: '0 10px 28px -4px rgba(0, 0, 0, 0.35), 0 4px 12px -2px rgba(0, 0, 0, 0.18)',
       }}
       onClick={onClick}
       aria-label="Toggle chat"

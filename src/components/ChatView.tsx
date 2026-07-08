@@ -8,7 +8,7 @@ import { InputArea } from './InputArea.tsx'
 import { Tabs } from './Tabs.tsx'
 import { NotificationsTab } from './NotificationsTab.tsx'
 import { FaqTab } from './FaqTab.tsx'
-import { resolveAvatarUrl } from '../assets/avatars/index.ts'
+import { effectiveAvatarKey, resolveAvatarUrl } from '../assets/avatars/index.ts'
 
 type TabId = 'notifications' | 'help' | 'chat'
 
@@ -122,7 +122,7 @@ export function ChatView({ onOpenSettings, onClose }: Props) {
               src={resolveAvatarUrl(config.botAvatar)}
               alt=""
               className="w-7 h-7 rounded-full object-cover flex-shrink-0"
-              style={{ border: '1px solid var(--t-bg-border)', background: config.botAvatar === 'bubble' ? 'var(--t-accent)' : 'var(--t-avatar-bg)' }}
+              style={{ border: '1px solid var(--t-bg-border)', background: effectiveAvatarKey(config.botAvatar) === 'bubble' ? 'var(--t-accent)' : 'var(--t-avatar-bg)' }}
             />
           ) : (
             <div className="w-2 h-2 rounded-full" style={{ background: 'var(--t-accent)' }} />

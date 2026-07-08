@@ -239,10 +239,9 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
             </Field>
 
             <Field label={t('settings.toggleButtonIcon')}>
-              <AvatarPicker
+              <ToggleIconPicker
                 value={local.toggleButtonIcon}
                 onChange={(v) => setLocal((l) => ({ ...l, toggleButtonIcon: v }))}
-                shape="circle"
               />
             </Field>
 
@@ -693,6 +692,9 @@ function Toggle({ label, checked, onChange }: {
   )
 }
 
+const WHITE_BG_AVATARS = new Set(['bean', 'owl', 'elia', 'orb'])
+const GRID_WHITE_BG_AVATARS = new Set(['bean', 'owl', 'elia', 'orb'])
+
 function AvatarPicker({
   value,
   onChange,
@@ -705,6 +707,8 @@ function AvatarPicker({
   const { t } = useTranslation()
   const previewUrl = resolveAvatarUrl(value)
   const radius = shape === 'circle' ? 'rounded-full' : 'rounded-lg'
+  const previewBg = value && WHITE_BG_AVATARS.has(value) ? '#ffffff' : 'var(--t-accent)'
+  const previewColor = value && WHITE_BG_AVATARS.has(value) ? '#000000' : 'var(--t-accent-fg)'
 
   return (
     <div className="space-y-3">
@@ -713,9 +717,8 @@ function AvatarPicker({
         <div
           className={`w-14 h-14 ${radius} overflow-hidden flex items-center justify-center text-xs`}
           style={{
-            background: 'var(--t-bg-surface2)',
-            color: 'var(--t-fg-muted)',
-            border: '1px solid var(--t-bg-border)',
+            background: previewBg,
+            color: previewColor,
           }}
         >
           {previewUrl ? (
@@ -748,6 +751,7 @@ function AvatarPicker({
               style={{
                 outline: selected ? '2px solid var(--t-accent)' : '1px solid var(--t-bg-border)',
                 outlineOffset: selected ? '1px' : '0',
+                background: GRID_WHITE_BG_AVATARS.has(id) ? '#ffffff' : 'var(--t-accent)',
               }}
               title={id}
             >
@@ -768,6 +772,81 @@ function AvatarPicker({
         }}
         className="input-field w-full text-xs"
       />
+    </div>
+  )
+}
+
+const TOGGLE_SPECIAL_ICONS = ['elia', 'orb', 'bubble'] as const
+
+function ToggleIconPicker({
+  value,
+  onChange,
+}: {
+  value: string | undefined
+  onChange: (v: string | undefined) => void
+}) {
+  const { t } = useTranslation()
+  const isSameAsBot = value === undefined
+
+  const handleCheckbox = (checked: boolean) => {
+    if (checked) {
+      onChange(undefined)
+    } else {
+      const first = TOGGLE_SPECIAL_ICONS.find((id) => builtInAvatars[id])
+      onChange(first)
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+        <div
+          className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center transition-colors"
+          style={{
+            background: isSameAsBot ? 'var(--t-accent)' : 'var(--t-bg-surface2)',
+            border: `1px solid ${isSameAsBot ? 'var(--t-accent)' : 'var(--t-bg-border)'}`,
+          }}
+          onClick={() => handleCheckbox(!isSameAsBot)}
+        >
+          {isSameAsBot && (
+            <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="var(--t-accent-fg)" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M2 6l3 3 5-5" />
+            </svg>
+          )}
+        </div>
+        <span className="text-sm text-fg-secondary">{t('settings.toggleButtonSameAsAvatar')}</span>
+      </label>
+
+      <div
+        className="flex items-center gap-3 flex-wrap"
+        style={{ opacity: isSameAsBot ? 0.35 : 1, pointerEvents: isSameAsBot ? 'none' : 'auto', transition: 'opacity 0.15s' }}
+      >
+        {TOGGLE_SPECIAL_ICONS.map((id) => {
+          if (!builtInAvatars[id]) return null
+          const selected = value === id
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onChange(id)}
+              className="flex flex-col items-center gap-1 transition-transform hover:scale-105"
+              title={id}
+            >
+              <div
+                className="w-10 h-10 rounded-full overflow-hidden"
+                style={{
+                  outline: selected ? '2px solid var(--t-accent)' : '1px solid var(--t-bg-border)',
+                  outlineOffset: selected ? '1px' : '0',
+                  background: WHITE_BG_AVATARS.has(id) ? '#ffffff' : 'var(--t-accent)',
+                }}
+              >
+                <img src={builtInAvatars[id]} alt={id} className="w-full h-full object-cover" />
+              </div>
+              <span className="text-[10px] text-fg-muted">{id}</span>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
