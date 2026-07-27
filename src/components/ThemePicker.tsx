@@ -17,7 +17,7 @@ export function ThemePicker() {
           {activeTheme === t.id && (
             <span
               className="absolute inset-0 rounded-full"
-              style={{ boxShadow: `0 0 0 2px ${t.baseColor}, 0 0 0 4px ${t.baseColor}`}}
+              style={{ boxShadow: `0 0 0 2px ${t.baseColor}, 0 0 0 4px ${t.accentColor}`}}
             />
           )}
         </button>

@@ -1,8 +1,7 @@
-import './i18n.ts'
 import './index.css'
 import { useState, useEffect, useRef } from 'react'
-import { useSettingsStore } from './store/settingsStore.ts'
-import { useChatStore } from './store/chatStore.ts'
+import { useSettingsStore, useChatStore, useStorageNamespace } from './store/StoreContext.tsx'
+import { scopedKey } from './lib/storage.ts'
 import { useTheme } from './hooks/useTheme.ts'
 import { useCta } from './hooks/useCta.ts'
 import { useAgentStream } from './hooks/useAgentStream.ts'
@@ -10,7 +9,7 @@ import { Sidebar } from './components/Sidebar.tsx'
 import { ChatView } from './components/ChatView.tsx'
 import { SettingsModal } from './components/SettingsModal.tsx'
 import { CtaPopup } from './components/CtaPopup.tsx'
-import { effectiveAvatarKey, resolveAvatarUrl } from './assets/avatars/index.ts'
+import { effectiveAvatarKey, resolveAvatarUrl, avatarContainerBg } from './assets/avatars/index.ts'
 
 /** Tracks whether the viewport qualifies as desktop.
  *  Requires both min-width: 768px and min-height: 600px so phones in
@@ -45,7 +44,12 @@ export function App() {
   const isWindow =
     config.mode === 'window' || (config.mode === 'mixed' && isDesktop)
 
+  const isLeft = config.position === 'left'
+  const side = isLeft ? 'left-4' : 'right-4'
+
   const [chatOpen, setChatOpen] = useState(false)
+  const maximizedKey = scopedKey('chatui-maximized', useStorageNamespace())
+  const [maximized, setMaximized] = useState(() => sessionStorage.getItem(maximizedKey) === '1')
 
   const showSidebar = false; // not using sidebar currently
   const hideSettings = config.hideSettings ?? false
@@ -55,6 +59,27 @@ export function App() {
   const openSettings = () => {
     if (!hideSettings) setSettingsOpen(true)
   }
+
+  useEffect(() => {
+    sessionStorage.setItem(maximizedKey, maximized ? '1' : '0')
+    if (wrapperRef.current) {
+      wrapperRef.current.style.zIndex = maximized ? '1000000' : ''
+    }
+  }, [maximized, maximizedKey])
+
+  useEffect(() => {
+    if (maximized && chatOpen) {
+      const prev = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => { document.body.style.overflow = prev }
+    }
+  }, [maximized, chatOpen])
+
+  useEffect(() => {
+    if (wrapperRef.current) {
+      wrapperRef.current.dataset.position = config.position ?? 'right'
+    }
+  }, [config.position, wrapperRef])
 
   // Ensure a session exists on first load
   useEffect(() => {
@@ -112,22 +137,56 @@ export function App() {
     </div>
   )
 
+  // ── Embedded mode — fills the target element, no toggle button ──────────
+  if (config.mode === 'embedded') {
+    return (
+      // .chat-ui's base CSS sets position: absolute (needed so window/mixed/fullscreen
+      // modes can stack fixed-positioned children above the page), which takes this div
+      // out of flow and breaks its flex/w-full sizing. Embedded mode has no fixed-positioned
+      // children, so override back to a normal flow position here.
+      <div className="chat-ui flex flex-col h-full w-full" ref={wrapperRef} style={{ position: 'static' }}>
+        <ChatView onOpenSettings={openSettings} />
+        {!hideSettings && settingsOpen && (
+          <SettingsModal onClose={() => setSettingsOpen(false)} />
+        )}
+      </div>
+    )
+  }
+
   // ── Window mode (or 'mixed' on desktop) ─────────────────────────────────
   if (isWindow) {
     return (
       <div className="chat-ui" ref={wrapperRef}>
+        {chatOpen && maximized && (
+          <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.85)', pointerEvents: 'all', cursor: 'default' }} />
+        )}
+
         {chatOpen && (
           <div
-            className="fixed bottom-4 right-4 z-50 w-[380px] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
-            style={{ border: '1px solid var(--t-bg-border)', background: 'var(--t-bg-base)', height: 'min(560px, calc(100vh - 32px))' }}
+            className={`fixed z-50 rounded-2xl shadow-2xl overflow-hidden flex flex-col ${
+              maximized ? '' : `bottom-4 ${side} w-[380px]`
+            }`}
+            style={{
+              border: '1px solid var(--t-bg-border)',
+              background: 'var(--t-bg-base)',
+              ...(maximized
+                ? { top: '1rem', bottom: '1rem', left: 0, right: 0, margin: '0 auto', width: 'calc(100% - 2rem)', maxWidth: '800px' }
+                : { height: 'min(560px, calc(100vh - 32px))' }
+              ),
+            }}
           >
-            <ChatView onOpenSettings={openSettings} onClose={closeChat} />
+            <ChatView
+              onOpenSettings={openSettings}
+              onClose={closeChat}
+              maximized={maximized}
+              onToggleMaximize={() => setMaximized((m) => !m)}
+            />
           </div>
         )}
 
         {showCta && !chatOpen && (
-          <div className="fixed bottom-20 right-4 z-50">
-            <CtaPopup text={ctaText} onDismiss={dismissCta} />
+          <div className={`fixed bottom-20 ${side} z-50`}>
+            <CtaPopup text={ctaText} onDismiss={dismissCta} align={isLeft ? 'left' : 'right'} />
           </div>
         )}
 
@@ -136,6 +195,7 @@ export function App() {
             open={false}
             iconSrc={resolveAvatarUrl(config.toggleButtonIcon ?? config.botAvatar)}
             iconKey={config.toggleButtonIcon ?? config.botAvatar}
+            align={isLeft ? 'left' : 'right'}
             onClick={openChat}
           />
         )}
@@ -187,14 +247,15 @@ export function App() {
       ) : (
         <>
           {showCta && (
-            <div className="fixed bottom-20 right-4 z-50">
-              <CtaPopup text={ctaText} onDismiss={dismissCta} />
+            <div className={`fixed bottom-20 ${side} z-50`}>
+              <CtaPopup text={ctaText} onDismiss={dismissCta} align={isLeft ? 'left' : 'right'} />
             </div>
           )}
           <ToggleButton
             open={false}
             iconSrc={resolveAvatarUrl(config.toggleButtonIcon ?? config.botAvatar)}
             iconKey={config.toggleButtonIcon ?? config.botAvatar}
+            align={isLeft ? 'left' : 'right'}
             onClick={openChat}
           />
         </>
@@ -211,11 +272,13 @@ function ToggleButton({
   open,
   iconSrc,
   iconKey,
+  align = 'right',
   onClick,
 }: {
   open: boolean
   iconSrc: string | undefined
   iconKey?: string
+  align?: 'right' | 'left'
   onClick: () => void
 }) {
   const showImage = Boolean(iconSrc) && !open
@@ -223,9 +286,9 @@ function ToggleButton({
   const isBubble = !resolvedKey || resolvedKey === 'bubble'
   return (
     <button
-      className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full flex items-center justify-center transition-transform hover:scale-105 overflow-hidden"
+      className={`fixed bottom-4 ${align === 'left' ? 'left-4' : 'right-4'} z-50 w-14 h-14 rounded-full flex items-center justify-center transition-transform hover:scale-105 overflow-hidden`}
       style={{
-        background: isBubble ? 'var(--t-accent)' : 'var(--t-chatbutton-bg)',
+        background: isBubble ? 'var(--t-accent)' : avatarContainerBg(iconKey),
         color: 'var(--t-accent-fg)',
         boxShadow: '0 10px 28px -4px rgba(0, 0, 0, 0.35), 0 4px 12px -2px rgba(0, 0, 0, 0.18)',
       }}

@@ -64,7 +64,7 @@ export interface ChatConfig {
   theme?: string
   /** Override individual CSS variables on the widget root, e.g. { '--t-avatar-bg': '#ff0000' } */
   cssVars?: Record<string, string>
-  mode?: 'window' | 'fullscreen' | 'mixed'
+  mode?: 'window' | 'fullscreen' | 'mixed' | 'embedded'
   // CTA popup (window mode only)
   showCta?: boolean
   ctaText?: string
@@ -72,6 +72,8 @@ export interface ChatConfig {
   ctaSound?: boolean
   /** Hide the built-in settings UI (gear button, theme picker, settings modal). */
   hideSettings?: boolean
+  /** Alignment of the floating widget (toggle button + chat window). Default: 'right'. */
+  position?: 'right' | 'left'
   /** Bot avatar. Built-in id (e.g. 'amara'), URL, or data URL. */
   botAvatar?: string
   /** Popup toggle button icon (window mode). Built-in id, URL, or data URL. */

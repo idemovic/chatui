@@ -1,8 +1,8 @@
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useTranslation } from 'react-i18next'
-import { useSettingsStore } from '../store/settingsStore.ts'
-import { effectiveAvatarKey, resolveAvatarUrl } from '../assets/avatars/index.ts'
+import { useSettingsStore } from '../store/StoreContext.tsx'
+import { resolveAvatarUrl, avatarContainerBg } from '../assets/avatars/index.ts'
 import type { Message } from '../types/index.ts'
 
 interface Props {
@@ -15,11 +15,10 @@ function BotAvatar() {
   const botAvatar = useSettingsStore((s) => s.config.botAvatar)
   const url = resolveAvatarUrl(botAvatar)
   if (url) {
-    const isBubble = effectiveAvatarKey(botAvatar) === 'bubble'
     return (
       <div
         className="w-7 h-7 rounded-full flex-shrink-0 overflow-hidden"
-        style={{ background: isBubble ? 'var(--t-accent)' : 'var(--t-avatar-bg)' }}
+        style={{ background: avatarContainerBg(botAvatar) }}
       >
         <img src={url} alt="" className="w-full h-full object-cover" />
       </div>
@@ -54,7 +53,7 @@ export function MessageBubble({ message, onRetry }: Props) {
       {isUser ? (
         <div
           className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center"
-          style={{ background: 'var(--t-user-bubble)', color: 'var(--t-user-fg)' }}
+          style={{ background: 'var(--t-user-bubble)', color: 'var(--t-accent-fg)' }}
         >
           <svg
             width="14"
@@ -82,7 +81,7 @@ export function MessageBubble({ message, onRetry }: Props) {
             isUser
               ? {
                 background: 'var(--t-user-bubble)',
-                color: 'var(--t-user-fg)',
+                color: 'var(--t-accent-fg)',
                 borderBottomRightRadius: '4px',
                 opacity: isSending ? 0.7 : 1,
                 outline: isFailed ? '1px solid rgba(239, 68, 68, 0.6)' : undefined,
@@ -141,11 +140,11 @@ export function MessageBubble({ message, onRetry }: Props) {
                     isUser
                       ? {
                           background: 'rgba(255, 255, 255, 0.15)',
-                          color: 'var(--t-user-fg)',
+                          color: 'var(--t-accent-fg)',
                           borderColor: 'rgba(255, 255, 255, 0.25)',
                         }
                       : {
-                          background: 'var(--t-bg-surface2, var(--t-bg-surface))',
+                          background: 'var(--t-bg-surface)',
                           color: 'var(--t-fg-primary)',
                           borderColor: 'var(--t-bg-border)',
                         }

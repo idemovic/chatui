@@ -1,5 +1,5 @@
 import { useEffect, type RefObject } from 'react'
-import { useSettingsStore } from '../store/settingsStore.ts'
+import { useSettingsStore } from '../store/StoreContext.tsx'
 import { getTheme } from '../themes.ts'
 
 export function useTheme({

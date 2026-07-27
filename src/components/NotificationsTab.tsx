@@ -92,7 +92,7 @@ function variantStyles(variant: NotificationTagVariant) {
     case 'neutral':
     default:
       return {
-        background: 'var(--t-bg-surface2)',
+        background: 'var(--t-bg-surface)',
         color: 'var(--t-fg-secondary)',
       }
   }

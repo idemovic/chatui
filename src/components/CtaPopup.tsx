@@ -1,12 +1,13 @@
 interface Props {
   text: string
   onDismiss: () => void
+  align?: 'right' | 'left'
 }
 
-export function CtaPopup({ text, onDismiss }: Props) {
+export function CtaPopup({ text, onDismiss, align = 'right' }: Props) {
   return (
     <div
-      className="absolute bottom-2 right-0 mb-2 w-64 cta-bubble rounded-2xl px-4 py-3 shadow-xl text-sm"
+      className={`absolute bottom-2 mb-2 w-64 cta-bubble rounded-2xl px-4 py-3 shadow-xl text-sm ${align === 'left' ? 'left-0' : 'right-0'}`}
       style={{
         background: 'var(--t-bg-surface)',
         border: '1px solid var(--t-bg-border)',

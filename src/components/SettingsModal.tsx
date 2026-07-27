@@ -1,7 +1,7 @@
 import { useState, useCallback, type ReactNode } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
-import { useSettingsStore } from '../store/settingsStore.ts'
-import { builtInAvatarIds, builtInAvatars, resolveAvatarUrl } from '../assets/avatars/index.ts'
+import { useSettingsStore } from '../store/StoreContext.tsx'
+import { builtInAvatarIds, builtInAvatars, resolveAvatarUrl, WHITE_BG_AVATARS, THEME_BG_AVATARS } from '../assets/avatars/index.ts'
 import { ThemePicker } from './ThemePicker.tsx'
 import type { ChatConfig, LangOverride } from '../types/index.ts'
 
@@ -44,12 +44,11 @@ export function SettingsModal({ onClose }: Props) {
         delete (cfg as Record<string, unknown>)[k]
       }
     })
-    return `import { useSettingsStore } from 'chatui/store'
+    return `// Apply to the instance returned by createChat(...):
+instance.setConfig(${JSON.stringify(cfg, null, 2)})
 
-useSettingsStore.getState().setConfig(${JSON.stringify(cfg, null, 2)})
-
-useSettingsStore.getState().setTheme(${JSON.stringify(activeTheme)})
-useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
+instance.setTheme(${JSON.stringify(activeTheme)})
+instance.setLanguage(${JSON.stringify(language)})
 `
   })()
 
@@ -62,7 +61,7 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
 
   // Per-language tab state
   const langKeys = Object.keys(local.i18n ?? {})
-  const allLangTabs = Array.from(new Set(['en', 'sk', ...langKeys]))
+  const allLangTabs = Array.from(new Set(['en', 'sk', 'cs', ...langKeys]))
   const [activeLangTab, setActiveLangTab] = useState(language)
   const [newLangCode, setNewLangCode] = useState('')
   const [showAddLang, setShowAddLang] = useState(false)
@@ -116,7 +115,7 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
       <div
         className="w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         style={{
-          background: 'var(--t-bg-surface)',
+          background: 'var(--t-bg-base)',
           border: '1px solid var(--t-bg-border)',
           maxHeight: '90vh',
         }}
@@ -151,7 +150,7 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
               value={exportCode}
               className="w-full font-mono text-xs p-3 rounded-lg resize-none"
               style={{
-                background: 'var(--t-bg-surface2)',
+                background: 'var(--t-bg-surface)',
                 color: 'var(--t-fg-primary)',
                 border: '1px solid var(--t-bg-border)',
                 minHeight: '300px',
@@ -166,10 +165,7 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
             {/* ── Interface language ── */}
             <Field label={t('settings.language')}>
               <div className="flex flex-wrap gap-2">
-                {[
-                  { code: 'en', label: 'EN' },
-                  { code: 'sk', label: 'SK' },
-                ].map((l) => (
+                {KNOWN_LANGS.filter((l) => ['en', 'sk', 'cs'].includes(l.code)).map((l) => (
                   <button
                     key={l.code}
                     onClick={() => setLanguage(l.code)}
@@ -177,7 +173,7 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
                     style={
                       language === l.code
                         ? { background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }
-                        : { background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }
+                        : { background: 'var(--t-bg-surface)', color: 'var(--t-fg-secondary)' }
                     }
                   >
                     {l.label}
@@ -337,7 +333,7 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
                     className="flex-1 py-1.5 rounded-lg text-sm capitalize transition-colors"
                     style={local.mode === m
                       ? { background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }
-                      : { background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }
+                      : { background: 'var(--t-bg-surface)', color: 'var(--t-fg-secondary)' }
                     }
                   >{m}</button>
                 ))}
@@ -360,6 +356,20 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
                 )}
               </div>
             )}
+
+            <Field label={t('settings.position')}>
+              <div className="flex gap-2">
+                {(['left', 'right'] as const).map((p) => (
+                  <button key={p} onClick={() => setLocal((l) => ({ ...l, position: p }))}
+                    className="flex-1 py-1.5 rounded-lg text-sm capitalize transition-colors"
+                    style={(local.position ?? 'right') === p
+                      ? { background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }
+                      : { background: 'var(--t-bg-surface)', color: 'var(--t-fg-secondary)' }
+                    }
+                  >{t(`settings.position_${p}`)}</button>
+                ))}
+              </div>
+            </Field>
 
             <hr style={{ borderColor: 'var(--t-bg-border)' }} />
 
@@ -501,7 +511,7 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
                     style={
                       activeLangTab === lang
                         ? { background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }
-                        : { background: 'var(--t-bg-surface2)', color: 'var(--t-fg-secondary)' }
+                        : { background: 'var(--t-bg-surface)', color: 'var(--t-fg-secondary)' }
                     }
                   >
                     {lang}
@@ -647,7 +657,7 @@ useSettingsStore.getState().setLanguage(${JSON.stringify(language)})
           padding: 8px 12px;
           border-radius: 8px;
           font-size: 13px;
-          background: var(--t-bg-surface2);
+          background: var(--t-bg-surface);
           color: var(--t-fg-primary);
           border: 1px solid var(--t-bg-border);
           outline: none;
@@ -682,7 +692,7 @@ function Toggle({ label, checked, onChange }: {
   return (
     <label className="flex items-center gap-3 cursor-pointer select-none">
       <div className="relative w-9 h-5 rounded-full transition-colors"
-        style={{ background: checked ? 'var(--t-accent)' : 'var(--t-bg-surface2)' }}
+        style={{ background: checked ? 'var(--t-accent)' : 'var(--t-bg-surface)' }}
         onClick={() => onChange(!checked)}>
         <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform shadow"
           style={{ left: checked ? '18px' : '2px' }} />
@@ -692,8 +702,6 @@ function Toggle({ label, checked, onChange }: {
   )
 }
 
-const WHITE_BG_AVATARS = new Set(['bean', 'owl', 'elia', 'orb'])
-const GRID_WHITE_BG_AVATARS = new Set(['bean', 'owl', 'elia', 'orb'])
 
 function AvatarPicker({
   value,
@@ -707,8 +715,14 @@ function AvatarPicker({
   const { t } = useTranslation()
   const previewUrl = resolveAvatarUrl(value)
   const radius = shape === 'circle' ? 'rounded-full' : 'rounded-lg'
-  const previewBg = value && WHITE_BG_AVATARS.has(value) ? '#ffffff' : 'var(--t-accent)'
-  const previewColor = value && WHITE_BG_AVATARS.has(value) ? '#000000' : 'var(--t-accent-fg)'
+  const previewBg = !value
+    ? 'var(--t-bg-surface)'
+    : WHITE_BG_AVATARS.has(value)
+      ? '#ffffff'
+      : THEME_BG_AVATARS.has(value)
+        ? 'var(--t-accent)'
+        : 'transparent'
+  const previewColor = value && WHITE_BG_AVATARS.has(value) ? '#000000' : 'var(--t-fg-secondary)'
 
   return (
     <div className="space-y-3">
@@ -751,7 +765,7 @@ function AvatarPicker({
               style={{
                 outline: selected ? '2px solid var(--t-accent)' : '1px solid var(--t-bg-border)',
                 outlineOffset: selected ? '1px' : '0',
-                background: GRID_WHITE_BG_AVATARS.has(id) ? '#ffffff' : 'var(--t-accent)',
+                background: WHITE_BG_AVATARS.has(id) ? '#ffffff' : THEME_BG_AVATARS.has(id) ? 'var(--t-accent)' : 'transparent',
               }}
               title={id}
             >
@@ -776,7 +790,7 @@ function AvatarPicker({
   )
 }
 
-const TOGGLE_SPECIAL_ICONS = ['elia', 'orb', 'bubble'] as const
+const TOGGLE_SPECIAL_ICONS = ['elia', 'orb', 'liquidorb', 'bubble'] as const
 
 function ToggleIconPicker({
   value,
@@ -803,7 +817,7 @@ function ToggleIconPicker({
         <div
           className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center transition-colors"
           style={{
-            background: isSameAsBot ? 'var(--t-accent)' : 'var(--t-bg-surface2)',
+            background: isSameAsBot ? 'var(--t-accent)' : 'var(--t-bg-surface)',
             border: `1px solid ${isSameAsBot ? 'var(--t-accent)' : 'var(--t-bg-border)'}`,
           }}
           onClick={() => handleCheckbox(!isSameAsBot)}
@@ -837,7 +851,7 @@ function ToggleIconPicker({
                 style={{
                   outline: selected ? '2px solid var(--t-accent)' : '1px solid var(--t-bg-border)',
                   outlineOffset: selected ? '1px' : '0',
-                  background: WHITE_BG_AVATARS.has(id) ? '#ffffff' : 'var(--t-accent)',
+                  background: WHITE_BG_AVATARS.has(id) ? '#ffffff' : THEME_BG_AVATARS.has(id) ? 'var(--t-accent)' : 'transparent',
                 }}
               >
                 <img src={builtInAvatars[id]} alt={id} className="w-full h-full object-cover" />

@@ -236,64 +236,127 @@
 
 <h2 id="mount">3. Minimal mount</h2>
 <p>
-  A single entry file is enough. The widget reads its configuration from chatui's Zustand store, so
-  you set the config once before React renders and everything picks it up from there.
+  <code>createChat()</code> is the entry point for every integration, React or not. It builds the
+  widget's state, translations and shadow root, and hands back an instance you can reconfigure or
+  unmount later. Pass your configuration straight to the call.
 </p>
 
-<pre><code><span class="c">// src/main.tsx</span>
-<span class="k">import</span> { StrictMode } <span class="k">from</span> <span class="s">'react'</span>
-<span class="k">import</span> { createRoot } <span class="k">from</span> <span class="s">'react-dom/client'</span>
+<pre><code><span class="c">// src/ChatWidget.tsx</span>
+<span class="k">import</span> { useEffect, useRef } <span class="k">from</span> <span class="s">'react'</span>
+<span class="k">import</span> { createChat, <span class="k">type</span> ChatInstance } <span class="k">from</span> <span class="s">'@elia-assistant/chatui'</span>
 
-<span class="k">import</span> { App <span class="k">as</span> ChatWidget } <span class="k">from</span> <span class="s">'@elia-assistant/chatui'</span>
-<span class="k">import</span> { useSettingsStore }    <span class="k">from</span> <span class="s">'@elia-assistant/chatui/store'</span>
+<span class="k">export function</span> ChatWidget() {
+  <span class="k">const</span> containerRef = useRef&lt;HTMLDivElement&gt;(null)
+  <span class="k">const</span> instanceRef  = useRef&lt;ChatInstance | null&gt;(null)
 
-<span class="c">// Configure BEFORE the first render. setConfig merges into the persisted store.</span>
-useSettingsStore.getState().setConfig({
+  useEffect(() =&gt; {
+    <span class="k">if</span> (!containerRef.current || instanceRef.current) <span class="k">return</span>
+
+    instanceRef.current = createChat({
+      target:      containerRef.current,
+      webhookUrl:  <span class="s">'https://your-n8n.example.com/webhook/abc123'</span>,
+      mode:        <span class="s">'window'</span>,
+      botName:     <span class="s">'Support'</span>,
+      streaming:   true,
+      theme:       <span class="s">'midnight'</span>,
+      language:    <span class="s">'en'</span>,
+    })
+
+    <span class="k">return</span> () =&gt; {
+      <span class="c">// Deferred so StrictMode's double-invoke doesn't unmount mid-render.</span>
+      <span class="k">const</span> instance = instanceRef.current
+      instanceRef.current = null
+      setTimeout(() =&gt; instance?.unmount(), 0)
+    }
+  }, [])
+
+  <span class="c">// The chat panel needs a sized parent.</span>
+  <span class="k">return</span> &lt;div ref={containerRef} style={{ height: <span class="s">'100vh'</span> }} /&gt;
+}</code></pre>
+
+<div class="callout">
+  <strong>Reconfiguring later.</strong> The returned instance exposes
+  <code>setConfig(patch)</code>, <code>setTheme(id)</code>, <code>setLanguage(lang)</code> and
+  <code>unmount()</code>, so you never need to reach into the widget's internal state. There is no
+  global store to import - see <a href="#multi">multiple widgets</a> for why.
+</div>
+
+<h3>Raw component tree (no shadow root)</h3>
+<p>
+  If you specifically need the widget inside your own React tree rather than a shadow root, render
+  <code>&lt;App /&gt;</code> directly. It reads its stores and translations from context, so you
+  build them yourself and supply both providers. Note that this path does not inject the widget's
+  CSS for you.
+</p>
+
+<pre><code><span class="k">import</span> { I18nextProvider } <span class="k">from</span> <span class="s">'react-i18next'</span>
+<span class="k">import</span> {
+  App,
+  StoreProvider,
+  createChatI18n,
+  createSettingsStore,
+  createChatStore,
+} <span class="k">from</span> <span class="s">'@elia-assistant/chatui'</span>
+
+<span class="c">// Create these once, at module scope - not on every render.</span>
+<span class="k">const</span> i18n          = createChatI18n()
+<span class="k">const</span> settingsStore = createSettingsStore(i18n)
+<span class="k">const</span> chatStore     = createChatStore()
+
+settingsStore.getState().setConfig({
   webhookUrl: <span class="s">'https://your-n8n.example.com/webhook/abc123'</span>,
-  mode:        <span class="s">'window'</span>,
-  botName:     <span class="s">'Support'</span>,
-  streaming:   true,
+  mode:       <span class="s">'window'</span>,
 })
-useSettingsStore.getState().setTheme(<span class="s">'midnight'</span>)
-useSettingsStore.getState().setLanguage(<span class="s">'en'</span>)
 
-<span class="k">const</span> rootEl = document.getElementById(<span class="s">'root'</span>)
-<span class="k">if</span> (!rootEl) <span class="k">throw new</span> Error(<span class="s">'Root element not found'</span>)
+<span class="k">export function</span> ChatWidget() {
+  <span class="k">return</span> (
+    &lt;I18nextProvider i18n={i18n}&gt;
+      &lt;StoreProvider settingsStore={settingsStore} chatStore={chatStore}&gt;
+        &lt;App /&gt;
+      &lt;/StoreProvider&gt;
+    &lt;/I18nextProvider&gt;
+  )
+}</code></pre>
 
-createRoot(rootEl).render(
-  &lt;StrictMode&gt;
-    <span class="c">{/* The chat panel needs a full-height parent. */}</span>
-    &lt;div style={{ height: <span class="s">'100vh'</span> }}&gt;
-      &lt;ChatWidget /&gt;
-    &lt;/div&gt;
-  &lt;/StrictMode&gt;,
-)</code></pre>
+<p>
+  Without both providers <code>&lt;App /&gt;</code> throws
+  <code>useSettingsStore must be used within a &lt;StoreProvider&gt;</code>.
+</p>
 
 <div class="callout">
   <strong>About persistence.</strong> chatui persists its config to <code>localStorage</code> under
-  the key <code>chatui-settings</code>. Calling <code>setConfig</code> on boot overwrites the
-  matching fields. Unset fields keep their stored values. If you want a fully clean slate, call
-  <code>localStorage.removeItem('chatui-settings')</code> before calling <code>setConfig</code>.
+  the key <code>chatui-settings</code>, and its conversation history under
+  <code>chatui-chat</code>. Options you pass to <code>createChat()</code> overwrite the matching
+  fields on boot; unset fields keep their stored values. For a clean slate, call
+  <code>localStorage.removeItem('chatui-settings')</code> before mounting.
 </div>
 
-<h3>Same thing without React (vanilla / CDN)</h3>
+<h3 id="multi">Multiple widgets on one page</h3>
 <p>
-  The package also exports a <code>createChat()</code> function. Use it from a non-React host or
-  a plain <code>&lt;script&gt;</code> tag — all options on the React entry are accepted, plus a required
-  <code>target</code> selector or element.
+  Every <code>createChat()</code> call owns its config, theme, UI language and conversation state,
+  so two widgets never overwrite each other's settings. A support widget and an embedded product
+  demo can sit on the same page and be themed independently.
 </p>
-<pre><code><span class="c">// ESM (bundler — same package, different entry)</span>
-<span class="k">import</span> { createChat } <span class="k">from</span> <span class="s">'@elia-assistant/chatui'</span>
+<p>
+  They do share one <code>localStorage</code>, though. Pass <code>storageNamespace</code> to keep
+  their persisted state apart:
+</p>
+<pre><code>createChat({ target: <span class="s">'#support'</span>, webhookUrl: <span class="s">'...'</span> })
 
-<span class="k">const</span> instance = createChat({
-  webhookUrl: <span class="s">'https://your-n8n.example.com/...'</span>,
-  mode:       <span class="s">'window'</span>,
-  language:   <span class="s">'sk'</span>,                             <span class="c">// optional shortcut for setLanguage()</span>
-  <span class="c">// target: '#chat',                          // optional — see note below</span>
-})
+createChat({
+  target:           <span class="s">'#demo'</span>,
+  webhookUrl:       <span class="s">'...'</span>,
+  mode:             <span class="s">'embedded'</span>,
+  theme:            <span class="s">'ivory'</span>,
+  storageNamespace: <span class="s">'demo'</span>,        <span class="c">// -> chatui-settings-demo, chatui-chat-demo</span>
+})</code></pre>
+<div class="callout info">
+  <strong>When to set it.</strong> Only when more than one instance can be mounted at once. Omit it
+  for the usual single-widget page and the default storage keys are used, so an existing install
+  keeps its saved settings and chat history.
+</div>
 
-<span class="c">// Later, if you need to remove it:</span>
-instance.unmount()</code></pre>
+<h3>Plain script tag (CDN)</h3>
 <p>From a <code>&lt;script&gt;</code> tag the global is named <code>Chatui</code>:</p>
 <pre><code>&lt;script src=<span class="s">"https://cdn.jsdelivr.net/npm/@elia-assistant/chatui/dist/chatui.iife.js"</span>&gt;&lt;/script&gt;
 &lt;script&gt;
@@ -315,9 +378,12 @@ instance.unmount()</code></pre>
   and delete the fields you do not need.
 </p>
 
-<pre><code><span class="k">import</span> { useSettingsStore } <span class="k">from</span> <span class="s">'@elia-assistant/chatui/store'</span>
+<pre><code><span class="k">import</span> { createChat } <span class="k">from</span> <span class="s">'@elia-assistant/chatui'</span>
 
-useSettingsStore.getState().setConfig({
+<span class="k">const</span> instance = createChat({
+
+  <span class="c">// ─── Mount target ────────────────────────────────────────────────</span>
+  target: <span class="s">'#chat'</span>,                            <span class="c">// selector or element; omit to append to body</span>
 
   <span class="c">// ─── Required ────────────────────────────────────────────────────</span>
   webhookUrl: <span class="s">'https://your-n8n.example.com/webhook/abc123'</span>,
@@ -339,6 +405,7 @@ useSettingsStore.getState().setConfig({
 
   <span class="c">// ─── Layout ───────────────────────────────────────────────────────</span>
   mode:        <span class="s">'window'</span>,                         <span class="c">// 'fullscreen' | 'window' | 'mixed'</span>
+  position:    <span class="s">'right'</span>,                          <span class="c">// 'right' (default) | 'left' — side the widget floats on</span>
 
   <span class="c">// ─── Bottom-sheet style (fullscreen / mixed-on-mobile) ──────────</span>
   fullscreenSheet:       false,                      <span class="c">// don't fully cover the viewport; sheet docked to bottom</span>
@@ -396,11 +463,15 @@ useSettingsStore.getState().setConfig({
       ctaText:         <span class="s">'Vyskúšajte ma!'</span>,
     },
   },
+
+  <span class="c">// ─── Initial theme and language ───────────────────────────────────</span>
+  theme:    <span class="s">'cosmos'</span>,
+  language: <span class="s">'sk'</span>,
 })
 
-<span class="c">// Theme and active language are separate state slices</span>
-useSettingsStore.getState().setTheme(<span class="s">'cosmos'</span>)
-useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre>
+<span class="c">// Or change either one later, without remounting:</span>
+instance.setTheme(<span class="s">'cosmos'</span>)
+instance.setLanguage(<span class="s">'sk'</span>)</code></pre>
 
 <h2 id="reference">5. Configuration reference</h2>
 
@@ -417,6 +488,7 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>metadata</code></td><td><code>object</code></td><td>-</td><td>Extra fields merged into every request body.</td></tr>
     <tr><td><code>streaming</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Parse the response as Server-Sent Events.</td></tr>
     <tr><td><code>mode</code></td><td><code>'fullscreen' | 'window' | 'mixed'</code></td><td><code>'window'</code></td><td><code>mixed</code> = fullscreen on mobile, floating window on desktop.</td></tr>
+    <tr><td><code>position</code></td><td><code>'right' | 'left'</code></td><td><code>'right'</code></td><td>Side of the screen the floating widget (toggle button, chat window, CTA popup) is anchored to.</td></tr>
     <tr><td><code>fullscreenSheet</code></td><td><code>boolean</code></td><td><code>false</code></td><td>In fullscreen layout (and mixed-on-mobile), present the chat as a bottom sheet (rounded top, drag handle, dimmed backdrop above) instead of fully covering the viewport.</td></tr>
     <tr><td><code>fullscreenSheetHeight</code></td><td><code>string</code></td><td><code>'75vh'</code></td><td>Sheet height as any CSS length. Only used when <code>fullscreenSheet</code> is true.</td></tr>
     <tr><td><code>showWelcomeScreen</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Welcome screen when the conversation is empty.</td></tr>
@@ -470,16 +542,22 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
 <table>
   <thead><tr><th>Id</th><th>Label</th><th>Scheme</th><th>Accent</th></tr></thead>
   <tbody>
-    <tr><td><code>midnight</code></td><td>Midnight</td><td>Dark</td><td><span class="swatch" style="background:#6366f1"></span>#6366f1</td></tr>
-    <tr><td><code>ivory</code></td><td>Ivory</td><td>Light</td><td><span class="swatch" style="background:#4338ca"></span>#4338ca</td></tr>
     <tr><td><code>sunrise</code></td><td>Sunrise</td><td>Light</td><td><span class="swatch" style="background:#f97316"></span>#f97316</td></tr>
+    <tr><td><code>ivory</code></td><td>Ivory</td><td>Light</td><td><span class="swatch" style="background:#4338ca"></span>#4338ca</td></tr>
+    <tr><td><code>cherry</code></td><td>Cherry</td><td>Light</td><td><span class="swatch" style="background:#ef4444"></span>#ef4444</td></tr>
+    <tr><td><code>sky</code></td><td>Sky</td><td>Sky</td><td><span class="swatch" style="background:#5ba1da"></span>#5ba1da</td></tr>
+    <tr><td><code>lavender</code></td><td>Lavender</td><td>Light</td><td><span class="swatch" style="background:#8b5cf6"></span>#8b5cf6</td></tr>
+    <tr><td><code>nice</code></td><td>Nice</td><td>Light</td><td><span class="swatch" style="background:#3f7e83"></span>#3f7e83</td></tr>
+    <tr><td><code>navy</code></td><td>Navy</td><td>Dark</td><td><span class="swatch" style="background:#3b82f6"></span>#3b82f6</td></tr>
+    <tr><td><code>amber</code></td><td>Amber</td><td>Dark</td><td><span class="swatch" style="background:#f59e0b"></span>#f59e0b</td></tr>
+    <tr><td><code>slate</code></td><td>Slate</td><td>Slate</td><td><span class="swatch" style="background:#38bdf8"></span>#38bdf8</td></tr>
+    <tr><td><code>graphite</code></td><td>Graphite</td><td>Graphite</td><td><span class="swatch" style="background:#4185eb"></span>#4185eb</td></tr>
+    <tr><td><code>stone</code></td><td>Stone</td><td>Stone</td><td><span class="swatch" style="background:#fbbf24"></span>#fbbf24</td></tr>
     <tr><td><code>cosmos</code></td><td>Cosmos</td><td>Dark</td><td><span class="swatch" style="background:#a855f7"></span>#a855f7</td></tr>
     <tr><td><code>forest</code></td><td>Forest</td><td>Dark</td><td><span class="swatch" style="background:#22c55e"></span>#22c55e</td></tr>
     <tr><td><code>ocean</code></td><td>Ocean</td><td>Dark</td><td><span class="swatch" style="background:#06b6d4"></span>#06b6d4</td></tr>
-    <tr><td><code>cherry</code></td><td>Cherry</td><td>Light</td><td><span class="swatch" style="background:#ef4444"></span>#ef4444</td></tr>
-    <tr><td><code>navy</code></td><td>Navy</td><td>Dark</td><td><span class="swatch" style="background:#3b82f6"></span>#3b82f6</td></tr>
-    <tr><td><code>lavender</code></td><td>Lavender</td><td>Light</td><td><span class="swatch" style="background:#8b5cf6"></span>#8b5cf6</td></tr>
-    <tr><td><code>amber</code></td><td>Amber</td><td>Dark</td><td><span class="swatch" style="background:#f59e0b"></span>#f59e0b</td></tr>
+    <tr><td><code>cherryDark</code></td><td>Cherry Dark</td><td>Dark</td><td><span class="swatch" style="background:#ef4444"></span>#ef4444</td></tr>
+    <tr><td><code>midnight</code></td><td>Midnight</td><td>Dark</td><td><span class="swatch" style="background:#6366f1"></span>#6366f1</td></tr>
   </tbody>
 </table>
 
@@ -502,7 +580,6 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
   <tbody>
     <tr><td><code>--t-bg-base</code></td><td>Outermost background of the widget.</td></tr>
     <tr><td><code>--t-bg-surface</code></td><td>Panels, input field, bot bubbles.</td></tr>
-    <tr><td><code>--t-bg-surface2</code></td><td>Raised surfaces (hover states, modals).</td></tr>
     <tr><td><code>--t-bg-border</code></td><td>Borders and dividers.</td></tr>
     <tr><td><code>--t-accent</code></td><td>Primary accent (send button, links, focus rings).</td></tr>
     <tr><td><code>--t-accent-fg</code></td><td>Text color on accent backgrounds.</td></tr>
@@ -510,7 +587,6 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
     <tr><td><code>--t-fg-secondary</code></td><td>Secondary text (subtitles, hints).</td></tr>
     <tr><td><code>--t-fg-muted</code></td><td>Muted text (placeholders, timestamps).</td></tr>
     <tr><td><code>--t-user-bubble</code></td><td>Background of the user's message bubbles.</td></tr>
-    <tr><td><code>--t-user-fg</code></td><td>Text color inside user message bubbles.</td></tr>
   </tbody>
 </table>
 <p>
@@ -526,8 +602,8 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
   Both <code>botAvatar</code> and <code>toggleButtonIcon</code> accept the same value forms:
 </p>
 <ul>
-  <li><strong>Built-in id</strong> — portrait avatars (sample): <code>'amara'</code>, <code>'david'</code>, <code>'elena'</code>, <code>'kenji'</code>, <code>'mei'</code>, <code>'nadia'</code>, <code>'priya'</code>, <code>'samuel'</code>, <code>'sofia'</code>, and ~80 more.</li>
-  <li><strong>Built-in id</strong> — special/icon avatars: <code>'elia'</code>, <code>'orb'</code>, <code>'bubble'</code>, <code>'bean'</code>, <code>'owl'</code>.</li>
+  <li><strong>Built-in id</strong> — portrait avatars (sample): <code>'amara'</code>, <code>'david'</code>, <code>'elena'</code>, <code>'kenji'</code>, <code>'mei'</code>, <code>'nadia'</code>, <code>'priya'</code>, <code>'samuel'</code>, <code>'sofia'</code>, and ~20 more.</li>
+  <li><strong>Built-in id</strong> — special/icon avatars: <code>'orb'</code>, <code>'bubble'</code>, <code>'bean'</code>, <code>'owl'</code>, <code>'liquidorb'</code>.</li>
   <li><strong>URL</strong>: any <code>http(s)://…</code> or root-relative path such as <code>'/img/my-avatar.png'</code></li>
   <li><strong>Data URL</strong>: <code>'data:image/png;base64,…'</code> (what the built-in file picker produces)</li>
 </ul>
@@ -559,16 +635,25 @@ useSettingsStore.getState().setLanguage(<span class="s">'sk'</span>)</code></pre
   English and Slovak ship pre-bundled inside <code>node_modules/@elia-assistant/chatui/dist/chunks/translation-*.js</code>. The widget
   loads them on demand via dynamic <code>import()</code>, no HTTP fetch.
 </p>
-<p>To register a new language at runtime (without rebuilding chatui):</p>
-<pre><code><span class="k">import</span> i18n <span class="k">from</span> <span class="s">'i18next'</span>
+<p>
+  To register a new language at runtime (without rebuilding chatui), add the bundle to the
+  instance's own i18next instance, exposed as <code>instance.i18n</code>:
+</p>
+<pre><code><span class="k">const</span> instance = createChat({ target: <span class="s">'#chat'</span>, webhookUrl: <span class="s">'...'</span> })
 
-i18n.addResourceBundle(<span class="s">'fr'</span>, <span class="s">'translation'</span>, {
+instance.i18n?.addResourceBundle(<span class="s">'fr'</span>, <span class="s">'translation'</span>, {
   welcome:  { subtitle: <span class="s">'Commencez une conversation.'</span> },
   input:    { placeholder: <span class="s">'Tapez un message...'</span> },
   <span class="c">// ... full keys: copy from node_modules/@elia-assistant/chatui/dist/chunks/translation-*.js</span>
 })
 
-useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre>
+instance.setLanguage(<span class="s">'fr'</span>)</code></pre>
+<div class="callout">
+  <strong>Not the global singleton.</strong> Each instance owns a private i18next instance so two
+  widgets on one page can show different UI languages. A bundle registered on the global
+  <code>i18next</code> import will not reach the widget - always go through
+  <code>instance.i18n</code>.
+</div>
 <p>
   Then add any French per-language overrides under <code>config.i18n.fr</code>.
 </p>
@@ -630,7 +715,7 @@ useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre
 <p>
   Skip the URL and pass items directly when prototyping or shipping a small static list:
 </p>
-<pre><code>useSettingsStore.getState().setConfig({
+<pre><code>instance.setConfig({
   tabs: {
     notifications: {
       items: [
@@ -698,7 +783,8 @@ useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre
   your config is static code. If you want them back (admin dashboard, internal tools, live demo),
   flip the flag:
 </p>
-<pre><code>useSettingsStore.getState().setConfig({
+<pre><code>createChat({
+  target:       <span class="s">'#chat'</span>,
   webhookUrl:   <span class="s">'https://your-n8n/webhook/abc'</span>,
   hideSettings: false,
 })</code></pre>
@@ -712,7 +798,57 @@ useSettingsStore.getState().setLanguage(<span class="s">'fr'</span>)</code></pre
 <h3>Clearing persisted state during development</h3>
 <pre><code><span class="c">// DevTools console, or a temporary boot-time line</span>
 localStorage.removeItem(<span class="s">'chatui-settings'</span>)
-localStorage.removeItem(<span class="s">'chatui-chat'</span>)</code></pre>
+localStorage.removeItem(<span class="s">'chatui-chat'</span>)
+
+<span class="c">// If the instance was created with storageNamespace: 'demo',</span>
+<span class="c">// its keys are suffixed instead:</span>
+localStorage.removeItem(<span class="s">'chatui-settings-demo'</span>)
+localStorage.removeItem(<span class="s">'chatui-chat-demo'</span>)</code></pre>
+
+<h3 id="migrating">Upgrading from 1.x</h3>
+<p>
+  2.0 removed the module-level global stores; each <code>createChat()</code> call now owns its
+  state, which is what makes <a href="#multi">multiple widgets</a> possible.
+  <strong>CDN / <code>Chatui.createChat()</code> integrations need no changes</strong>, and the
+  default storage keys are unchanged so saved settings and history carry over.
+</p>
+<table>
+  <thead>
+    <tr><th>1.x</th><th>2.0</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>useSettingsStore.getState().setConfig({...})</code></td>
+      <td><code>instance.setConfig({...})</code>, or pass the options to <code>createChat()</code></td>
+    </tr>
+    <tr>
+      <td><code>useSettingsStore.getState().setTheme(id)</code></td>
+      <td><code>instance.setTheme(id)</code></td>
+    </tr>
+    <tr>
+      <td><code>useSettingsStore.getState().setLanguage(lang)</code></td>
+      <td><code>instance.setLanguage(lang)</code></td>
+    </tr>
+    <tr>
+      <td><code>useChatStore</code> from <code>@elia-assistant/chatui/chat-store</code></td>
+      <td>removed — no global chat store exists</td>
+    </tr>
+    <tr>
+      <td><code>i18next.addResourceBundle(...)</code> on the global singleton</td>
+      <td><code>instance.i18n?.addResourceBundle(...)</code></td>
+    </tr>
+    <tr>
+      <td><code>&lt;App /&gt;</code> rendered directly</td>
+      <td>still supported, but must be wrapped in <code>&lt;I18nextProvider&gt;</code> + <code>&lt;StoreProvider&gt;</code></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  The <code>./store</code> and <code>./chat-store</code> subpath exports now expose only the
+  <code>createSettingsStore</code> / <code>createChatStore</code> factories and their state types,
+  so a stale <code>useSettingsStore</code> import fails immediately rather than at the first
+  <code>.getState()</code> call.
+</p>
 
 </main>
 

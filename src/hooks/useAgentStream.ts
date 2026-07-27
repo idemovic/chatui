@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
-import { useChatStore } from '../store/chatStore.ts'
-import { useSettingsStore } from '../store/settingsStore.ts'
+import { useSettingsStore, useChatStore } from '../store/StoreContext.tsx'
 import type { Message } from '../types/index.ts'
 
 interface InitResponse {

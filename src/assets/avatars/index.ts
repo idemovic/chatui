@@ -1,8 +1,3 @@
-import bean from './avatar-bean.svg'
-import owl from './avatar-owl.svg'
-import elia from './avatar-elia.svg'
-import bubble from './avatar-bubble.svg'
-import orb from './avatar-orb.png'
 import alan from './avatar-alan.svg'
 import ben from './avatar-ben.svg'
 import bianca from './avatar-bianca.svg'
@@ -29,15 +24,34 @@ import sofia from './avatar-sofia.svg'
 import stella from './avatar-stella.svg'
 import zoe from './avatar-zoe.svg'
 
+import bean from './avatar-bean.svg'
+import owl from './avatar-owl.svg'
+import elia from './avatar-elia.svg'
+import orb from './avatar-orb.png'
+import liquidorb from './avatar-liquidorb.png'
+import bubble from './avatar-bubble.svg'
+
 
 export const builtInAvatars: Record<string, string> = {
   alan, ben, bianca, celeste, claire, david, diana, ella,
   emma, ethan, eva, henry, ian, kevin, lena, liam, luke,
   mason, maya, nathan, nora, samuel, sofia, stella, zoe, 
-  bean, owl, elia, orb, bubble
+  bean, owl, elia, orb, liquidorb, bubble
 }
 
 export const builtInAvatarIds = Object.keys(builtInAvatars)
+
+export const WHITE_BG_AVATARS = new Set(['bean', 'owl', 'elia', 'orb'])
+export const THEME_BG_AVATARS = new Set(['bubble'])
+
+/** Returns the CSS background value for an avatar container based on the avatar type. */
+export function avatarContainerBg(key: string | undefined): string {
+  const resolved = effectiveAvatarKey(key)
+  if (!resolved) return 'transparent'
+  if (WHITE_BG_AVATARS.has(resolved)) return '#ffffff'
+  if (THEME_BG_AVATARS.has(resolved)) return 'var(--t-accent)'
+  return 'transparent'
+}
 
 /** Returns the effective avatar key after resolving fallbacks.
  *  Unknown built-in IDs (e.g. a removed avatar) normalise to 'bubble'.

@@ -79,7 +79,7 @@ export function FaqTab({ feedUrl, inlineItems }: Props) {
                         <span
                           className="inline-block px-2 py-0.5 rounded-md text-[11px] font-medium"
                           style={{
-                            background: 'var(--t-bg-surface2)',
+                            background: 'var(--t-bg-surface)',
                             color: 'var(--t-fg-secondary)',
                           }}
                         >

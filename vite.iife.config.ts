@@ -12,7 +12,10 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    cssInjectedByJsPlugin(),
+    cssInjectedByJsPlugin({
+      // Inject CSS only into the main IIFE file, not any stray chunks.
+      jsAssetsFilterFunction: (chunk) => chunk.fileName.includes('chatui.iife'),
+    }),
   ],
   // Replace Node-only globals at build time so the IIFE runs in raw browsers.
   // (For the ESM build, the consumer's bundler does this — for IIFE we must.)
@@ -30,7 +33,7 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: 'src/createChat.ts',
+      entry: 'src/iife.ts',
       name: 'Chatui',
       formats: ['iife'],
       fileName: () => 'chatui.iife.js',
@@ -38,6 +41,10 @@ export default defineConfig({
     rollupOptions: {
       // Bundle EVERYTHING — including React — so the file works on a bare HTML page.
       external: [],
+      output: {
+        // Inline all dynamic imports (i18n locale globs) into the single IIFE file.
+        inlineDynamicImports: true,
+      },
     },
     cssCodeSplit: false,
     sourcemap: true,

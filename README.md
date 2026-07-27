@@ -15,20 +15,74 @@ Ships as a pre-built ESM bundle and a CDN-ready IIFE bundle. Config-compatible w
 npm install @elia-assistant/chatui
 ```
 
-```ts
-// src/main.tsx
-import { App as ChatWidget } from '@elia-assistant/chatui'
-import { useSettingsStore } from '@elia-assistant/chatui/store'
+```tsx
+// src/ChatWidget.tsx
+import { useEffect, useRef } from 'react'
+import { createChat, type ChatInstance } from '@elia-assistant/chatui'
 
-useSettingsStore.getState().setConfig({
+export function ChatWidget() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const instanceRef = useRef<ChatInstance | null>(null)
+
+  useEffect(() => {
+    if (!containerRef.current || instanceRef.current) return
+    instanceRef.current = createChat({
+      target: containerRef.current,
+      webhookUrl: 'https://your-n8n.example.com/webhook/abc',
+      mode: 'window',
+    })
+    return () => {
+      // Deferred so StrictMode's double-invoke doesn't unmount mid-render.
+      const instance = instanceRef.current
+      instanceRef.current = null
+      setTimeout(() => instance?.unmount(), 0)
+    }
+  }, [])
+
+  return <div ref={containerRef} style={{ height: '100%' }} />
+}
+```
+
+`createChat()` mounts into a shadow root, so the widget's CSS is fully isolated from your app's.
+
+The host's `vite.config.ts` needs `optimizeDeps.exclude: ['@elia-assistant/chatui']` so Vite doesn't re-bundle the already-bundled package. See [example.html](./example.html) for the full integration guide.
+
+#### Raw component tree (no shadow root)
+
+If you need the widget inside your own React tree rather than a shadow root, render `<App />` directly. It reads its stores and translations from context, so you must build them and supply both providers:
+
+```tsx
+import { I18nextProvider } from 'react-i18next'
+import {
+  App,
+  StoreProvider,
+  createChatI18n,
+  createSettingsStore,
+  createChatStore,
+} from '@elia-assistant/chatui'
+
+// Create these once, outside the component - not on every render.
+const i18n = createChatI18n()
+const settingsStore = createSettingsStore(i18n)
+const chatStore = createChatStore()
+
+settingsStore.getState().setConfig({
   webhookUrl: 'https://your-n8n.example.com/webhook/abc',
   mode: 'window',
 })
 
-// then render <ChatWidget /> inside a full-height container
+export function ChatWidget() {
+  return (
+    <I18nextProvider i18n={i18n}>
+      <StoreProvider settingsStore={settingsStore} chatStore={chatStore}>
+        <App />
+      </StoreProvider>
+    </I18nextProvider>
+  )
+}
 ```
 
-The host's `vite.config.ts` needs `optimizeDeps.exclude: ['@elia-assistant/chatui']` so Vite doesn't re-bundle the already-bundled package. See [example.html](./example.html) for the full integration guide.
+Without both providers `<App />` throws `useSettingsStore must be used within a <StoreProvider>`. Note that this path does not inject the widget's CSS for you - prefer `createChat()` unless you specifically need to avoid the shadow root.
 
 ### Plain HTML (CDN, no bundler)
 
@@ -56,8 +110,23 @@ const instance = createChat({
   webhookUrl: '...',
   mode: 'window',
 })
-// instance.unmount() to remove
+
+instance.setConfig({ botName: 'Support' })  // patch config without remounting
+instance.setTheme('cosmos')
+instance.setLanguage('sk')
+instance.unmount()                          // remove
 ```
+
+### Multiple widgets on one page
+
+Every `createChat()` call gets its own config, theme, language and conversation state, so two widgets never fight over each other's settings. They do share `localStorage`, though - pass `storageNamespace` to keep their persisted state apart:
+
+```ts
+createChat({ target: '#support', webhookUrl: '...' })
+createChat({ target: '#demo', webhookUrl: '...', storageNamespace: 'demo' })
+```
+
+Omit `storageNamespace` for the single-widget case and the default storage keys are used, so existing installs keep their saved settings and history.
 
 ---
 
@@ -65,18 +134,20 @@ const instance = createChat({
 
 - **n8n webhook compatible** — same parameters as `@n8n/chat`; works with any Chat Trigger out of the box
 - **Three display modes** — `fullscreen`, `window` (floating button + popup), or `mixed` (window on desktop, fullscreen on mobile)
+- **Left/right positioning** — `position: 'left'` anchors the floating button and chat window to the left side of the screen
 - **Bottom-sheet style** — opt-in `fullscreenSheet` mode covers ~3/4 of the screen with a rounded top instead of going edge-to-edge
 - **Optional tabs** — surface a Notifications feed (URL or inline JSON) and a searchable FAQ alongside the chat
 - **SSE streaming** — optional word-by-word bot responses
-- **10 built-in themes** — Midnight, Ivory, Sunrise, Cosmos, Forest, Ocean, Cherry, Navy, Lavender, Amber; switch at runtime
+- **16 built-in themes** — Sunrise, Ivory, Cherry, Sky, Lavender, Nice, Navy, Amber, Slate, Graphite, Stone, Cosmos, Forest, Ocean, Cherry Dark, Midnight; switch at runtime
 - **30 built-in avatars** + file upload (max 500 KB) or URL — same picker for the floating button icon
 - **CTA popup** — timed speech-bubble with optional Web Audio notification, window mode only
 - **Conversation history** — optional sidebar with persistent multi-session history
 - **Per-language content** — initial messages, bot name, CTA text, welcome subtitle, tab titles, all configurable per language
-- **Multilingual UI** — English and Slovak bundled; extend via `i18next.addResourceBundle` at runtime
+- **Multilingual UI** — English and Slovak bundled; extend via `instance.i18n.addResourceBundle` at runtime
 - **Markdown rendering** — bot messages render full GFM via `react-markdown`
 - **Configurable "Powered by" footer** — change the link text/URL or hide it entirely
 - **Persistent settings** — config + theme + language survive page reloads (`localStorage`)
+- **Multi-instance safe** — every `createChat()` call is fully isolated; `storageNamespace` separates their persisted state too
 - **Lockable UI** — `hideSettings: true` removes the gear, theme picker, and settings modal (default for npm consumers)
 - **Export config** — generate ready-to-paste host code from the settings modal
 
@@ -84,7 +155,7 @@ const instance = createChat({
 
 ## Configuration
 
-All options live on `ChatConfig`. Set them once at boot via `setConfig()` (or pass to `createChat()`).
+All options live on `ChatConfig`. Pass them to `createChat()`, or patch them later via `instance.setConfig()`.
 
 ### Required
 
@@ -107,7 +178,8 @@ All options live on `ChatConfig`. Set them once at boot via `setConfig()` (or pa
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `mode` | `'fullscreen' \| 'window' \| 'mixed'` | `'fullscreen'` | Display mode |
+| `mode` | `'fullscreen' \| 'window' \| 'mixed'` | `'window'` | Display mode |
+| `position` | `'right' \| 'left'` | `'right'` | Side of the screen the floating widget is anchored to (window / mixed mode) |
 | `fullscreenSheet` | `boolean` | `false` | Render fullscreen as a bottom sheet (rounded top, dimmed backdrop) |
 | `fullscreenSheetHeight` | `string` | `'75vh'` | Sheet height as any CSS length |
 | `showWelcomeScreen` | `boolean` | `true` | Show welcome screen when no messages |
@@ -158,7 +230,7 @@ A tab is shown only if its block has `feedUrl` or `items`. If neither tab is con
 | `initialMessages` | `string[]` | Global fallback initial bot messages |
 | `i18n[lang]` | `LangOverride` | Per-language content overrides |
 
-To set the initial UI language, call `useSettingsStore.getState().setLanguage('sk')` after `setConfig()` (or pass `language: 'sk'` to `createChat()`). On a fresh browser, the default falls back to `navigator.language` then `'en'`.
+To set the initial UI language, pass `language: 'sk'` to `createChat()` (or call `instance.setLanguage('sk')` later). On a fresh browser, the default falls back to `navigator.language` then `'en'`.
 
 `LangOverride` fields: `initialMessages`, `ctaText`, `botName`, `welcomeSubtitle`, `tabs.{notifications,help,chat}.title`.
 
@@ -170,16 +242,22 @@ Resolution chain: `i18n[activeLang].X` -> `i18n['en'].X` -> global `config.X`.
 
 | ID | Name | Style | Accent |
 |---|---|---|---|
-| `midnight` | Midnight | Dark | Indigo `#6366f1` |
-| `ivory` | Ivory | Light | Indigo `#4338ca` |
 | `sunrise` | Sunrise | Light | Orange `#f97316` |
+| `ivory` | Ivory | Light | Indigo `#4338ca` |
+| `cherry` | Cherry | Light | Red `#ef4444` |
+| `sky` | Sky | Light | Blue `#5ba1da` |
+| `lavender` | Lavender | Light | Violet `#8b5cf6` |
+| `nice` | Nice | Light | Cyan `#3f7e83` |
+| `navy` | Navy | Light | Blue `#ebf3f2` |
+| `amber` | Amber | Dark | Amber `#f59e0b` |
+| `slate` | Slate | Light | Blue `#38bdf8` |
+| `graphite` | Graphite | Blue `#4185eb` |
+| `stone` | Stone | Light | Orange `#fbbf24` |
 | `cosmos` | Cosmos | Dark | Purple `#a855f7` |
 | `forest` | Forest | Dark | Green `#22c55e` |
 | `ocean` | Ocean | Dark | Cyan `#06b6d4` |
-| `cherry` | Cherry | Light | Red `#ef4444` |
-| `navy` | Navy | Dark | Blue `#3b82f6` |
-| `lavender` | Lavender | Light | Violet `#8b5cf6` |
-| `amber` | Amber | Dark | Amber `#f59e0b` |
+| `cherryDark` | Cherry Dark | Dark | Red `#ef4444` |
+| `midnight` | Midnight | Dark | Indigo `#6366f1` |
 
 Defined in `src/themes.ts` — add your own by appending to the array.
 
@@ -254,18 +332,21 @@ The FAQ tab includes a search box that filters by case-insensitive substring acr
 Bundled languages: `en`, `sk` (split into `dist/chunks/translation-*.js`, lazy-loaded).
 To add another without rebuilding chatui, register the bundle yourself:
 
-```ts
-import i18n from 'i18next'
-import { useSettingsStore } from '@elia-assistant/chatui/store'
+Each instance owns a private i18next instance, exposed as `instance.i18n`. Register the bundle there - a bundle added to the global `i18next` singleton will not reach the widget:
 
-i18n.addResourceBundle('fr', 'translation', {
+```ts
+const instance = createChat({ target: '#chat', webhookUrl: '...' })
+
+instance.i18n?.addResourceBundle('fr', 'translation', {
   welcome:  { subtitle: 'Commencez une conversation.' },
   input:    { placeholder: 'Tapez un message...' },
   // ...full keys: see node_modules/@elia-assistant/chatui/dist/chunks/translation-*.js
 })
 
-useSettingsStore.getState().setLanguage('fr')
+instance.setLanguage('fr')
 ```
+
+`instance.i18n` is `undefined` only when `createChat()` was called before `DOMContentLoaded` and the widget has not mounted yet.
 
 Then any per-language overrides live under `config.i18n.fr`.
 
@@ -276,13 +357,14 @@ Then any per-language overrides live under `config.i18n.fr`.
 Hidden by default for npm consumers — configuration is expected to live in code. Flip `hideSettings: false` to expose the gear, theme picker, and settings modal (handy for admin dashboards, internal tools, live demos):
 
 ```ts
-useSettingsStore.getState().setConfig({
+createChat({
+  target:       '#chat',
   webhookUrl:   '...',
   hideSettings: false,
 })
 ```
 
-The settings modal includes an **Export config** button that generates the exact `setConfig()` call for pasting into a host project.
+The settings modal includes an **Export config** button that generates the exact `instance.setConfig()` call for pasting into a host project.
 
 The chatui repo's own `npm run dev` unlocks the UI automatically.
 
@@ -328,6 +410,26 @@ See [example.html](./example.html) for the full integration guide and [vanilla-t
 | HTTP / SSE | Native `fetch` |
 
 React 19 is a peer dependency for the ESM bundle. The IIFE bundle includes React + ReactDOM.
+
+---
+
+## Migrating from 1.x
+
+2.0 removed the module-level global stores. Each `createChat()` call now owns its config, theme, language and conversation state, which is what makes multiple widgets on one page possible. `createChat()` itself is unchanged, so **CDN / `Chatui.createChat()` integrations need no changes** - and the default `localStorage` keys are unchanged, so saved settings and chat history carry over.
+
+What did change:
+
+| 1.x | 2.0 |
+|---|---|
+| `import { useSettingsStore } from '@elia-assistant/chatui/store'` | removed - use the `createChat()` instance |
+| `useSettingsStore.getState().setConfig({...})` | `instance.setConfig({...})`, or pass the options to `createChat()` |
+| `useSettingsStore.getState().setTheme(id)` | `instance.setTheme(id)` |
+| `useSettingsStore.getState().setLanguage(lang)` | `instance.setLanguage(lang)` |
+| `useChatStore` from `@elia-assistant/chatui/chat-store` | removed - no global chat store exists |
+| `i18next.addResourceBundle(...)` on the global singleton | `instance.i18n?.addResourceBundle(...)` |
+| `<App />` rendered directly | still supported, but must be wrapped in `<I18nextProvider>` + `<StoreProvider>` (see [Install](#raw-component-tree-no-shadow-root)) |
+
+The `./store` and `./chat-store` subpath exports now expose only the `createSettingsStore` / `createChatStore` factories and their state types. Importing `useSettingsStore` from them fails at import time rather than silently returning something without `.getState()`.
 
 ---
 

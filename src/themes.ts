@@ -2,40 +2,16 @@ import type { ThemeDef } from './types/index.ts'
 
 export const themes: ThemeDef[] = [
   {
-    id: 'midnight',
-    label: 'Midnight',
-    baseColor: '#0f1117',
-    accentColor: '#6366f1'
-  },
-  {
-    id: 'ivory',
-    label: 'Ivory',
-    baseColor: '#ffffff',
-    accentColor: '#4338ca'
-  },
-  {
     id: 'sunrise',
     label: 'Sunrise',
     baseColor: '#ffffff',
     accentColor: '#f97316'
   },
   {
-    id: 'cosmos',
-    label: 'Cosmos',
-    baseColor: '#1e1a30',
-    accentColor: '#a855f7'
-  },
-  {
-    id: 'forest',
-    label: 'Forest',
-    baseColor: '#0a1410',
-    accentColor: '#22c55e'
-  },
-  {
-    id: 'ocean',
-    label: 'Ocean',
-    baseColor: '#060f1a',
-    accentColor: '#06b6d4'
+    id: 'ivory',
+    label: 'Ivory',
+    baseColor: '#f1ede5',
+    accentColor: '#e08229'
   },
   {
     id: 'cherry',
@@ -44,10 +20,10 @@ export const themes: ThemeDef[] = [
     accentColor: '#ef4444'
   },
   {
-    id: 'navy',
-    label: 'Navy',
-    baseColor: '#080f1e',
-    accentColor: '#3b82f6'
+    id: 'sky',
+    label: 'Sky',
+    baseColor: '#ffffff',
+    accentColor: '#5ba1da'
   },
   {
     id: 'lavender',
@@ -56,9 +32,21 @@ export const themes: ThemeDef[] = [
     accentColor: '#8b5cf6'
   },
   {
+    id: 'nice',
+    label: 'Nice',
+    baseColor: '#ffffff',
+    accentColor: '#3f7e83'
+  }, 
+  {
+    id: 'navy',
+    label: 'Navy',
+    baseColor: '#ebf3f2',
+    accentColor: '#bed6dd'
+  },
+  {
     id: 'amber',
     label: 'Amber',
-    baseColor: '#0f0a00',
+    baseColor: '#3d2c15',
     accentColor: '#f59e0b'
   },
   {
@@ -70,20 +58,44 @@ export const themes: ThemeDef[] = [
   {
     id: 'graphite',
     label: 'Graphite',
-    baseColor: '#424242',
-    accentColor: '#f472b6'
-  },
-  {
-    id: 'teal',
-    label: 'Teal',
-    baseColor: '#F1F5F9',
-    accentColor: '#0D9488'
+    baseColor: '#313949',
+    accentColor: '#4185eb'
   },
   {
     id: 'stone',
     label: 'Stone',
     baseColor: '#44403c',
     accentColor: '#fbbf24'
+  },
+  {
+    id: 'cosmos',
+    label: 'Cosmos',
+    baseColor: '#2f356b',
+    accentColor: '#7855f7'
+  },
+  {
+    id: 'forest',
+    label: 'Forest',
+    baseColor: '#1b362c',
+    accentColor: '#22c55e'
+  },
+  {
+    id: 'ocean',
+    label: 'Ocean',
+    baseColor: '#075985',
+    accentColor: '#3b82f6'
+  },
+  {
+    id: 'cherryDark',
+    label: 'Cherry Dark',
+    baseColor: '#440b19',
+    accentColor: '#ef4444'
+  },
+  {
+    id: 'midnight',
+    label: 'Midnight',
+    baseColor: '#0f1117',
+    accentColor: '#6366f1'
   },
 ]
 

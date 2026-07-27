@@ -1,6 +1,5 @@
 import { useCallback } from 'react'
-import { useChatStore } from '../store/chatStore.ts'
-import { useSettingsStore } from '../store/settingsStore.ts'
+import { useSettingsStore, useChatStore, useChatStoreApi } from '../store/StoreContext.tsx'
 import { sendMessage } from '../lib/n8nClient.ts'
 import type { Message, Attachment } from '../types/index.ts'
 
@@ -19,6 +18,7 @@ export function useChat() {
     updateMessageStatus,
     createSession,
   } = useChatStore()
+  const chatStoreApi = useChatStoreApi()
   const config = useSettingsStore((s) => s.config)
   const language = useSettingsStore((s) => s.language)
   const isStreaming = useChatStore((s) => s.isStreaming)
@@ -52,7 +52,7 @@ export function useChat() {
         // Empty response = n8n short-circuited because a live agent is handling this
         // sender. Drop the empty bot placeholder and keep the typing indicator visible
         // until the agent's reply arrives over the SSE stream.
-        const lastMsg = useChatStore.getState().messages[sessionId]?.slice(-1)[0]
+        const lastMsg = chatStoreApi.getState().messages[sessionId]?.slice(-1)[0]
         if (lastMsg?.role === 'bot' && lastMsg.content === '') {
           removeLastBotIfEmpty(sessionId)
           setAwaitingAgentReply(sessionId, true)
@@ -78,6 +78,7 @@ export function useChat() {
       setStreaming,
       setAwaitingAgentReply,
       updateMessageStatus,
+      chatStoreApi,
     ],
   )
 
@@ -107,7 +108,7 @@ export function useChat() {
 
   const retry = useCallback(
     async (messageId: string) => {
-      const state = useChatStore.getState()
+      const state = chatStoreApi.getState()
       const sessionId = state.activeSessionId
       if (!sessionId) return
 
@@ -117,7 +118,7 @@ export function useChat() {
 
       await dispatch(message.content, messageId, sessionId, message.attachments)
     },
-    [config.webhookUrl, dispatch],
+    [config.webhookUrl, dispatch, chatStoreApi],
   )
 
   return { send, retry, isStreaming }

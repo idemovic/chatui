@@ -1,0 +1,93 @@
+{
+  "errors": {
+    "failedToSend": "Zprávu se nepodařilo odeslat",
+    "retry": "Zkusit znovu"
+  },
+  "welcome": {
+    "subtitle": "Začněte konverzaci. Jsem tu pro vás."
+  },
+  "input": {
+    "placeholder": "Napište zprávu… (Enter = odeslat)",
+    "placeholderUnconfigured": "Nastavte webhook URL v nastavení…"
+  },
+  "header": {
+    "assistant": "Bot",
+    "online": "online",
+    "notConfigured": "Nenakonfigurováno"
+  },
+  "sidebar": {
+    "title": "Konverzace",
+    "empty": "Zatím žádné konverzace.",
+    "newChat": "Nová konverzace",
+    "settings": "Nastavení"
+  },
+  "footer": {
+    "poweredBy": "Poskytuje <a>{{label}}</a>"
+  },
+  "tabs": {
+    "notifications": "Tipy",
+    "help": "Pomoc",
+    "chat": "Chat",
+    "faqSearch": "Hledat ve FAQ…",
+    "loading": "Načítám…",
+    "error": "Nepodařilo se načíst",
+    "empty": {
+      "notifications": "Zatím žádná oznámení.",
+      "faq": "Žádné shodné položky."
+    }
+  },
+  "settings": {
+    "title": "Nastavení",
+    "language": "Jazyk rozhraní",
+    "webhookUrl": "Webhook URL",
+    "chatInputKey": "Klíč vstupu chatu",
+    "sessionKey": "Klíč relace",
+    "botName": "Jméno bota (globální záloha)",
+    "metadata": "Metadata (JSON)",
+    "streaming": "Streamovat odpověď bota po tokenech",
+    "agentStreamSection": "Živý operátor",
+    "agentStreamHint": "Když je nastaveno, odpovědi operátora odeslané z dashboardu se zobrazí v chatu v reálném čase. Pro vypnutí nechte obě pole prázdná.",
+    "agentStreamApiBaseUrl": "URL backendu",
+    "agentStreamTenantId": "ID tenanta",
+    "welcomeScreen": "Zobrazit uvítací obrazovku",
+    "sidebar": "Zobrazit historii konverzací",
+    "fileUploads": "Povolit nahrávání souborů",
+    "allowedFileExtensions": "Povolené přípony souborů",
+    "mode": "Režim zobrazení",
+    "position": "Pozice widgetu",
+    "position_right": "Vpravo",
+    "position_left": "Vlevo",
+    "fullscreenSheet": "Styl spodního panelu (nepokryje celou obrazovku)",
+    "fullscreenSheetHeight": "Výška panelu (CSS délka, např. 75vh, 600px)",
+    "tabsSection": "Záložky (oznámení + FAQ)",
+    "tabsNotificationsTitle": "Název záložky oznámení",
+    "tabsNotificationsFeedUrl": "URL feedu oznámení",
+    "tabsHelpTitle": "Název záložky FAQ",
+    "tabsHelpFeedUrl": "URL feedu FAQ",
+    "tabsChatTitle": "Název záložky chatu",
+    "cta": "Zobrazit CTA popup",
+    "ctaSound": "Přehrát zvuk notifikace",
+    "ctaDelay": "Zpoždění CTA (ms)",
+    "perLanguage": "Obsah podle jazyka",
+    "addLanguage": "Přidat jazyk",
+    "botNameOverride": "Přepsat jméno bota",
+    "welcomeSubtitle": "Uvítací podtitul",
+    "initialMessages": "Úvodní zprávy (jedna na řádek)",
+    "initialMessagesPlaceholder": "Dobrý den! Jak vám mohu pomoci?\nMluvím vaším jazykem.",
+    "ctaTextLabel": "Text CTA popupu",
+    "botAvatar": "Avatar bota",
+    "toggleButtonIcon": "Ikona tlačítka popupu",
+    "toggleButtonSameAsAvatar": "Stejně jako avatar bota",
+    "avatarNone": "Žádný",
+    "avatarClear": "Vymazat",
+    "avatarUrlPlaceholder": "nebo vložte URL",
+    "save": "Uložit",
+    "cancel": "Zrušit",
+    "theme": "Téma",
+    "exportConfig": "Exportovat konfiguraci",
+    "exportHint": "Vložte toto do bootstrap souboru vaší hostitelské aplikace (např. <code>src/main.tsx</code>) před prvním renderem Reactu. Podívejte se na <code>example.html</code> pro kompletní návod k integraci.",
+    "back": "Zpět",
+    "copyToClipboard": "Kopírovat do schránky",
+    "copied": "Zkopírováno"
+  }
+}

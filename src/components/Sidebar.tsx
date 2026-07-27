@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useChatStore } from '../store/chatStore.ts'
-import { useSettingsStore } from '../store/settingsStore.ts'
+import { useSettingsStore, useChatStore } from '../store/StoreContext.tsx'
 
 interface Props {
   onOpenSettings: () => void
@@ -52,9 +51,9 @@ export function Sidebar({ onOpenSettings }: Props) {
             className="group flex items-center gap-2 px-3 py-2 mx-2 rounded-lg cursor-pointer transition-colors"
             style={
               activeSessionId === sess.id
-                ? { background: 'var(--t-bg-surface2)' }
+                ? { background: 'var(--t-bg-surface)' }
                 : hovered === sess.id
-                  ? { background: 'var(--t-bg-surface2)', opacity: 0.7 }
+                  ? { background: 'var(--t-bg-surface)', opacity: 0.7 }
                   : {}
             }
             onClick={() => setActiveSession(sess.id)}

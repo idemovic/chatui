@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useChatStore } from '../store/chatStore.ts'
-import { useSettingsStore } from '../store/settingsStore.ts'
+import { useSettingsStore, useChatStore } from '../store/StoreContext.tsx'
 import { useChat } from '../hooks/useChat.ts'
 import { MessageBubble, TypingIndicator } from './MessageBubble.tsx'
 import { InputArea } from './InputArea.tsx'
 import { Tabs } from './Tabs.tsx'
 import { NotificationsTab } from './NotificationsTab.tsx'
 import { FaqTab } from './FaqTab.tsx'
-import { effectiveAvatarKey, resolveAvatarUrl } from '../assets/avatars/index.ts'
+import { resolveAvatarUrl, avatarContainerBg } from '../assets/avatars/index.ts'
 
 type TabId = 'notifications' | 'help' | 'chat'
 
@@ -16,9 +15,11 @@ interface Props {
   onOpenSettings: () => void
   /** When provided, renders a close (X) button in the header. Omit for permanent fullscreen layouts. */
   onClose?: () => void
+  maximized?: boolean
+  onToggleMaximize?: () => void
 }
 
-export function ChatView({ onOpenSettings, onClose }: Props) {
+export function ChatView({ onOpenSettings, onClose, maximized, onToggleMaximize }: Props) {
   const { t } = useTranslation()
   const activeSessionId = useChatStore((s) => s.activeSessionId)
   const messages = useChatStore((s) =>
@@ -120,9 +121,10 @@ export function ChatView({ onOpenSettings, onClose }: Props) {
           {resolveAvatarUrl(config.botAvatar) ? (
             <img
               src={resolveAvatarUrl(config.botAvatar)}
-              alt=""
+              alt=''
               className="w-7 h-7 rounded-full object-cover flex-shrink-0"
-              style={{ border: '1px solid var(--t-bg-border)', background: effectiveAvatarKey(config.botAvatar) === 'bubble' ? 'var(--t-accent)' : 'var(--t-avatar-bg)' }}
+              style={{ border: '1px solid var(--t-bg-border)', background: avatarContainerBg(config.botAvatar)}}
+              
             />
           ) : (
             <div className="w-2 h-2 rounded-full" style={{ background: 'var(--t-accent)' }} />
@@ -143,6 +145,15 @@ export function ChatView({ onOpenSettings, onClose }: Props) {
               title={t('sidebar.settings')}
             >
               <SettingsIcon />
+            </button>
+          )}
+          {onToggleMaximize && (
+            <button
+              onClick={onToggleMaximize}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-fg-secondary hover:text-fg-primary hover:bg-bg-surface transition-colors"
+              aria-label={maximized ? 'Restore' : 'Maximize'}
+            >
+              {maximized ? <RestoreIcon /> : <MaximizeIcon />}
             </button>
           )}
           {onClose && (
@@ -251,6 +262,28 @@ function CloseIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
       <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  )
+}
+
+function MaximizeIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="15 3 21 3 21 9" />
+      <polyline points="9 21 3 21 3 15" />
+      <line x1="21" y1="3" x2="14" y2="10" />
+      <line x1="3" y1="21" x2="10" y2="14" />
+    </svg>
+  )
+}
+
+function RestoreIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="4 14 10 14 10 20" />
+      <polyline points="20 10 14 10 14 4" />
+      <line x1="10" y1="14" x2="3" y2="21" />
+      <line x1="21" y1="3" x2="14" y2="10" />
     </svg>
   )
 }

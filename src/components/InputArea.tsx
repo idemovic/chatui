@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { Trans } from 'react-i18next'
-import { useSettingsStore } from '../store/settingsStore.ts'
-import { useChatStore } from '../store/chatStore.ts'
+import { useSettingsStore, useChatStoreApi, type ChatStoreHook } from '../store/StoreContext.tsx'
 import type { Attachment } from '../types/index.ts'
 
 interface Props {
@@ -11,12 +10,16 @@ interface Props {
   allowFileUploads?: boolean
 }
 
-async function getUploadToken(config: any, sessionId: string): Promise<string | null> {
+async function getUploadToken(
+  chatStore: ChatStoreHook,
+  config: any,
+  sessionId: string,
+): Promise<string | null> {
   const stream = config.agentStream
   if (!stream || !stream.apiBaseUrl || !stream.tenantId) return null
 
   // Check if we already have a token in the store and it's not expired
-  const tokenData = useChatStore.getState().tokens?.[sessionId]
+  const tokenData = chatStore.getState().tokens?.[sessionId]
   if (tokenData && tokenData.expiresAt > Date.now() + 60000) { // valid for at least 1 min
     return tokenData.token
   }
@@ -32,7 +35,7 @@ async function getUploadToken(config: any, sessionId: string): Promise<string | 
     const init = (await res.json()) as { token: string; expiresAt: string }
 
     // Save to store
-    useChatStore.getState().setToken(sessionId, init.token, Date.parse(init.expiresAt))
+    chatStore.getState().setToken(sessionId, init.token, Date.parse(init.expiresAt))
     return init.token
   } catch {
     return null
@@ -48,7 +51,8 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const config = useSettingsStore((s) => s.config)
-  const activeSessionId = useChatStore((s) => s.activeSessionId)
+  const chatStore = useChatStoreApi()
+  const activeSessionId = chatStore((s) => s.activeSessionId)
 
   const submit = useCallback(() => {
     const text = value.trim()
@@ -109,8 +113,8 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
     }
 
     // 3. Upload file
-    const sessionId = activeSessionId ?? useChatStore.getState().createSession()
-    const token = await getUploadToken(config, sessionId)
+    const sessionId = activeSessionId ?? chatStore.getState().createSession()
+    const token = await getUploadToken(chatStore, config, sessionId)
     if (!token) {
       setUploadError("Unable to authenticate file upload.")
       e.target.value = ''
@@ -179,7 +183,7 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
               key={i}
               className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium"
               style={{
-                background: 'var(--t-bg-surface2, var(--t-bg-surface))',
+                background: 'var(--t-bg-surface)',
                 color: 'var(--t-fg-primary)',
                 border: '1px solid var(--t-bg-border)',
               }}
