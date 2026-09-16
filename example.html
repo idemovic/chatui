@@ -324,11 +324,13 @@ settingsStore.getState().setConfig({
 </p>
 
 <div class="callout">
-  <strong>About persistence.</strong> chatui persists its config to <code>localStorage</code> under
+  <strong>About persistence.</strong> chatui persists its state to <code>localStorage</code> under
   the key <code>chatui-settings</code>, and its conversation history under
-  <code>chatui-chat</code>. Options you pass to <code>createChat()</code> overwrite the matching
-  fields on boot; unset fields keep their stored values. For a clean slate, call
-  <code>localStorage.removeItem('chatui-settings')</code> before mounting.
+  <code>chatui-chat</code>. On boot, <code>createChat()</code> resets the config to
+  <em>defaults + your options</em> - your code is the source of truth, and an option you remove
+  actually turns off for returning visitors instead of lingering in their storage. Theme and
+  language keep their persisted values unless you pass <code>theme</code> / <code>language</code>
+  explicitly. Conversation history always survives reloads.
 </div>
 
 <h3 id="multi">Multiple widgets on one page</h3>
@@ -500,6 +502,7 @@ instance.setLanguage(<span class="s">'sk'</span>)</code></pre>
     <tr><td><code>botAvatar</code></td><td><code>string</code></td><td>-</td><td>Built-in avatar id, full URL, or data URL. See Avatars section. Unknown built-in ids fall back to <code>'bubble'</code>.</td></tr>
     <tr><td><code>toggleButtonIcon</code></td><td><code>string</code></td><td>-</td><td>Icon shown inside the floating toggle button (<code>window</code> / <code>mixed</code> mode). When omitted, the toggle button displays the same icon as <code>botAvatar</code>. Recommended special ids: <code>'elia'</code>, <code>'orb'</code>, <code>'bubble'</code>. Accepts the same value forms as <code>botAvatar</code>.</td></tr>
     <tr><td><code>initialMessages</code></td><td><code>string[]</code></td><td><code>[]</code></td><td>Global fallback initial bot messages.</td></tr>
+    <tr><td><code>initialMessagesClickable</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Render initial messages as clickable suggestions; clicking one sends its text as the visitor's message.</td></tr>
     <tr><td><code>i18n</code></td><td><code>Record&lt;string, LangOverride&gt;</code></td><td>-</td><td>Per-language overrides. See sub-table.</td></tr>
     <tr><td><code>showCta</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Show the CTA speech bubble above the floating button.</td></tr>
     <tr><td><code>ctaText</code></td><td><code>string</code></td><td><code>'Hi! How can I help you today?'</code></td><td>Global fallback CTA text.</td></tr>

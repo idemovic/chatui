@@ -104,3 +104,13 @@ export const defaultThemeId = 'midnight'
 export function getTheme(id: string): ThemeDef {
   return themes.find((t) => t.id === id) ?? themes[0]!
 }
+
+/** Derived from the base colour's luminance, so new themes need no extra flag.
+ *  Matches the color-scheme declared per theme in index.css. */
+export function isDarkTheme(id: string): boolean {
+  const hex = getTheme(id).baseColor.replace('#', '')
+  const r = parseInt(hex.slice(0, 2), 16)
+  const g = parseInt(hex.slice(2, 4), 16)
+  const b = parseInt(hex.slice(4, 6), 16)
+  return 0.299 * r + 0.587 * g + 0.114 * b < 128
+}

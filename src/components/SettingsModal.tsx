@@ -310,6 +310,8 @@ instance.setLanguage(${JSON.stringify(language)})
                 onChange={(v) => setLocal((l) => ({ ...l, streaming: v }))} />
               <Toggle label={t('settings.welcomeScreen')} checked={local.showWelcomeScreen ?? true}
                 onChange={(v) => setLocal((l) => ({ ...l, showWelcomeScreen: v }))} />
+              <Toggle label={t('settings.initialMessagesClickable')} checked={local.initialMessagesClickable ?? false}
+                onChange={(v) => setLocal((l) => ({ ...l, initialMessagesClickable: v }))} />
               <Toggle label={t('settings.fileUploads')} checked={local.allowFileUploads ?? false}
                 onChange={(v) => setLocal((l) => ({ ...l, allowFileUploads: v, allowedFileExtensions: v ? (l.allowedFileExtensions ?? '.pdf,.docx,.png,.jpg,.jpeg') : l.allowedFileExtensions }))} />
               {local.allowFileUploads && (
@@ -665,7 +667,7 @@ instance.setLanguage(${JSON.stringify(language)})
         }
         .input-field:focus { border-color: var(--t-accent); }
         @media (max-width: 767px) {
-          .input-field { font-size: 1rem; }
+          .input-field { font-size: 16px; }
         }
       `}</style>
     </div>

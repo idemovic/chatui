@@ -5,17 +5,11 @@
         <g id="avatars">
             <rect x="0" y="0" width="1000" height="765" style="fill:rgb(227,227,227);"/>
             <g transform="matrix(1,0,0,1,-0.223,-0.251)">
-                <clipPath id="_clip1">
-                    <circle cx="873.223" cy="121.251" r="33"/>
-                </clipPath>
-                <g clip-path="url(#_clip1)">
+                <g>
                     <rect x="840.211" y="88.251" width="66" height="66" style="fill:rgb(205,158,62);"/>
                 </g>
                 <g>
-                    <clipPath id="_clip2">
-                        <circle cx="873.223" cy="121.251" r="33"/>
-                    </clipPath>
-                    <g clip-path="url(#_clip2)">
+                    <g>
                         <g>
                             <path d="M880.945,143.678C875.977,141.011 868.735,141.93 865.433,144.077C862.04,146.283 861.744,149.562 862.316,154.252L883.838,154.251C884.491,149.386 884.271,145.463 880.945,143.678Z" style="fill:rgb(145,143,160);fill-rule:nonzero;"/>
                             <path d="M873.05,150.459C881.954,150.459 884.86,138.786 872.626,138.786C863.831,138.786 863.522,150.459 873.05,150.459Z" style="fill:rgb(102,102,125);fill-rule:nonzero;"/>

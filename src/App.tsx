@@ -140,11 +140,10 @@ export function App() {
   // ── Embedded mode — fills the target element, no toggle button ──────────
   if (config.mode === 'embedded') {
     return (
-      // .chat-ui's base CSS sets position: absolute (needed so window/mixed/fullscreen
-      // modes can stack fixed-positioned children above the page), which takes this div
-      // out of flow and breaks its flex/w-full sizing. Embedded mode has no fixed-positioned
-      // children, so override back to a normal flow position here.
-      <div className="chat-ui flex flex-col h-full w-full" ref={wrapperRef} style={{ position: 'static' }}>
+      // No .chat-ui--positioned here: this mode has no fixed-positioned children (unlike
+      // window/mixed/fullscreen), so it must stay a normal in-flow, unstacked element -
+      // see index.css's .chat-ui--positioned rule for why.
+      <div className="chat-ui flex flex-col h-full w-full" ref={wrapperRef}>
         <ChatView onOpenSettings={openSettings} />
         {!hideSettings && settingsOpen && (
           <SettingsModal onClose={() => setSettingsOpen(false)} />
@@ -156,7 +155,7 @@ export function App() {
   // ── Window mode (or 'mixed' on desktop) ─────────────────────────────────
   if (isWindow) {
     return (
-      <div className="chat-ui" ref={wrapperRef}>
+      <div className="chat-ui chat-ui--positioned" ref={wrapperRef}>
         {chatOpen && maximized && (
           <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.85)', pointerEvents: 'all', cursor: 'default' }} />
         )}
@@ -170,7 +169,7 @@ export function App() {
               border: '1px solid var(--t-bg-border)',
               background: 'var(--t-bg-base)',
               ...(maximized
-                ? { top: '1rem', bottom: '1rem', left: 0, right: 0, margin: '0 auto', width: 'calc(100% - 2rem)', maxWidth: '800px' }
+                ? { top: '16px', bottom: '16px', left: 0, right: 0, margin: '0 auto', width: 'calc(100% - 32px)', maxWidth: '800px' }
                 : { height: 'min(560px, calc(100vh - 32px))' }
               ),
             }}
@@ -212,7 +211,7 @@ export function App() {
   const useSheet = config.fullscreenSheet === true
 
   return (
-    <div className="chat-ui" ref={wrapperRef}>
+    <div className="chat-ui chat-ui--positioned" ref={wrapperRef}>
       {chatOpen ? (
         useSheet ? (
           <>

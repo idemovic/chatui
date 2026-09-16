@@ -50,6 +50,7 @@
     "agentStreamApiBaseUrl": "URL backendu",
     "agentStreamTenantId": "ID tenanta",
     "welcomeScreen": "Zobrazit uvítací obrazovku",
+    "initialMessagesClickable": "Klikatelné úvodní zprávy",
     "sidebar": "Zobrazit historii konverzací",
     "fileUploads": "Povolit nahrávání souborů",
     "allowedFileExtensions": "Povolené přípony souborů",

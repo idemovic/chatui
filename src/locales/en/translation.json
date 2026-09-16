@@ -50,6 +50,7 @@
     "agentStreamApiBaseUrl": "Backend URL",
     "agentStreamTenantId": "Tenant ID",
     "welcomeScreen": "Show welcome screen",
+    "initialMessagesClickable": "Clickable initial messages",
     "sidebar": "Show conversation sidebar",
     "fileUploads": "Allow file uploads",
     "allowedFileExtensions": "Allowed file extensions",

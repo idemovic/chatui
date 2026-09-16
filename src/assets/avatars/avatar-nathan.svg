@@ -1,21 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg width="100%" height="100%" viewBox="0 0 66 66" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
-    <g transform="matrix(1,0,0,1,-915,-14)">
+    <g transform="matrix(1,0,0,1,-914.866,-13.607)">
         <g id="avatars">
-            <rect x="0" y="0" width="1000" height="765" style="fill:rgb(227,227,227);"/>
-            <g transform="matrix(1,0,0,1,0.134,0.393)">
-                <clipPath id="_clip1">
-                    <circle cx="947.866" cy="46.607" r="33"/>
-                </clipPath>
-                <g clip-path="url(#_clip1)">
+            <g>
+                <g>
                     <rect x="914.853" y="13.607" width="66" height="66" style="fill:rgb(182,168,169);"/>
                 </g>
                 <g>
-                    <clipPath id="_clip2">
-                        <circle cx="947.866" cy="46.607" r="33"/>
-                    </clipPath>
-                    <g clip-path="url(#_clip2)">
+                    <g>
                         <g>
                             <path d="M940.063,65.778C935.897,68.488 936.57,72.873 937.651,79.607L957.161,79.608C958.342,73.116 959.109,67.586 955.028,65.394C950.234,62.821 943.249,63.708 940.063,65.778Z" style="fill:rgb(227,79,126);fill-rule:nonzero;"/>
                             <path d="M947.876,70.31C945.871,70.144 945.361,71.849 945.361,71.849L946.968,73.794L944.951,79.607L950.705,79.607L948.524,73.839L950.082,72.019C950.083,72.019 949.668,70.456 947.876,70.31Z" style="fill:rgb(58,58,74);fill-rule:nonzero;"/>

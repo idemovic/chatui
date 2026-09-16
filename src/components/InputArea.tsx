@@ -2,6 +2,8 @@ import { useState, useRef, useCallback } from 'react'
 import { Trans } from 'react-i18next'
 import { useSettingsStore, useChatStoreApi, type ChatStoreHook } from '../store/StoreContext.tsx'
 import type { Attachment } from '../types/index.ts'
+import { isDarkTheme } from '../themes.ts'
+import aiLabelCircle from '../assets/ai-label-circle-black.svg'
 
 interface Props {
   onSend: (text: string, attachments?: Attachment[]) => void
@@ -10,35 +12,63 @@ interface Props {
   allowFileUploads?: boolean
 }
 
+/** Fallback for the undocumented `maxInputLength` option. */
+const DEFAULT_MAX_INPUT_LENGTH = 2000
+
+/**
+ * Turns a failed response into a message the visitor can act on. The API replies in two shapes:
+ * controllers return `{ error }`, while the rate limiter and the global exception handler return
+ * problem+json carrying `title`. Reading only the first is why a 429 used to surface as a bare
+ * status code. Rate-limit rejections also carry Retry-After, the one part of the response that
+ * says when to come back.
+ */
+async function describeFailure(res: Response): Promise<string> {
+  if (res.status === 429) {
+    // Number(null) is 0, so this also covers the header being absent or unreadable.
+    const retryAfter = Number(res.headers.get('Retry-After'))
+    return retryAfter > 0
+      ? `Too many requests. Please try again in ${retryAfter} seconds.`
+      : 'Too many requests. Please wait a moment and try again.'
+  }
+
+  const body = (await res.json().catch(() => ({}))) as { error?: string; title?: string }
+  return body.error || body.title || `Upload failed with status ${res.status}`
+}
+
+type UploadToken = { token: string } | { error: string }
+
 async function getUploadToken(
   chatStore: ChatStoreHook,
   config: any,
   sessionId: string,
-): Promise<string | null> {
+): Promise<UploadToken> {
   const stream = config.agentStream
-  if (!stream || !stream.apiBaseUrl || !stream.tenantId) return null
+  if (!stream || !stream.apiBaseUrl || !stream.tenantId) {
+    return { error: 'Unable to authenticate file upload.' }
+  }
 
   // Check if we already have a token in the store and it's not expired
   const tokenData = chatStore.getState().tokens?.[sessionId]
   if (tokenData && tokenData.expiresAt > Date.now() + 60000) { // valid for at least 1 min
-    return tokenData.token
+    return { token: tokenData.token }
   }
 
-  // Otherwise, fetch a new one
+  // Otherwise, fetch a new one. init is itself rate-limited, so a failure here is not
+  // necessarily an auth problem and must not be reported as one.
   try {
     const res = await fetch(`${stream.apiBaseUrl.replace(/\/$/, '')}/api/public/chat-stream/init`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tenantId: stream.tenantId, sessionId }),
     })
-    if (!res.ok) return null
+    if (!res.ok) return { error: await describeFailure(res) }
     const init = (await res.json()) as { token: string; expiresAt: string }
 
     // Save to store
     chatStore.getState().setToken(sessionId, init.token, Date.parse(init.expiresAt))
-    return init.token
+    return { token: init.token }
   } catch {
-    return null
+    return { error: 'Unable to authenticate file upload.' }
   }
 }
 
@@ -51,13 +81,18 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const config = useSettingsStore((s) => s.config)
+  const activeTheme = useSettingsStore((s) => s.activeTheme)
   const chatStore = useChatStoreApi()
   const activeSessionId = chatStore((s) => s.activeSessionId)
+
+  // Text goes straight to the public n8n webhook, so this also caps the tokens a single paste can burn.
+  const maxLength = config.maxInputLength ?? DEFAULT_MAX_INPUT_LENGTH
+  const tooLong = value.length > maxLength
 
   const submit = useCallback(() => {
     const text = value.trim()
     const hasAttachments = attachments.length > 0
-    if ((!text && !hasAttachments) || disabled || uploading) return
+    if ((!text && !hasAttachments) || tooLong || disabled || uploading) return
 
     onSend(text, attachments)
     setValue('')
@@ -66,7 +101,7 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
-  }, [value, disabled, uploading, attachments, onSend])
+  }, [value, tooLong, disabled, uploading, attachments, onSend])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -114,12 +149,13 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
 
     // 3. Upload file
     const sessionId = activeSessionId ?? chatStore.getState().createSession()
-    const token = await getUploadToken(chatStore, config, sessionId)
-    if (!token) {
-      setUploadError("Unable to authenticate file upload.")
+    const tokenResult = await getUploadToken(chatStore, config, sessionId)
+    if ('error' in tokenResult) {
+      setUploadError(tokenResult.error)
       e.target.value = ''
       return
     }
+    const token = tokenResult.token
 
     setUploading(true)
     try {
@@ -135,8 +171,7 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
       })
 
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
-        throw new Error(errData.error || `Upload failed with status ${res.status}`)
+        throw new Error(await describeFailure(res))
       }
 
       const attachment = (await res.json()) as Attachment
@@ -211,6 +246,13 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
         </div>
       )}
 
+      {/* Character counter, shown once the message nears the limit */}
+      {value.length >= maxLength * 0.8 && (
+        <div className={`flex justify-end px-3 pt-2 text-xs tabular-nums ${tooLong ? 'text-red-500 font-medium' : 'text-fg-muted'}`}>
+          {value.length} / {maxLength}
+        </div>
+      )}
+
       <div className="flex items-end gap-2 p-3">
         {allowFileUploads && (
           <label
@@ -237,6 +279,7 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
           onKeyDown={handleKeyDown}
           placeholder={placeholder ?? 'Type a message… (Enter to send, Shift+Enter for newline)'}
           disabled={disabled}
+          aria-invalid={tooLong || undefined}
           rows={1}
           className="flex-1 rounded-xl px-4 py-2.5 text-base md:text-sm leading-relaxed focus:outline-none disabled:opacity-50 min-h-[42px]"
           style={{
@@ -249,7 +292,7 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
 
         <button
           onClick={submit}
-          disabled={disabled || uploading || (!value.trim() && attachments.length === 0)}
+          disabled={disabled || uploading || tooLong || (!value.trim() && attachments.length === 0)}
           className="flex-shrink-0 w-[42px] h-[42px] rounded-xl flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           style={{ background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }}
         >
@@ -260,10 +303,10 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
         </button>
       </div>
 
-      <div className="text-center text-[11px] pb-2 px-3 text-fg-muted">
+      <div className="flex items-center justify-center gap-1.5 min-h-[28px] text-[11px] pb-2 px-3 text-fg-muted">
         <Trans
           i18nKey="footer.poweredBy"
-          values={{ label: 'ELIA AI Assistant' }}
+          values={{ label: 'ELIA Asistent' }}
           components={{
             a: (
               <a
@@ -275,6 +318,13 @@ export function InputArea({ onSend, disabled, placeholder, allowFileUploads }: P
               />
             ),
           }}
+        />
+        {/* The icon is pure black/white, so inverting it on dark themes gives the white variant. */}
+        <img
+          src={aiLabelCircle}
+          alt=""
+          className="flex-shrink-0 w-7 h-7 opacity-50"
+          style={isDarkTheme(activeTheme) ? { filter: 'invert(1)' } : undefined}
         />
       </div>
     </div>

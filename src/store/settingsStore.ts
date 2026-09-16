@@ -22,6 +22,7 @@ const defaultConfig: ChatConfig = {
   chatSessionKey: 'sessionId',
   mode: 'window',
   showWelcomeScreen: true,
+  initialMessagesClickable: false,
   streaming: false,
   allowFileUploads: false,
   botName: 'Bot',

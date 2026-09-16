@@ -71,7 +71,7 @@ export function FaqTab({ feedUrl, inlineItems }: Props) {
                 {isOpen && (
                   <div
                     className="px-4 pb-3 text-sm text-fg-secondary leading-relaxed whitespace-pre-line"
-                    style={{ borderTop: '1px solid var(--t-bg-border)', paddingTop: '0.75rem' }}
+                    style={{ borderTop: '1px solid var(--t-bg-border)', paddingTop: '12px' }}
                   >
                     {item.answer}
                     {item.category && (

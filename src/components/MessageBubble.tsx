@@ -41,11 +41,132 @@ function formatTime(ts: number, lang?: string): string {
   }).format(new Date(ts))
 }
 
+/** The bubble itself (content + attachments), without avatar or status row. */
+function Bubble({ message, onClick }: { message: Message; onClick?: () => void }) {
+  const isUser = message.role === 'user'
+  const isFailed = isUser && message.status === 'failed'
+  const isSending = isUser && message.status === 'sending'
+  const clickable = !!onClick
+
+  return (
+    <div
+      className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words${clickable ? ' cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+      role={clickable ? 'button' : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={
+        clickable
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onClick?.()
+              }
+            }
+          : undefined
+      }
+      style={
+        isUser
+          ? {
+            background: 'var(--t-user-bubble)',
+            color: 'var(--t-accent-fg)',
+            borderBottomRightRadius: '4px',
+            opacity: isSending ? 0.7 : 1,
+            outline: isFailed ? '1px solid rgba(239, 68, 68, 0.6)' : undefined,
+          }
+          : {
+            background: 'var(--t-bg-surface)',
+            color: 'var(--t-fg-primary)',
+            border: '1px solid var(--t-bg-border)',
+            borderBottomLeftRadius: '4px',
+          }
+      }
+    >
+      {isUser ? (
+        <span>{message.content}</span>
+      ) : (
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+            pre: ({ children }) => (
+              <pre className="bg-bg-base rounded p-3 overflow-x-auto text-xs my-2">
+                {children}
+              </pre>
+            ),
+            code: ({ children }) => (
+              <code className="bg-bg-base px-1.5 py-0.5 rounded text-xs">{children}</code>
+            ),
+            ul: ({ children }) => <ul className="list-disc pl-5 mb-2">{children}</ul>,
+            ol: ({ children }) => <ol className="list-decimal pl-5 mb-2">{children}</ol>,
+            a: ({ href, children }) => (
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent underline"
+              >
+                {children}
+              </a>
+            ),
+          }}
+        >
+          {message.content}
+        </ReactMarkdown>
+      )}
+
+      {message.attachments && message.attachments.length > 0 && (
+        <div className="flex flex-col gap-2 mt-2 min-w-[200px]">
+          {message.attachments.map((file, idx) => (
+            <a
+              key={idx}
+              href={file.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 p-2.5 rounded-xl border transition-all text-xs font-medium no-underline hover:opacity-90"
+              style={
+                isUser
+                  ? {
+                      background: 'rgba(255, 255, 255, 0.15)',
+                      color: 'var(--t-accent-fg)',
+                      borderColor: 'rgba(255, 255, 255, 0.25)',
+                    }
+                  : {
+                      background: 'var(--t-bg-surface)',
+                      color: 'var(--t-fg-primary)',
+                      borderColor: 'var(--t-bg-border)',
+                    }
+              }
+              title={`Download ${file.name}`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0">
+                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+              </svg>
+              <div className="flex-1 min-w-0">
+                <div className="truncate font-semibold">{file.name}</div>
+                {file.size && (
+                  <div className="opacity-75 text-[10px]">
+                    {(file.size / 1024).toFixed(0)} KB
+                  </div>
+                )}
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="flex-shrink-0">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" x2="12" y1="15" y2="3" />
+              </svg>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function MessageBubble({ message, onRetry }: Props) {
   const { t, i18n } = useTranslation()
   const isUser = message.role === 'user'
   const isFailed = isUser && message.status === 'failed'
-  const isSending = isUser && message.status === 'sending'
 
   return (
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} items-end mb-4`}>
@@ -74,105 +195,7 @@ export function MessageBubble({ message, onRetry }: Props) {
       )}
 
       <div className={`flex flex-col gap-1 max-w-[88%] ${isUser ? 'items-end' : 'items-start'}`}>
-        {/* Bubble */}
-        <div
-          className="px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words"
-          style={
-            isUser
-              ? {
-                background: 'var(--t-user-bubble)',
-                color: 'var(--t-accent-fg)',
-                borderBottomRightRadius: '4px',
-                opacity: isSending ? 0.7 : 1,
-                outline: isFailed ? '1px solid rgba(239, 68, 68, 0.6)' : undefined,
-              }
-              : {
-                background: 'var(--t-bg-surface)',
-                color: 'var(--t-fg-primary)',
-                border: '1px solid var(--t-bg-border)',
-                borderBottomLeftRadius: '4px',
-              }
-          }
-        >
-          {isUser ? (
-            <span>{message.content}</span>
-          ) : (
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                pre: ({ children }) => (
-                  <pre className="bg-bg-base rounded p-3 overflow-x-auto text-xs my-2">
-                    {children}
-                  </pre>
-                ),
-                code: ({ children }) => (
-                  <code className="bg-bg-base px-1.5 py-0.5 rounded text-xs">{children}</code>
-                ),
-                ul: ({ children }) => <ul className="list-disc pl-5 mb-2">{children}</ul>,
-                ol: ({ children }) => <ol className="list-decimal pl-5 mb-2">{children}</ol>,
-                a: ({ href, children }) => (
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent underline"
-                  >
-                    {children}
-                  </a>
-                ),
-              }}
-            >
-              {message.content}
-            </ReactMarkdown>
-          )}
-
-          {message.attachments && message.attachments.length > 0 && (
-            <div className="flex flex-col gap-2 mt-2 min-w-[200px]">
-              {message.attachments.map((file, idx) => (
-                <a
-                  key={idx}
-                  href={file.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-2.5 rounded-xl border transition-all text-xs font-medium no-underline hover:opacity-90"
-                  style={
-                    isUser
-                      ? {
-                          background: 'rgba(255, 255, 255, 0.15)',
-                          color: 'var(--t-accent-fg)',
-                          borderColor: 'rgba(255, 255, 255, 0.25)',
-                        }
-                      : {
-                          background: 'var(--t-bg-surface)',
-                          color: 'var(--t-fg-primary)',
-                          borderColor: 'var(--t-bg-border)',
-                        }
-                  }
-                  title={`Download ${file.name}`}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0">
-                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-                    <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-                  </svg>
-                  <div className="flex-1 min-w-0">
-                    <div className="truncate font-semibold">{file.name}</div>
-                    {file.size && (
-                      <div className="opacity-75 text-[10px]">
-                        {(file.size / 1024).toFixed(0)} KB
-                      </div>
-                    )}
-                  </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="flex-shrink-0">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" x2="12" y1="15" y2="3" />
-                  </svg>
-                </a>
-              ))}
-            </div>
-          )}
-        </div>
+        <Bubble message={message} />
 
         {/* Status row: timestamp + (on failure) retry chip */}
         <div className="flex items-center gap-2 px-1">
@@ -195,6 +218,39 @@ export function MessageBubble({ message, onRetry }: Props) {
           ) : (
             <span className="text-xs text-fg-muted">{formatTime(message.ts, i18n.language)}</span>
           )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Several bot messages stacked under one avatar with a single timestamp. Used for the initial
+ * messages; when <c>onClick</c> is set each bubble is a clickable suggestion.
+ */
+export function BotMessageGroup({
+  messages,
+  onClick,
+}: {
+  messages: string[]
+  onClick?: (text: string) => void
+}) {
+  const { i18n } = useTranslation()
+  const ts = Date.now()
+
+  return (
+    <div className="flex gap-3 flex-row items-end mb-4">
+      <BotAvatar />
+      <div className="flex flex-col gap-1 max-w-[88%] items-start">
+        {messages.map((text, i) => (
+          <Bubble
+            key={i}
+            message={{ id: String(i), role: 'bot', content: text, ts }}
+            onClick={onClick ? () => onClick(text) : undefined}
+          />
+        ))}
+        <div className="flex items-center gap-2 px-1">
+          <span className="text-xs text-fg-muted">{formatTime(ts, i18n.language)}</span>
         </div>
       </div>
     </div>

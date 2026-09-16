@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore, useChatStore } from '../store/StoreContext.tsx'
 import { useChat } from '../hooks/useChat.ts'
-import { MessageBubble, TypingIndicator } from './MessageBubble.tsx'
+import { MessageBubble, BotMessageGroup, TypingIndicator } from './MessageBubble.tsx'
 import { InputArea } from './InputArea.tsx'
 import { Tabs } from './Tabs.tsx'
 import { NotificationsTab } from './NotificationsTab.tsx'
@@ -35,7 +35,7 @@ export function ChatView({ onOpenSettings, onClose, maximized, onToggleMaximize 
   const hideSettings = config.hideSettings ?? false
   const { send, retry } = useChat()
 
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
   const isFirstScroll = useRef(true)
   const prevMessageCount = useRef(0)
 
@@ -89,23 +89,23 @@ export function ChatView({ onOpenSettings, onClose, maximized, onToggleMaximize 
     if (!activeSessionId) createSession()
   }, [activeSessionId, createSession])
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom — use direct scrollTop on the container rather than
+  // scrollIntoView, which traverses up past the shadow DOM and scrolls the host page.
   useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
     const count = messages.length
     if (isFirstScroll.current) {
-      // On initial mount (or session restore) jump instantly so we don't
-      // animate through the entire history.
-      bottomRef.current?.scrollIntoView({ behavior: 'auto' })
+      el.scrollTop = el.scrollHeight
       isFirstScroll.current = false
     } else if (count > prevMessageCount.current || isStreaming) {
-      // Smooth-scroll only when new messages arrive or while streaming.
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
     }
     prevMessageCount.current = count
   }, [messages, isStreaming])
 
   const hasInitialMessages = initialMessages.length > 0
-  const showWelcome = config.showWelcomeScreen && messages.length === 0 && !isStreaming && !hasInitialMessages
+  const showWelcome = config.showWelcomeScreen && messages.length === 0 && !isStreaming
   const welcomeSubtitle = langData.welcomeSubtitle ?? t('welcome.subtitle')
 
   const showChat = !tabsEnabled || activeTab === 'chat'
@@ -187,34 +187,33 @@ export function ChatView({ onOpenSettings, onClose, maximized, onToggleMaximize 
       {/* Chat (default tab, or shown when no tabs configured) */}
       {showChat && (
         <>
-          <div className="flex-1 overflow-y-auto px-4 py-4">
-            {showWelcome ? (
-              <WelcomeScreen botName={botName} subtitle={welcomeSubtitle} />
-            ) : (
-              <>
-                {messages.length === 0 &&
-                  initialMessages.map((msg, i) => (
-                    <MessageBubble
-                      key={i}
-                      message={{ id: String(i), role: 'bot', content: msg, ts: Date.now() }}
-                    />
-                  ))}
-                {messages.map((msg, i) => {
-                  const isEmptyBotPlaceholder =
-                    isStreaming &&
-                    i === messages.length - 1 &&
-                    msg.role === 'bot' &&
-                    msg.content === ''
-                  if (isEmptyBotPlaceholder) return null
-                  return <MessageBubble key={msg.id} message={msg} onRetry={retry} />
-                })}
-                {((isStreaming &&
-                  messages[messages.length - 1]?.role === 'bot' &&
-                  messages[messages.length - 1]?.content === '') ||
-                  awaitingAgent) && <TypingIndicator />}
-              </>
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
+            {showWelcome && (
+              <WelcomeScreen
+                botName={botName}
+                subtitle={welcomeSubtitle}
+                avatar={config.botAvatar}
+              />
             )}
-            <div ref={bottomRef} />
+            {messages.length === 0 && hasInitialMessages && (
+              <BotMessageGroup
+                messages={initialMessages}
+                onClick={config.initialMessagesClickable ? (text) => void send(text) : undefined}
+              />
+            )}
+            {messages.map((msg, i) => {
+              const isEmptyBotPlaceholder =
+                isStreaming &&
+                i === messages.length - 1 &&
+                msg.role === 'bot' &&
+                msg.content === ''
+              if (isEmptyBotPlaceholder) return null
+              return <MessageBubble key={msg.id} message={msg} onRetry={retry} />
+            })}
+            {((isStreaming &&
+              messages[messages.length - 1]?.role === 'bot' &&
+              messages[messages.length - 1]?.content === '') ||
+              awaitingAgent) && <TypingIndicator />}
           </div>
 
           {/* Input */}
@@ -232,15 +231,33 @@ export function ChatView({ onOpenSettings, onClose, maximized, onToggleMaximize 
   )
 }
 
-function WelcomeScreen({ botName, subtitle }: { botName: string; subtitle: string }) {
+function WelcomeScreen({
+  botName,
+  subtitle,
+  avatar,
+}: {
+  botName: string
+  subtitle: string
+  avatar: string | undefined
+}) {
+  const avatarUrl = resolveAvatarUrl(avatar)
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-8">
-      <div
-        className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl"
-        style={{ background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }}
-      >
-        💬
-      </div>
+    <div className="flex flex-col items-center gap-4 text-center px-8 pt-6 mb-8">
+      {avatarUrl ? (
+        <img
+          src={avatarUrl}
+          alt=""
+          className="w-16 h-16 rounded-full object-cover"
+          style={{ border: '1px solid var(--t-bg-border)', background: avatarContainerBg(avatar) }}
+        />
+      ) : (
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center text-2xl"
+          style={{ background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }}
+        >
+          💬
+        </div>
+      )}
       <div>
         <h2 className="text-lg font-semibold text-fg-primary mb-1">{botName}</h2>
         <p className="text-sm text-fg-secondary whitespace-pre-line">{subtitle}</p>

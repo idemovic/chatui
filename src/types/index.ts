@@ -54,8 +54,12 @@ export interface ChatConfig {
   showWelcomeScreen?: boolean
   /** Global fallback initial messages — per-language overrides live in i18n[lang].initialMessages */
   initialMessages?: string[]
+  /** Render initial messages as clickable suggestions: clicking one sends its text as the user's message. Default: false. */
+  initialMessagesClickable?: boolean
   allowFileUploads?: boolean
   allowedFileExtensions?: string
+  /** Max characters per visitor message. Default: 2000. Intentionally left out of the README. */
+  maxInputLength?: number
   /** Per-language content: initial messages, CTA text, bot name, welcome subtitle */
   i18n?: Record<string, LangOverride>
   // Extended options

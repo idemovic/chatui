@@ -146,7 +146,7 @@ Omit `storageNamespace` for the single-widget case and the default storage keys 
 - **Multilingual UI** — English and Slovak bundled; extend via `instance.i18n.addResourceBundle` at runtime
 - **Markdown rendering** — bot messages render full GFM via `react-markdown`
 - **Configurable "Powered by" footer** — change the link text/URL or hide it entirely
-- **Persistent settings** — config + theme + language survive page reloads (`localStorage`)
+- **Persistent settings** — theme + language + conversation history survive page reloads (`localStorage`); config is reset to *defaults + your `createChat()` options* on every mount, so your code stays the source of truth
 - **Multi-instance safe** — every `createChat()` call is fully isolated; `storageNamespace` separates their persisted state too
 - **Lockable UI** — `hideSettings: true` removes the gear, theme picker, and settings modal (default for npm consumers)
 - **Export config** — generate ready-to-paste host code from the settings modal
@@ -228,6 +228,7 @@ A tab is shown only if its block has `feedUrl` or `items`. If neither tab is con
 | Parameter | Type | Description |
 |---|---|---|
 | `initialMessages` | `string[]` | Global fallback initial bot messages |
+| `initialMessagesClickable` | `boolean` | Render initial messages as clickable suggestions; clicking one sends its text to the webhook (default `false`) |
 | `i18n[lang]` | `LangOverride` | Per-language content overrides |
 
 To set the initial UI language, pass `language: 'sk'` to `createChat()` (or call `instance.setLanguage('sk')` later). On a fresh browser, the default falls back to `navigator.language` then `'en'`.
