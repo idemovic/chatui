@@ -3,6 +3,9 @@
     "failedToSend": "Failed to send",
     "retry": "Retry"
   },
+  "divider": {
+    "newConversation": "New conversation"
+  },
   "welcome": {
     "subtitle": "Start a conversation. I'm here to help."
   },
@@ -13,7 +16,9 @@
   "header": {
     "assistant": "Bot",
     "online": "online",
-    "notConfigured": "Not configured"
+    "notConfigured": "Not configured",
+    "newChatConfirm": "Start a new conversation? Previous messages will be cleared.",
+    "newChatConfirmYes": "Start new"
   },
   "sidebar": {
     "title": "Conversations",
@@ -58,6 +63,7 @@
     "position": "Widget position",
     "position_right": "Right",
     "position_left": "Left",
+    "bottomOffset": "Bottom offset (px)",
     "fullscreenSheet": "Bottom-sheet style (don't cover full screen)",
     "fullscreenSheetHeight": "Sheet height (CSS length, e.g. 75vh, 600px)",
     "tabsSection": "Tabs (notifications + FAQ)",

@@ -78,6 +78,10 @@ export interface ChatConfig {
   hideSettings?: boolean
   /** Alignment of the floating widget (toggle button + chat window). Default: 'right'. */
   position?: 'right' | 'left'
+  /** Extra px to lift the floating widget (toggle button, CTA popup, chat window) above its
+   *  default 16px from the bottom edge, e.g. to clear a cookie bar. Capped at runtime so it never
+   *  leaves the viewport. Default: 0. */
+  bottomOffset?: number
   /** Bot avatar. Built-in id (e.g. 'amara'), URL, or data URL. */
   botAvatar?: string
   /** Popup toggle button icon (window mode). Built-in id, URL, or data URL. */

@@ -2,10 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Message, Session } from '../types/index.ts'
 import { scopedKey } from '../lib/storage.ts'
-
-function randomId(): string {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36)
-}
+import { randomId } from '../lib/randomId.ts'
 
 export interface ChatState {
   sessions: Session[]

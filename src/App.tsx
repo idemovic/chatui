@@ -47,6 +47,15 @@ export function App() {
   const isLeft = config.position === 'left'
   const side = isLeft ? 'left-4' : 'right-4'
 
+  // bottomOffset lifts the widget above its default 16px. The cap lives in CSS so it follows the
+  // viewport as it resizes, and neither element ever drops below the default 16px: the 56px toggle
+  // button leaves ~120px above it for the CTA bubble (a few lines of text) plus a 16px top margin,
+  // and the window rises only as far as its full 560px height still fits.
+  const lifted = 16 + Math.max(0, config.bottomOffset ?? 0)
+  const buttonBottom = `max(16px, min(${lifted}px, calc(100dvh - 192px)))`
+  const ctaBottom = `calc(${buttonBottom} + 64px)`
+  const windowBottom = `max(16px, min(${lifted}px, calc(100dvh - 576px)))`
+
   const [chatOpen, setChatOpen] = useState(false)
   const maximizedKey = scopedKey('chatui-maximized', useStorageNamespace())
   const [maximized, setMaximized] = useState(() => sessionStorage.getItem(maximizedKey) === '1')
@@ -163,14 +172,14 @@ export function App() {
         {chatOpen && (
           <div
             className={`fixed z-50 rounded-2xl shadow-2xl overflow-hidden flex flex-col ${
-              maximized ? '' : `bottom-4 ${side} w-[380px]`
+              maximized ? '' : `${side} w-[380px]`
             }`}
             style={{
               border: '1px solid var(--t-bg-border)',
               background: 'var(--t-bg-base)',
               ...(maximized
                 ? { top: '16px', bottom: '16px', left: 0, right: 0, margin: '0 auto', width: 'calc(100% - 32px)', maxWidth: '800px' }
-                : { height: 'min(560px, calc(100vh - 32px))' }
+                : { bottom: windowBottom, height: 'min(560px, calc(100vh - 32px))' }
               ),
             }}
           >
@@ -184,7 +193,7 @@ export function App() {
         )}
 
         {showCta && !chatOpen && (
-          <div className={`fixed bottom-20 ${side} z-50`}>
+          <div className={`fixed ${side} z-50`} style={{ bottom: ctaBottom }}>
             <CtaPopup text={ctaText} onDismiss={dismissCta} align={isLeft ? 'left' : 'right'} />
           </div>
         )}
@@ -195,6 +204,7 @@ export function App() {
             iconSrc={resolveAvatarUrl(config.toggleButtonIcon ?? config.botAvatar)}
             iconKey={config.toggleButtonIcon ?? config.botAvatar}
             align={isLeft ? 'left' : 'right'}
+            bottom={buttonBottom}
             onClick={openChat}
           />
         )}
@@ -246,7 +256,7 @@ export function App() {
       ) : (
         <>
           {showCta && (
-            <div className={`fixed bottom-20 ${side} z-50`}>
+            <div className={`fixed ${side} z-50`} style={{ bottom: ctaBottom }}>
               <CtaPopup text={ctaText} onDismiss={dismissCta} align={isLeft ? 'left' : 'right'} />
             </div>
           )}
@@ -255,6 +265,7 @@ export function App() {
             iconSrc={resolveAvatarUrl(config.toggleButtonIcon ?? config.botAvatar)}
             iconKey={config.toggleButtonIcon ?? config.botAvatar}
             align={isLeft ? 'left' : 'right'}
+            bottom={buttonBottom}
             onClick={openChat}
           />
         </>
@@ -272,12 +283,15 @@ function ToggleButton({
   iconSrc,
   iconKey,
   align = 'right',
+  bottom,
   onClick,
 }: {
   open: boolean
   iconSrc: string | undefined
   iconKey?: string
   align?: 'right' | 'left'
+  /** CSS `bottom` value. */
+  bottom: string
   onClick: () => void
 }) {
   const showImage = Boolean(iconSrc) && !open
@@ -285,8 +299,9 @@ function ToggleButton({
   const isBubble = !resolvedKey || resolvedKey === 'bubble'
   return (
     <button
-      className={`fixed bottom-4 ${align === 'left' ? 'left-4' : 'right-4'} z-50 w-14 h-14 rounded-full flex items-center justify-center transition-transform hover:scale-105 overflow-hidden`}
+      className={`fixed ${align === 'left' ? 'left-4' : 'right-4'} z-50 w-14 h-14 rounded-full flex items-center justify-center transition-transform hover:scale-105 overflow-hidden`}
       style={{
+        bottom,
         background: isBubble ? 'var(--t-accent)' : avatarContainerBg(iconKey),
         color: 'var(--t-accent-fg)',
         boxShadow: '0 10px 28px -4px rgba(0, 0, 0, 0.35), 0 4px 12px -2px rgba(0, 0, 0, 0.18)',

@@ -3,6 +3,9 @@
     "failedToSend": "Správu sa nepodarilo odoslať",
     "retry": "Skúsiť znova"
   },
+  "divider": {
+    "newConversation": "Nová konverzácia"
+  },
   "welcome": {
     "subtitle": "Začnite konverzáciu. Som tu pre vás."
   },
@@ -13,7 +16,9 @@
   "header": {
     "assistant": "Bot",
     "online": "online",
-    "notConfigured": "Nenakonfigurované"
+    "notConfigured": "Nenakonfigurované",
+    "newChatConfirm": "Začať novú konverzáciu? Predchádzajúce správy budú vymazané.",
+    "newChatConfirmYes": "Začať novú"
   },
   "sidebar": {
     "title": "Konverzácie",
@@ -58,6 +63,7 @@
     "position": "Pozícia widgetu",
     "position_right": "Vpravo",
     "position_left": "Vľavo",
+    "bottomOffset": "Odsadenie zdola (px)",
     "fullscreenSheet": "Štýl spodného panela (nepokryje celú obrazovku)",
     "fullscreenSheetHeight": "Výška panela (CSS dĺžka, napr. 75vh, 600px)",
     "tabsSection": "Záložky (oznámenia + FAQ)",

@@ -180,6 +180,7 @@ All options live on `ChatConfig`. Pass them to `createChat()`, or patch them lat
 |---|---|---|---|
 | `mode` | `'fullscreen' \| 'window' \| 'mixed'` | `'window'` | Display mode |
 | `position` | `'right' \| 'left'` | `'right'` | Side of the screen the floating widget is anchored to (window / mixed mode) |
+| `bottomOffset` | `number` | `0` | Extra px to lift the floating button, CTA and chat window above the bottom edge (e.g. to clear a cookie bar). Capped so the widget stays inside the viewport |
 | `fullscreenSheet` | `boolean` | `false` | Render fullscreen as a bottom sheet (rounded top, dimmed backdrop) |
 | `fullscreenSheetHeight` | `string` | `'75vh'` | Sheet height as any CSS length |
 | `showWelcomeScreen` | `boolean` | `true` | Show welcome screen when no messages |
@@ -396,6 +397,14 @@ npx serve . -l 5173
 ```
 
 See [example.html](./example.html) for the full integration guide and [vanilla-test.html](./vanilla-test.html) for a CDN-style smoke test.
+
+### Publishing
+
+After `npm publish`, purge the jsDelivr cache so the CDN serves the new build:
+
+```bash
+curl https://purge.jsdelivr.net/npm/@elia-assistant/chatui@latest/dist/chatui.iife.js
+```
 
 ---
 

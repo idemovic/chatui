@@ -373,6 +373,12 @@ instance.setLanguage(${JSON.stringify(language)})
               </div>
             </Field>
 
+            <Field label={t('settings.bottomOffset')}>
+              <input type="number" value={local.bottomOffset ?? 0}
+                onChange={(e) => setLocal((l) => ({ ...l, bottomOffset: Math.max(0, Number(e.target.value)) || undefined }))}
+                className="input-field" min={0} step={10} />
+            </Field>
+
             <hr style={{ borderColor: 'var(--t-bg-border)' }} />
 
             {/* ── Tabs (notifications / help feeds) ── */}

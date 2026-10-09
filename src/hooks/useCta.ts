@@ -39,12 +39,18 @@ export function useCta(config: ChatConfig, language: string, enabled: boolean) {
     config.ctaText ??
     'Hi! How can I help you today?'
 
-  const dismiss = useCallback(() => setShowCta(false), [])
+  // Also marks the CTA as spent, so a still-pending timer (e.g. the chat was opened before the
+  // delay elapsed) neither shows the popup nor plays the sound.
+  const dismiss = useCallback(() => {
+    shownRef.current = true
+    setShowCta(false)
+  }, [])
 
   useEffect(() => {
     if (!shouldShow || shownRef.current) return
 
     const timer = setTimeout(() => {
+      if (shownRef.current) return
       shownRef.current = true
       setShowCta(true)
       if (sound) playNotificationSound()

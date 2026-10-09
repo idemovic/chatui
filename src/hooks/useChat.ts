@@ -2,10 +2,7 @@ import { useCallback } from 'react'
 import { useSettingsStore, useChatStore, useChatStoreApi } from '../store/StoreContext.tsx'
 import { sendMessage } from '../lib/n8nClient.ts'
 import type { Message, Attachment } from '../types/index.ts'
-
-function randomId(): string {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36)
-}
+import { randomId } from '../lib/randomId.ts'
 
 export function useChat() {
   const {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore, useChatStore } from '../store/StoreContext.tsx'
 import { useChat } from '../hooks/useChat.ts'
@@ -10,6 +10,9 @@ import { FaqTab } from './FaqTab.tsx'
 import { resolveAvatarUrl, avatarContainerBg } from '../assets/avatars/index.ts'
 
 type TabId = 'notifications' | 'help' | 'chat'
+
+/** Gap between consecutive messages after which a "new conversation" divider is shown. */
+const NEW_CONVERSATION_GAP_MS = 60 * 60 * 1000
 
 interface Props {
   onOpenSettings: () => void
@@ -26,6 +29,7 @@ export function ChatView({ onOpenSettings, onClose, maximized, onToggleMaximize 
     activeSessionId ? (s.messages[activeSessionId] ?? []) : [],
   )
   const createSession = useChatStore((s) => s.createSession)
+  const deleteSession = useChatStore((s) => s.deleteSession)
   const isStreaming = useChatStore((s) => s.isStreaming)
   const awaitingAgent = useChatStore((s) =>
     activeSessionId ? !!s.awaitingAgentReply[activeSessionId] : false,
@@ -84,10 +88,40 @@ export function ChatView({ onOpenSettings, onClose, maximized, onToggleMaximize 
 
   const [activeTab, setActiveTab] = useState<TabId>('chat')
 
+  // Re-render once the last message crosses the gap, so the trailing divider appears without
+  // waiting for the next message.
+  const lastTs = messages[messages.length - 1]?.ts
+  const [now, setNow] = useState(Date.now)
+  useEffect(() => {
+    if (lastTs === undefined) return
+    const delay = lastTs + NEW_CONVERSATION_GAP_MS - Date.now() + 1
+    if (delay <= 0) {
+      setNow(Date.now())
+      return
+    }
+    const id = setTimeout(() => setNow(Date.now()), delay)
+    return () => clearTimeout(id)
+  }, [lastTs])
+  const showTrailingDivider =
+    lastTs !== undefined && !isStreaming && now - lastTs > NEW_CONVERSATION_GAP_MS
+
   // Ensure there's always an active session
   useEffect(() => {
     if (!activeSessionId) createSession()
   }, [activeSessionId, createSession])
+
+  // A new conversation needs a fresh session id, not just cleared messages: n8n keys its chat
+  // memory and the backend its interaction on the id. The old session is dropped because the
+  // sidebar is off, so nothing could reach it again. Blocked while a reply is pending so a live
+  // agent isn't left talking to nobody.
+  const [confirmingNewChat, setConfirmingNewChat] = useState(false)
+  const canStartNewChat = messages.length > 0 && !isStreaming && !awaitingAgent
+  const startNewChat = () => {
+    const previousId = activeSessionId
+    createSession()
+    if (previousId) deleteSession(previousId)
+    setConfirmingNewChat(false)
+  }
 
   // Auto-scroll to bottom — use direct scrollTop on the container rather than
   // scrollIntoView, which traverses up past the shadow DOM and scrolls the host page.
@@ -138,6 +172,16 @@ export function ChatView({ onOpenSettings, onClose, maximized, onToggleMaximize 
         </div>
 
         <div className="flex items-center gap-1">
+          {canStartNewChat && (
+            <button
+              onClick={() => setConfirmingNewChat(true)}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-fg-secondary hover:text-fg-primary hover:bg-bg-surface transition-colors"
+              title={t('sidebar.newChat')}
+              aria-label={t('sidebar.newChat')}
+            >
+              <NewChatIcon />
+            </button>
+          )}
           {!hideSettings && (
             <button
               onClick={onOpenSettings}
@@ -167,6 +211,28 @@ export function ChatView({ onOpenSettings, onClose, maximized, onToggleMaximize 
           )}
         </div>
       </div>
+
+      {confirmingNewChat && canStartNewChat && (
+        <div
+          className="flex items-center gap-2 px-4 py-2 border-b flex-shrink-0 text-xs"
+          style={{ borderColor: 'var(--t-bg-border)', background: 'var(--t-bg-surface)' }}
+        >
+          <span className="flex-1 text-fg-secondary">{t('header.newChatConfirm')}</span>
+          <button
+            onClick={() => setConfirmingNewChat(false)}
+            className="px-2 py-1 rounded-md text-fg-secondary hover:text-fg-primary transition-colors"
+          >
+            {t('settings.cancel')}
+          </button>
+          <button
+            onClick={startNewChat}
+            className="px-2 py-1 rounded-md font-medium"
+            style={{ background: 'var(--t-accent)', color: 'var(--t-accent-fg)' }}
+          >
+            {t('header.newChatConfirmYes')}
+          </button>
+        </div>
+      )}
 
       {/* Tab bar (only when tabs are configured) */}
       {tabsEnabled && (
@@ -208,12 +274,19 @@ export function ChatView({ onOpenSettings, onClose, maximized, onToggleMaximize 
                 msg.role === 'bot' &&
                 msg.content === ''
               if (isEmptyBotPlaceholder) return null
-              return <MessageBubble key={msg.id} message={msg} onRetry={retry} />
+              const isNewConversation = i > 0 && msg.ts - messages[i - 1].ts > NEW_CONVERSATION_GAP_MS
+              return (
+                <Fragment key={msg.id}>
+                  {isNewConversation && <ConversationDivider label={t('divider.newConversation')} />}
+                  <MessageBubble message={msg} onRetry={retry} />
+                </Fragment>
+              )
             })}
             {((isStreaming &&
               messages[messages.length - 1]?.role === 'bot' &&
               messages[messages.length - 1]?.content === '') ||
               awaitingAgent) && <TypingIndicator />}
+            {showTrailingDivider && <ConversationDivider label={t('divider.newConversation')} />}
           </div>
 
           {/* Input */}
@@ -227,6 +300,16 @@ export function ChatView({ onOpenSettings, onClose, maximized, onToggleMaximize 
           />
         </>
       )}
+    </div>
+  )
+}
+
+function ConversationDivider({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-3 my-4 text-xs text-fg-muted">
+      <div className="flex-1 h-px" style={{ background: 'var(--t-bg-border)' }} />
+      <span>{label}</span>
+      <div className="flex-1 h-px" style={{ background: 'var(--t-bg-border)' }} />
     </div>
   )
 }
@@ -271,6 +354,15 @@ function SettingsIcon() {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <circle cx="12" cy="12" r="3" />
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  )
+}
+
+function NewChatIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" />
     </svg>
   )
 }
